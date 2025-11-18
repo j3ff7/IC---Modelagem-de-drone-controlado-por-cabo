@@ -1,111 +1,75 @@
-# =============================================================================
-# PROJECT CHRONO - http://projectchrono.org
-#
-# Copyright (c) 2014 projectchrono.org
-# All rights reserved.
-#
-# Use of this source code is governed by a BSD-style license that can be found
-# in the LICENSE file at the top level of the distribution and at
-# http://projectchrono.org/license-chrono.txt.
-#
-# =============================================================================
-
 import pychrono as chrono
 import pychrono.fea as fea
 import pychrono.irrlicht as chronoirr
-from test1_modle2 import  Model2
+from test1_modle2 import Model2
 
+print("Cable with moving end - PyChrono 9.0.0")
 
-
-# Select solver type (SPARSE_QR, SPARSE_LU, or MINRES).
-#ChSolver::Type solver_type = ChSolver::Type::SPARSE_QR
-solver = chrono.ChSolverSparseQR()
-
-print("Copyright (c) 2017 projectchrono.org\nChrono version: ")
-
-# Create a Chrono physical system
-sys = chrono.ChSystemNSC()
-
-
-# Create a mesh, that is a container for groups of elements and
-# their referenced nodes.
+# Create system
+sys = chrono.ChSystemSMC()
 mesh = fea.ChMesh()
 
-# Create one of the available models (defined in FEAcables.h)
-##model = Model1(sys, mesh)
+# Create model
 model = Model2(sys, mesh)
-#model = Model3(sys, mesh)
-
-# Remember to add the mesh to the system!
 sys.Add(mesh)
 
-# ==Asset== attach a visualization of the FEM mesh.
-# This will automatically update a triangle mesh (a ChVisualShapeTriangleMesh
-# asset that is internally managed) by setting  proper
-# coordinates and vertex colors as in the FEM elements.
-# Such triangle mesh can be rendered by Irrlicht or POVray or whatever
-# postprocessor that can handle a colored ChVisualShapeTriangleMesh).
+# Simple visualization for PyChrono 9.0.0
+vis_beam = chrono.ChVisualShapeFEA(mesh)
+vis_beam.SetFEMdataType(chrono.ChVisualShapeFEA.DataType_ELEM_BEAM_MZ)
+vis_beam.SetColorscaleMinMax(-0.01, 0.01)
+vis_beam.SetSmoothFaces(True)
+mesh.AddVisualShapeFEA(vis_beam)
 
-colormap_type = chrono.ChColormap.Type_JET
-colormap_range = chrono.ChVector2d(-0.01, 0.01)
+# Visualização adicional para nós
+vis_nodes = chrono.ChVisualShapeFEA(mesh)
+vis_nodes.SetFEMglyphType(chrono.ChVisualShapeFEA.GlyphType_NODE_DOT_POS)
+vis_nodes.SetFEMdataType(chrono.ChVisualShapeFEA.DataType_NONE)
+vis_nodes.SetSymbolsThickness(0.006)
+vis_nodes.SetSymbolsScale(0.01)
+vis_nodes.SetZbufferHide(False)
+mesh.AddVisualShapeFEA(vis_nodes)
 
-vis_beam_A = chrono.ChVisualShapeFEA()
-vis_beam_A.SetFEMdataType(chrono.ChVisualShapeFEA.DataType_ELEM_BEAM_MZ)
-vis_beam_A.SetColormapRange(colormap_range)
-vis_beam_A.SetSmoothFaces(True)
-vis_beam_A.SetWireframe(False)
-mesh.AddVisualShapeFEA(vis_beam_A)
-
-vis_beam_B = chrono.ChVisualShapeFEA()
-vis_beam_B.SetFEMglyphType(chrono.ChVisualShapeFEA.GlyphType_NODE_DOT_POS) # NODE_CSYS
-vis_beam_B.SetFEMdataType(chrono.ChVisualShapeFEA.DataType_NONE)
-vis_beam_B.SetSymbolsThickness(0.006)
-vis_beam_B.SetSymbolsScale(0.01)
-vis_beam_B.SetZbufferHide(False)
-mesh.AddVisualShapeFEA(vis_beam_B)
-
-# Create the Irrlicht visualization
+# Irrlicht visualization
 vis = chronoirr.ChVisualSystemIrrlicht()
 vis.AttachSystem(sys)
 vis.SetWindowSize(1024,768)
-vis.SetWindowTitle('FEA cables')
+vis.SetWindowTitle('Moving Cable Test')
 vis.Initialize()
-vis.AddLogo(chrono.GetChronoDataFile('logo_chrono_alpha.png'))
 vis.AddSkyBox()
-vis.AddCamera(chrono.ChVector3d(0, 0.6, -1))
+vis.AddCamera(chrono.ChVector3d(0.5, 0.5, 1.5))
 vis.AddTypicalLights()
-vis.AddGuiColorbar('Mz (Nm)', colormap_range, colormap_type, False, chrono.ChVector2i(10, 100))
 
-# Set solver and solver settings
+# Solver
+solver = chrono.ChSolverSparseQR()
+sys.SetSolver(solver)
+solver.SetVerbose(False)
 
-if solver.GetType()==chrono.ChSolver.Type_SPARSE_QR:
-	print("Using SparseQR solver")
-	sys.SetSolver(solver)
-	solver.UseSparsityPatternLearner(True)
-	solver.LockSparsityPattern(True)
-	solver.SetVerbose(False)
+# ⭐⭐ LOOP DE SIMULAÇÃO ÚNICO COM PRINT ⭐⭐
+step = 0
+simulation_time = 0.0
+print_interval = 50  # Print a cada 50 steps
+time_step = 0.01
 
-elif solver.GetType()== chrono.ChSolver.Type_MINRES :
-	print( "Using MINRES solver" )
-	sys.SetSolver(solver)
-	solver.SetMaxIterations(200)
-	solver.SetTolerance(1e-10)
-	solver.EnableDiagonalPreconditioner(True)
-	solver.EnableWarmStart(True)  # IMPORTANT for convergence when using EULER_IMPLICIT_LINEARIZED
-	solver.SetVerbose(False)
+print("🚀 Iniciando simulação...")
+print("Tempo(s) | Pos_X | Pos_Y | Pos_Z")
+print("-" * 35)
 
-else:
-	print("Solver type not supported." )
-    
-
-# Set integrator
-ts = chrono.ChTimestepperHHT(sys)
-sys.SetTimestepper(ts)
-
-# Simulation loop
 while vis.Run():
+    # Atualiza visualização
     vis.BeginScene()
     vis.Render()
     vis.EndScene()
-    sys.DoStepDynamics(0.01)
-	##model.PrintBodyPositions()
+    
+    # Avança simulação física
+    sys.DoStepDynamics(time_step)
+    
+    # Atualiza contadores
+    simulation_time += time_step
+    step += 1
+    
+    # ⭐⭐ MONITORA A POSIÇÃO ⭐⭐
+    if step % print_interval == 0:
+        body_pos = model.body_move.GetPos()  # Pega a posição atual
+        print(f"{simulation_time:6.2f}s | {body_pos.x:6.3f} | {body_pos.y:6.3f} | {body_pos.z:6.3f}")
+
+print("✅ Simulação finalizada!")

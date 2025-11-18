@@ -63,55 +63,33 @@ class Model2:
     def __init__(self, system, mesh):
 
         msection_cable2 = fea.ChBeamSectionCable()
-
         msection_cable2.SetDiameter(0.015)
-
         msection_cable2.SetYoungModulus(0.001e9)
-
         msection_cable2.SetRayleighDamping(0.000)
 
 
         builder = fea.ChBuilderCableANCF()
-
         builder.BuildBeam(mesh, msection_cable2, 10,
-
         chrono.ChVector3d(0, 0, -0.1),
-
         chrono.ChVector3d(1, 0.5, -0.1))
 
-
         mtruss = chrono.ChBody()
-
         mtruss.SetFixed(True)
-
         system.Add(mtruss)
 
         first_node = builder.GetLastBeamNodes().front()
-
         last_node = builder.GetLastBeamNodes().back()
-
-
-        # --- Restrição de junta (articulada) ---
-
-        # Usamos ChLinkNodeFrame para uma conexão de "junta esférica"
-
+            
         constraint_hinge = fea.ChLinkNodeFrame()
-
         constraint_hinge.Initialize(first_node, mtruss) # Conecta o nó ao corpo fixo
-
         system.Add(constraint_hinge)
 
         constraint_pos = fea.ChLinkNodeFrame()
-
         constraint_pos.Initialize(last_node, mtruss)
-
         system.Add(constraint_pos)
 
-
         msphere_visual = chrono.ChVisualShapeSphere(0.02) # Esfera com 2cm de raio
-
         constraint_hinge.AddVisualShape(msphere_visual)
-
         constraint_pos.AddVisualShape(msphere_visual) 
     
 
