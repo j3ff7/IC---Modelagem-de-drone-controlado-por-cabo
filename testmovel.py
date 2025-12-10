@@ -2,6 +2,8 @@ import pychrono as chrono
 import pychrono.fea as fea
 import pychrono.irrlicht as chronoirr
 from test1_modle2 import Model2
+import pandas as pd
+
 
 print("Cable with moving end - PyChrono 9.0.0")
 
@@ -44,21 +46,24 @@ solver = chrono.ChSolverSparseQR()
 sys.SetSolver(solver)
 solver.SetVerbose(False)
 
-# ⭐⭐ LOOP DE SIMULAÇÃO ÚNICO COM PRINT ⭐⭐
 step = 0
 simulation_time = 0.0
-print_interval = 50  # Print a cada 50 steps
+print_interval = 25
 time_step = 0.01
 
-print("🚀 Iniciando simulação...")
-print("Tempo(s) | Pos_X | Pos_Y | Pos_Z")
-print("-" * 35)
+print("Iniciando simulação...")
+print("Tempo(s) | Pos_X | Pos_Y | Pos_Z | Roll° | Pitch° | Yaw° | Tensão_M | Tensão_F")
+print("-" * 55)
+
+lista_dados = []
 
 while vis.Run():
     # Atualiza visualização
     vis.BeginScene()
     vis.Render()
     vis.EndScene()
+    
+    model.update_motion(time_step)
     
     # Avança simulação física
     sys.DoStepDynamics(time_step)
@@ -67,9 +72,11 @@ while vis.Run():
     simulation_time += time_step
     step += 1
     
-    # ⭐⭐ MONITORA A POSIÇÃO ⭐⭐
     if step % print_interval == 0:
-        body_pos = model.body_move.GetPos()  # Pega a posição atual
-        print(f"{simulation_time:6.2f}s | {body_pos.x:6.3f} | {body_pos.y:6.3f} | {body_pos.z:6.3f}")
-
-print("✅ Simulação finalizada!")
+        model.PrintBodyPosition(simulation_time)
+        dados = model.PrintBodyPosition(simulation_time)
+        lista_dados.append(dados)
+        
+df = pd.DataFrame(lista_dados)
+df.to_csv("resultados_simulacao.csv", index=False)
+print("Simulação finalizada!")
