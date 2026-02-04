@@ -1,0 +1,233 @@
+<?xml version="1.0" ?>
+<sdf version="1.8">
+  <model name="meu_drone_v2">
+    
+    <link name="base_link">
+      <pose>0 0 0.2 0 0 0</pose> 
+      <inertial>
+        <mass>1.5</mass>
+        <inertia>
+          <ixx>0.0547</ixx> <iyy>0.0558</iyy> <izz>0.0900</izz>
+          <ixy>0</ixy> <ixz>0</ixz> <iyz>0</iyz>
+        </inertia>
+      </inertial>
+      
+      <visual name="base_link_visual">
+        <pose>0 0 0 0 0 0</pose> 
+        <geometry>
+          <mesh>
+            <uri>model://meu_drone/meshes/Drone_corpo_fixed.stl</uri>
+            <scale>0.001 0.001 0.001</scale>
+          </mesh>
+        </geometry>
+      </visual>
+      
+      <collision name="base_link_collision">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://meu_drone/meshes/Drone_corpo_fixed.stl</uri>
+            <scale>0.001 0.001 0.001</scale>
+          </mesh>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="rotor_0">
+      <pose>0.15 -0.10 0.21 0 0 0</pose> <inertial>
+        <mass>0.005</mass>
+        <inertia><ixx>0.0001</ixx> <iyy>0.0001</iyy> <izz>0.0001</izz></inertia>
+      </inertial>
+      <visual name="rotor_0_visual">
+        <pose>0 0 0 0 0 0</pose> <geometry>
+          <mesh>
+            <uri>model://meu_drone/meshes/helice.STL</uri>
+            <scale>0.001 0.001 0.001</scale>
+          </mesh>
+        </geometry>
+        <material><ambient>1 0 0 1</ambient></material> </visual>
+      <collision name="rotor_0_collision">
+         <geometry><cylinder><radius>0.06</radius><length>0.01</length></cylinder></geometry>
+      </collision>
+    </link>
+
+    <joint name="rotor_0_joint" type="revolute">
+      <parent>base_link</parent>
+      <child>rotor_0</child>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit><lower>-1e16</lower> <upper>1e16</upper></limit>
+      </axis>
+    </joint>
+
+    <link name="rotor_1">
+      <pose>-0.14 0.12 0.21 0 0 0</pose>
+      <inertial>
+        <mass>0.005</mass>
+        <inertia><ixx>0.0001</ixx> <iyy>0.0001</iyy> <izz>0.0001</izz></inertia>
+      </inertial>
+      <visual name="rotor_1_visual">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://meu_drone/meshes/helice.STL</uri>
+            <scale>0.001 0.001 0.001</scale>
+          </mesh>
+        </geometry>
+        <material><ambient>1 0 0 1</ambient></material> </visual>
+      <collision name="rotor_1_collision">
+         <geometry><cylinder><radius>0.06</radius><length>0.01</length></cylinder></geometry>
+      </collision>
+    </link>
+
+    <joint name="rotor_1_joint" type="revolute">
+      <parent>base_link</parent>
+      <child>rotor_1</child>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit><lower>-1e16</lower> <upper>1e16</upper></limit>
+      </axis>
+    </joint>
+
+    <link name="rotor_2">
+      <pose>0.14 0.12 0.21 0 0 0</pose>
+      <inertial>
+        <mass>0.005</mass>
+        <inertia><ixx>0.0001</ixx> <iyy>0.0001</iyy> <izz>0.0001</izz></inertia>
+      </inertial>
+      <visual name="rotor_2_visual">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://meu_drone/meshes/helice.STL</uri>
+            <scale>0.001 0.001 0.001</scale>
+          </mesh>
+        </geometry>
+        <material><ambient>0 0 0 1</ambient></material> </visual>
+      <collision name="rotor_2_collision">
+         <geometry><cylinder><radius>0.06</radius><length>0.01</length></cylinder></geometry>
+      </collision>
+    </link>
+
+    <joint name="rotor_2_joint" type="revolute">
+      <parent>base_link</parent>
+      <child>rotor_2</child>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit><lower>-1e16</lower> <upper>1e16</upper></limit>
+      </axis>
+    </joint>
+
+    <link name="rotor_3">
+      <pose>-0.15 -0.10 0.21 0 0 0</pose>
+      <inertial>
+        <mass>0.005</mass>
+        <inertia><ixx>0.0001</ixx> <iyy>0.0001</iyy> <izz>0.0001</izz></inertia>
+      </inertial>
+      <visual name="rotor_3_visual">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://meu_drone/meshes/helice.STL</uri>
+            <scale>0.001 0.001 0.001</scale>
+          </mesh>
+        </geometry>
+        <material><ambient>0 0 0 1</ambient></material> </visual>
+      <collision name="rotor_3_collision">
+         <geometry><cylinder><radius>0.06</radius><length>0.01</length></cylinder></geometry>
+      </collision>
+    </link>
+
+    <joint name="rotor_3_joint" type="revolute">
+      <parent>base_link</parent>
+      <child>rotor_3</child>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit><lower>-1e16</lower> <upper>1e16</upper></limit>
+      </axis>
+    </joint>
+
+    <plugin
+      filename="gz-sim-multicopter-control-system"
+      name="gz::sim::systems::MulticopterVelocityControl">
+      <robotNamespace>meu_drone</robotNamespace>
+      <commandSubTopic>cmd_vel</commandSubTopic>
+      <comLinkName>base_link</comLinkName>
+      <velocityGain>2.7 2.7 2.7</velocityGain>
+      <attitudeGain>2 3 0.15</attitudeGain>
+      <angularRateGain>0.4 0.52 0.18</angularRateGain>
+      
+      <rotorConfiguration>
+        <rotor>
+          <jointName>rotor_0_joint</jointName>
+          <forceConstant>8.54858e-06</forceConstant>
+          <momentConstant>0.016</momentConstant>
+          <direction>-1</direction>
+        </rotor>
+        <rotor>
+          <jointName>rotor_1_joint</jointName>
+          <forceConstant>8.54858e-06</forceConstant>
+          <momentConstant>0.016</momentConstant>
+          <direction>-1</direction>
+        </rotor>
+        <rotor>
+          <jointName>rotor_2_joint</jointName>
+          <forceConstant>8.54858e-06</forceConstant>
+          <momentConstant>0.016</momentConstant>
+          <direction>1</direction>
+        </rotor>
+        <rotor>
+          <jointName>rotor_3_joint</jointName>
+          <forceConstant>8.54858e-06</forceConstant>
+          <momentConstant>0.016</momentConstant>
+          <direction>1</direction>
+        </rotor>
+      </rotorConfiguration>
+    </plugin>
+    
+    <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+      <jointName>rotor_0_joint</jointName>
+      <linkName>rotor_0</linkName>
+      <actuator_number>0</actuator_number>
+      <turningDirection>cw</turningDirection>
+      <motorConstant>8.54858e-06</motorConstant>
+      <momentConstant>0.016</momentConstant>
+      <maxRotVelocity>1000</maxRotVelocity>
+      <robotNamespace>meu_drone</robotNamespace>
+    </plugin>
+
+    <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+      <jointName>rotor_1_joint</jointName>
+      <linkName>rotor_1</linkName>
+      <actuator_number>1</actuator_number>
+      <turningDirection>cw</turningDirection>
+      <motorConstant>8.54858e-06</motorConstant>
+      <momentConstant>0.016</momentConstant>
+      <maxRotVelocity>1000</maxRotVelocity>
+      <robotNamespace>meu_drone</robotNamespace>
+    </plugin>
+
+    <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+      <jointName>rotor_2_joint</jointName>
+      <linkName>rotor_2</linkName>
+      <actuator_number>2</actuator_number>
+      <turningDirection>ccw</turningDirection>
+      <motorConstant>8.54858e-06</motorConstant>
+      <momentConstant>0.016</momentConstant>
+      <maxRotVelocity>1000</maxRotVelocity>
+      <robotNamespace>meu_drone</robotNamespace>
+    </plugin>
+
+    <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+      <jointName>rotor_3_joint</jointName>
+      <linkName>rotor_3</linkName>
+      <actuator_number>3</actuator_number>
+      <turningDirection>ccw</turningDirection>
+      <motorConstant>8.54858e-06</motorConstant>
+      <momentConstant>0.016</momentConstant>
+      <maxRotVelocity>1000</maxRotVelocity>
+      <robotNamespace>meu_drone</robotNamespace>
+    </plugin>
+
+  </model>
+</sdf>

@@ -9,6 +9,12 @@ print("Cable with moving end - PyChrono 9.0.0")
 
 # Create system
 sys = chrono.ChSystemSMC()
+sys.SetGravitationalAcceleration(chrono.ChVector3d(0, -9.81, 0))
+
+#floor = chrono.ChBodyEasyBox(10, 0.2, 10, 1000)
+#floor.SetPos(chrono.ChVector3d(0, 0, 0))
+#floor.SetFixed(True)
+#floor.GetVisualShape(0).SetColor(chrono.ChColor(0.9, 0.9, 0.9))
 mesh = fea.ChMesh()
 
 # Create model
@@ -49,11 +55,12 @@ solver.SetVerbose(False)
 step = 0
 simulation_time = 0.0
 print_interval = 25
-time_step = 0.01
+time_step = 0.005
+
 
 print("Iniciando simulação...")
-print("Tempo(s) | Pos_X | Pos_Y | Pos_Z | Roll° | Pitch° | Yaw° | Tensão_M | Tensão_F")
-print("-" * 55)
+print("Tempo(s) | Start_X | Start_Y | Start_Z | End_X | End_Y | End_Z | Pitch° | Yaw° | Tensão_Início | Tensão_Fim")
+print("-" * 100)
 
 lista_dados = []
 
@@ -62,7 +69,7 @@ while vis.Run():
     vis.BeginScene()
     vis.Render()
     vis.EndScene()
-    
+
     model.update_motion(time_step)
     
     # Avança simulação física
@@ -73,10 +80,17 @@ while vis.Run():
     step += 1
     
     if step % print_interval == 0:
-        model.PrintBodyPosition(simulation_time)
         dados = model.PrintBodyPosition(simulation_time)
         lista_dados.append(dados)
-        
-df = pd.DataFrame(lista_dados)
-df.to_csv("resultados_simulacao.csv", index=False)
+        # Imprime dados formatados
+        print(f"{simulation_time:6.2f}s | Start:({dados['Start_X']:5.3f},{dados['Start_Y']:5.3f},{dados['Start_Z']:5.3f}) | End:({dados['End_X']:5.3f},{dados['End_Y']:5.3f},{dados['End_Z']:5.3f}) | Pitch:{dados['Pitch']:6.1f}° | Yaw:{dados['Yaw']:6.1f}° | Tensão_S:{dados['Tensao_Start']:6.2f}N | Tensão_E:{dados['Tensao_End']:6.2f}N")
+
+# Salva os dados em CSV após a simulação
+if lista_dados:
+    df = pd.DataFrame(lista_dados)
+    df.to_csv("resultados_cabo_fixo.csv", index=False)
+    print(f"\nDados salvos em 'resultados_cabo_fixo.csv' ({len(df)} registros)")
+else:
+    print("Nenhum dado coletado durante a simulação")
+
 print("Simulação finalizada!")

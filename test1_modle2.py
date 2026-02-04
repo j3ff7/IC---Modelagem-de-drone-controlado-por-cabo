@@ -6,33 +6,64 @@ import pandas as pd
 
 class Model2:
     def __init__(self, system, mesh):
+        
+        cable_diameter = 0.015
+        cable_density = 1000
+        cable__young = 70e9
+        
+        self.initial_pos = 2
+        self.final_pos = 1
+        self.move_duration = 5
+        
+        self.start_pos = chrono.ChVector3d(0, 1, 0)
+        self.end_pos = chrono.ChVector3d(self.initial_pos, 1, 0)
+        
+        
         msection_cable2 = fea.ChBeamSectionCable()
-        msection_cable2.SetDiameter(0.015)
-        msection_cable2.SetDensity(1000)
-        msection_cable2.SetYoungModulus(0.001e9)
+        msection_cable2.SetDiameter(cable_diameter)
+        msection_cable2.SetDensity(cable_density)
+        msection_cable2.SetYoungModulus(cable__young)
         msection_cable2.SetRayleighDamping(0.000)
+        
+        elements = 100
 
         self.builder = fea.ChBuilderCableANCF()
-        self.builder.BuildBeam(mesh, msection_cable2, 10,
-        chrono.ChVector3d(0, 0, 0),
-        chrono.ChVector3d(1, 0.5, 0))
-
-        mtruss = chrono.ChBody()
+        self.builder.BuildBeam(mesh, msection_cable2, elements,
+        self.start_pos,
+        self.end_pos)
+        
+        contact_cable = chrono.ChContactMaterialSMC()
+        contact_cable.SetFriction(0.4)
+        contact_cable.SetRestitution(0.1)
+        contact_cable.SetYoungModulus(1e7)
+        contact_cable.SetPoissonRatio(0.3)
+        
+        self.contactcloud = fea.ChContactSurfaceNodeCloud(contact_cable, mesh)
+        mesh.AddContactSurface(self.contactcloud)
+        
+        beam_nodes = self.builder.GetLastBeamNodes() 
+        contact_radius = cable_diameter * 1.5   
+        for node in beam_nodes:
+            self.contactcloud.AddNode(node, contact_radius)
+        
+        #Chão
+        contact_floor = chrono.ChContactMaterialSMC()
+        contact_floor.SetFriction(0.5)
+        contact_floor.SetRestitution(0.1)  
+        contact_floor.SetYoungModulus(1e9)  
+        contact_floor.SetPoissonRatio(0.3)  
+        mtruss = chrono.ChBodyEasyBox(25, 0.1, 25, 1000, True, True, contact_floor)
+        mtruss.SetPos(chrono.ChVector3d(0.5,-0.05,0))
         mtruss.SetFixed(True)
+        mtruss.GetVisualShape(0).SetColor(chrono.ChColor(0.3, 0.3, 0.6))  # Cor azulada
         system.Add(mtruss)
+        
 
         first_node = self.builder.GetLastBeamNodes().front()
         last_node = self.builder.GetLastBeamNodes().back()
         
-        self.start_pos = last_node.GetPos()
-        
-        vector_pos = last_node.GetPos()
-        self.x0 = vector_pos.x
-        self.y0 = vector_pos.y
-        self.z0 = vector_pos.z
-        
         self.body_move = chrono.ChBody()  # Agora é self.body_move
-        self.body_move.SetPos(chrono.ChVector3d(self.x0,self.y0,self.z0))
+        self.body_move.SetPos(self.end_pos)
         self.body_move.SetFixed(True)
         self.body_move.SetMass(0.1)
         system.Add(self.body_move)  
@@ -43,10 +74,14 @@ class Model2:
         self.body_ref.SetPos(self.start_pos)
         system.Add(self.body_ref)
         
+        #self.body_last = chrono.ChBody()
+        #self.body_last.SetFixed(True)  # Corpo fixo
+        #self.body_last.SetPos(last_node.GetPos())
+        #system.Add(self.body_last)
             
         # Primeira extremidade fixa
         self.constraint_hinge = fea.ChLinkNodeFrame()
-        self.constraint_hinge.Initialize(first_node, mtruss)
+        self.constraint_hinge.Initialize(first_node, self.body_ref)
         system.Add(self.constraint_hinge)
         
         # Conexão da última extremidade
@@ -81,70 +116,39 @@ class Model2:
         self.constraint_hinge.AddVisualShape(msphere_visual)
         self.constraint_last.AddVisualShape(msphere_visual)
         
-        # Visualização para o corpo móvel - COR VERMELHA
-        box_visual = chrono.ChVisualShapeBox(0.05, 0.05, 0.05)
-        box_visual.SetColor(chrono.ChColor(1.0, 0.0, 0.0))
-        self.body_move.AddVisualShape(box_visual)
-        
         # Visualização para referência fixa - COR AZUL
         ref_sphere = chrono.ChVisualShapeSphere(0.015)
         ref_sphere.SetColor(chrono.ChColor(0.0, 0.0, 1.0))
         self.body_ref.AddVisualShape(ref_sphere)
         
-        self.simulation_time = 0.0
-
-        print("Motor configurado para movimento em Quadrado")
+        # Visualização para última extremidade fixa - TAMBÉM AZUL
+        move_sphere = chrono.ChVisualShapeSphere(0.015)
+        move_sphere.SetColor(chrono.ChColor(0.0, 0.0, 1.0))  # Azul
+        self.body_move.AddVisualShape(move_sphere)
         
+        self.simulation_time = 0.0
 
     def update_motion(self, dt):
         
         self.simulation_time += dt
-
-        L = 0.5
-        cycle_time = 1
         
-        section_time = cycle_time/4
-        
-        speed = L / section_time
-        
-        t = self.simulation_time % cycle_time
-        
-        dz = 0
-        dy = 0 
-        
-        if t < section_time:
-            dz = speed*t
-            dy = 0
+        if self.simulation_time <= self.move_duration:
+            time_elapsed = self.simulation_time/self.move_duration
+            factor = 0.5*(1-m.cos(time_elapsed*m.pi))
             
-        elif t < (2*section_time):
-            local_t = t - section_time
-            dz = L
-            dy = speed * local_t
+            new_pos = self.initial_pos + (self.final_pos - self.initial_pos) * factor
             
-        elif t < (3 * section_time):
-            local_t = t - (2 * section_time)
-            dz = L - (speed * local_t) 
-            dy = L
+            current_pos = self.body_move.GetPos()
+            current_pos.x = new_pos
             
-        else:
-            local_t = t - (3 * section_time)
-            dz = 0.0
-            dy = L - (speed * local_t) 
-            
-        new_pos = chrono.ChVector3d(self.x0,
-                                    self.y0 + dy,
-                                    self.z0 + dz)
-        
-        self.body_move.SetPos(new_pos)
-            
+            self.body_move.SetPos(current_pos)        
+    
     def PrintBodyPosition(self, time=None):
-        # Posição do corpo móvel
-        body_pos = self.body_move.GetPos()
         
         #Tensão nas extremidades do cabo
-        react_movel = self.constraint_last.GetReaction2()
-        force_vec_movel = react_movel.force
-        tensao_movel = force_vec_movel.Length()
+        react_last = self.constraint_last.GetReaction2()
+        force_vec_last = react_last.force
+        tensao_last = force_vec_last.Length()
         
         react_fixa = self.constraint_hinge.GetReaction2()
         force_vec_fixa = react_fixa.force
@@ -152,6 +156,14 @@ class Model2:
         
         # Ângulos do cabo
         nodes = self.builder.GetLastBeamNodes()
+        length = 0  
+        for i in range(len(nodes) -1):
+            pos_a = nodes[i].GetPos()
+            pos_b = nodes[i+1].GetPos()
+            
+            dist = (pos_b - pos_a).Length()
+            length += dist
+            
         if len(nodes) >= 2:
             last_node = nodes[-1]
             penultimate_node = nodes[-2]
@@ -164,18 +176,23 @@ class Model2:
             pitch_deg = 0.0
             yaw_deg = 0.0
         
+        pos_atual = self.body_move.GetPos()
+        
+        print(f"Comprimento do cabo: {length}m")
         if time is not None:
-            print(f"{time:6.2f}s | CORPO:({body_pos.x:5.3f},{body_pos.y:5.3f},{body_pos.z:5.3f}) | CABO:Pitch:{pitch_deg:6.1f}° Yaw:{yaw_deg:6.1f}° | Tensão: Móvel: {tensao_movel:.2f}N Fixa:{tensao_fixa:.2f}N")
+            print(f"{time:6.2f}s | Início:({self.start_pos.x:5.3f},{self.start_pos.y:5.3f},{self.start_pos.z:5.3f}) | Fim:({pos_atual.x:5.3f},{pos_atual.y:5.3f},{pos_atual.z:5.3f}) | Cabo:Pitch:{pitch_deg:6.1f}° Yaw:{yaw_deg:6.1f}° | Tensão: Início: {tensao_fixa:.2f}N Fim:{tensao_last:.2f}N | Comprimento:({length:.3f}")
         else:
-            print(f"Corpo: ({body_pos.x:.3f}, {body_pos.y:.3f}, {body_pos.z:.3f}) | Cabo: Pitch:{pitch_deg:.1f}° Yaw:{yaw_deg:.1f}° | Tensão: Móvel: {tensao_movel:.2f}N Fixa:{tensao_fixa:.2f}N")
+            print(f"Início: ({self.start_pos.x:.3f}, {self.start_pos.y:.3f}, {self.start_pos.z:.3f}) | Fim: ({pos_atual.x:.3f}, {pos_atual.y:.3f}, {pos_atual.z:.3f}) | Cabo: Pitch:{pitch_deg:.1f}° Yaw:{yaw_deg:.1f}° | Tensão: Início: {tensao_fixa:.2f}N Fim:{tensao_last:.2f}N")
         
         return {
             "Tempo": time if time else 0.0,
-            "Pos_X": body_pos.x,
-            "Pos_Y": body_pos.y,
-            "Pos_Z": body_pos.z,
-            "Pitch": pitch_deg,
-            "Yaw": yaw_deg,
-            "Tensao_Movel": tensao_movel,
-            "Tensao_Fixa": tensao_fixa
-        }
+            "Start_X": self.start_pos.x,
+            "Start_Y": self.start_pos.y,
+            "Start_Z": self.start_pos.z,
+            "End_X": pos_atual.x,      
+            "End_Y": pos_atual.y,       
+            "End_Z": pos_atual.z,      
+            "Pitch": pitch_deg,        
+            "Yaw": yaw_deg,             
+            "Tensao_Start": tensao_fixa,
+            "Tensao_End": tensao_last}
