@@ -1,0 +1,359 @@
+function sysCall_init()
+
+    -- Temp
+    print('=== Objetos filhos do Quadcopter ===')
+    local children = sim.getObjectsInTree(quad, sim.object_shape_type, 0)
+    local quad = sim.getObject('/Quadcopter')
+
+    for i=1,#children do
+        local name = sim.getObjectAlias(children[i], 1)
+        print('Shape encontrado:', name)
+    end
+    -- Temp
+
+
+    -- ==============================
+    -- PARAMETROS DO TETHER
+    -- ==============================
+    local N           = 25          -- numero de segmentos
+    local segLen      = 0.08        -- comprimento de cada segmento [m]
+    local segRad      = 0.012       -- raio [m]
+    local massPerSeg  = 0.05        -- massa por segmento [kg]
+
+    -- nó físico (para 2 revolutes por elo)
+    local nodeRad     = 0.006
+
+    local nodeMass    = 0.02
+
+    -- damping (reduz oscilacao)
+    local segLinDamp  = 0.25
+    local segAngDamp  = 0.35
+    local nodeLinDamp = 0.35
+    local nodeAngDamp = 0.45
+
+    -- slack inicial: quanto o cabo "começa" abaixo do ponto no drone
+    local slackZ = 0.15  -- [m]
+
+    -- direção do cabo (para baixo no mundo)
+    local zdir = {0, 0, -1}
+
+    -- ==============================
+    -- ARRAYS GLOBAIS (para debug)
+    -- ==============================
+    segments, nodes, jointsX, jointsY = {}, {}, {}, {}
+
+    -- ==============================
+    -- PONTO DE FIXACAO NO DRONE
+    -- ==============================
+    local attachPath = '/Quadcopter/tether_attach'  -- dummy
+    attachPoint = sim.getObject(attachPath)
+    if attachPoint == -1 then
+        error('Nao encontrei attachPoint: '..attachPath..' (use Copy path no dummy e atualize attachPath)')
+    end
+
+    -- Corpo DINÂMICO do drone (tem que ser SHAPE dinâmico!)
+    local droneBodyPath = '/Quadcopter/body'
+    droneBody = sim.getObject(droneBodyPath)
+    if droneBody == -1 then
+        error('Nao encontrei droneBody: '..droneBodyPath..' (procure um SHAPE dinamico do drone)')
+    end
+
+    -- Pose do ponto de fixação (no mundo)
+    local pAttach = sim.getObjectPosition(attachPoint, -1)
+    local oAttach = sim.getObjectOrientation(attachPoint, -1)
+
+    -- ==============================
+    -- FUNCOES DE CRIACAO
+    -- ==============================
+    local function createSegment(i, pos)
+        local cyl = sim.createPrimitiveShape(
+            sim.primitiveshape_cylinder,
+            {2*segRad, 2*segRad, segLen},
+            0
+        )
+        sim.setObjectAlias(cyl, string.format('tether_seg_%02d', i), 0)
+        sim.setObjectPosition(cyl, -1, pos)
+
+        sim.setObjectInt32Param(cyl, sim.shapeintparam_static, 0)
+        sim.setObjectInt32Param(cyl, sim.shapeintparam_respondable, 0) -- TESTE: sem colisao
+        sim.setShapeMass(cyl, massPerSeg)
+
+        pcall(function()
+            sim.setObjectFloatParam(cyl, sim.dynparam_linear_damping, segLinDamp)
+            sim.setObjectFloatParam(cyl, sim.dynparam_angular_damping, segAngDamp)
+        end)
+
+        return cyl
+    end
+
+    local function createNode(i, pos)
+        local s = sim.createPrimitiveShape(
+            sim.primitiveshape_spheroid,
+            {2*nodeRad, 2*nodeRad, 2*nodeRad},
+            0
+        )
+        sim.setObjectAlias(s, string.format('tether_node_%02d', i), 0)
+        sim.setObjectPosition(s, -1, pos)
+
+        sim.setObjectInt32Param(s, sim.shapeintparam_static, 0)
+        sim.setObjectInt32Param(s, sim.shapeintparam_respondable, 1) -- nó não colide
+        sim.setShapeMass(s, nodeMass)
+
+        pcall(function()
+            sim.setObjectFloatParam(s, sim.dynparam_linear_damping, nodeLinDamp)
+            sim.setObjectFloatParam(s, sim.dynparam_angular_damping, nodeAngDamp)
+        end)
+
+        return s
+    end
+
+    local function createRevolute(name, pos, axis, parentObj, childObj)
+        local j = sim.createJoint(sim.joint_revolute, sim.jointmode_dynamic, 0)
+        sim.setObjectAlias(j, name, 0)
+        sim.setObjectPosition(j, -1, pos)
+
+        if axis == 'x' then
+            sim.setObjectOrientation(j, -1, {0,0,0})
+        elseif axis == 'y' then
+            sim.setObjectOrientation(j, -1, {0,0,math.pi/2})
+        end
+
+        sim.setObjectParent(j, parentObj, true)
+        sim.setObjectParent(childObj, j, true)
+
+        pcall(function()
+            sim.setJointInterval(j, true, {-0.5, 1.0})
+        end)
+
+        return j
+    end
+
+    -- ==============================
+    -- CRIAR SEGMENTOS (do drone para baixo)
+    -- ==============================
+    for i=1,N do
+        local s = slackZ + (i-1)*segLen
+        local pos = {
+            pAttach[1] + zdir[1]*s,
+            pAttach[2] + zdir[2]*s,
+            pAttach[3] + zdir[3]*s
+        }
+        segments[i] = createSegment(i, pos)
+    end
+
+    -- ==============================
+    -- CONECTAR SEGMENTOS (2 revolutes por elo)
+    -- ==============================
+    for i=1,(N-1) do
+        local posA = sim.getObjectPosition(segments[i], -1)
+        -- âncora no "fim de baixo" do seg_i (como zdir é -Z, é -segLen/2 em Z)
+        local anchor = {posA[1], posA[2], posA[3] + zdir[3]*(segLen/2)}
+
+        nodes[i] = createNode(i, anchor)
+        jointsX[i] = createRevolute(string.format('tether_jX_%02d', i), anchor, 'x', segments[i], nodes[i])
+        jointsY[i] = createRevolute(string.format('tether_jY_%02d', i), anchor, 'y', nodes[i], segments[i+1])
+    end
+    
+    -- ==============================
+    -- PRENDER AO DRONE usando FORCE SENSOR (OFFSET-FREE)
+    -- tudo no frame do droneBody
+    -- ==============================
+
+    -- Pose do dummy RELATIVA ao corpo dinâmico do drone:
+    local pRel = sim.getObjectPosition(attachPoint, droneBody)
+    local oRel = sim.getObjectOrientation(attachPoint, droneBody)
+
+    -- 1) Force sensor (criação correta para sua versão)
+    local options = 0
+    local intParams = {0,0,0,0,0}
+    local floatParams = {0,0,0,0,0}
+    fs = sim.createForceSensor(options, intParams, floatParams)
+    sim.setObjectAlias(fs, 'tether_forceSensor', 0)
+
+    -- 2) Parenta primeiro no droneBody (sem manter pose do mundo)
+    sim.setObjectParent(fs, droneBody, false)
+
+    -- 3) Agora seta pose do sensor NO FRAME do droneBody (exatamente no dummy)
+    sim.setObjectPosition(fs, droneBody, pRel)
+    sim.setObjectOrientation(fs, droneBody, oRel)
+
+    -- 4) Encaixa seg1 no frame do sensor e parenta
+    sim.setObjectParent(segments[1], fs, true)
+    sim.setObjectPosition(segments[1], fs, {0,0,0})
+    sim.setObjectOrientation(segments[1], fs, {0,0,0})
+    
+    -- ==============================
+    -- FIXAÇÃO NA ORIGEM (COM MASSA FANTASMA ATIVADA)
+    -- ==============================
+    -- 1) Garante que a base está imóvel no chão
+    local baseAnchor = sim.createPrimitiveShape(sim.primitiveshape_spheroid, {0.1, 0.1, 0.1}, 0)
+    sim.setObjectAlias(baseAnchor, 'anchor_origem', 0)
+    sim.setObjectPosition(baseAnchor, -1, {0, 0, 0.05})
+    sim.setObjectInt32Param(baseAnchor, sim.shapeintparam_static, 1)    -- 1 = ESTÁTICO (Parede)
+    sim.setObjectInt32Param(baseAnchor, sim.shapeintparam_respondable, 0) -- Sem colisão
+    
+    -- 2) Cria o Sensor de força na base
+    fs_ground = sim.createForceSensor(0, {0,0,0,0,0}, {0,0,0,0,0})
+    sim.setObjectAlias(fs_ground, 'tether_forceSensor_ground', 0)
+    sim.setObjectParent(fs_ground, baseAnchor, false)
+    sim.setObjectPosition(fs_ground, baseAnchor, {0, 0, 0})
+
+    -- 3) Cria uma "Massa Fantasma" pendurada no sensor
+    local fsMass = sim.createPrimitiveShape(sim.primitiveshape_cuboid, {0.05, 0.05, 0.05}, 0)
+    sim.setObjectAlias(fsMass, 'sensor_mass', 0)
+    sim.setObjectInt32Param(fsMass, sim.shapeintparam_static, 0)      -- O SEGREDO: 0 = DINÂMICO!
+    sim.setObjectInt32Param(fsMass, sim.shapeintparam_respondable, 1) -- Com colisão
+    sim.setShapeMass(fsMass, 0.1)
+    sim.setObjectParent(fsMass, fs_ground, false)
+    sim.setObjectPosition(fsMass, fs_ground, {0, 0, 0})
+
+    -- 4) Cria um Dummy na massa fantasma
+    local dummyGround = sim.createDummy(0.05)
+    sim.setObjectAlias(dummyGround, 'tether_dummy_ground', 0)
+    sim.setObjectParent(dummyGround, fsMass, false)
+    sim.setObjectPosition(dummyGround, fsMass, {0, 0, 0})
+
+    -- 5) Cria um Dummy na ponta do último segmento
+    local lastSeg = segments[N]
+    local dummySeg = sim.createDummy(0.05)
+    sim.setObjectAlias(dummySeg, 'tether_dummy_segN', 0)
+    sim.setObjectParent(dummySeg, lastSeg, false)
+    sim.setObjectPosition(dummySeg, lastSeg, {0, 0, -segLen/2}) 
+
+    -- 6) Conecta os Dummies para fechar a malha
+    sim.setLinkDummy(dummyGround, dummySeg)
+    local linkType = sim.dummy_linktype_dynamics_loop_closure or sim.dummy_linktype_dynamics_force_constraint or 1
+    sim.setObjectInt32Param(dummyGround, sim.dummyintparam_link_type, linkType)
+    
+    
+    -- ==============================
+    -- EXPORTAÇÃO DE DADOS (CSV)
+    -- ==============================
+    -- Pega o caminho de onde a cena está salva para jogar o arquivo na mesma pasta
+    local scenePath = sim.getStringParam(sim.stringparam_scene_path)
+    
+    -- Se a cena não estiver salva, ele joga na pasta raiz do CoppeliaSim
+    if scenePath == '' then 
+        scenePath = sim.getStringParam(sim.stringparam_application_path) 
+    end
+    
+    local filePath = '/home/joseubu/IC/Coppelia/Dados_simulacao/dados_tensao.csv'
+    
+    -- Abre o arquivo em modo de escrita ("w")
+    arquivo_csv = io.open(filePath, "w")
+    
+    if arquivo_csv then
+        -- Adicionamos as colunas PosX, PosY e PosZ no cabeçalho
+        arquivo_csv:write("Tempo(s),Tensao_Drone(N),Tensao_Origem(N),PosX(m),PosY(m),PosZ(m),Angulo_EixoX(graus),Angulo_EixoY(graus),Angulo_EixoZ(graus)\n")
+        print("Arquivo CSV criado em: " .. filePath)
+    else
+        print("Erro: Nao foi possivel criar o arquivo CSV.")
+    end
+    
+    
+end
+
+
+--[[
+function sysCall_actuation()
+    -- opcional: você pode imprimir comprimento aproximado
+    -- local p0 = sim.getObjectPosition(segments[1], -1)
+    -- local pN = sim.getObjectPosition(segments[#segments], -1)
+    
+    
+    local t = sim.getSimulationTime()
+    if math.floor(t*5) ~= math.floor((t-sim.getSimulationTimeStep())*5) then
+        local pA = sim.getObjectPosition(attachPoint, -1)     -- dummy no drone
+        local p1 = sim.getObjectPosition(segments[1], -1)     -- primeiro elo
+        local dx,dy,dz = p1[1]-pA[1], p1[2]-pA[2], p1[3]-pA[3]
+        local dist = math.sqrt(dx*dx+dy*dy+dz*dz)
+        print(string.format("dist(attach->seg1)=%.3f m", dist))
+    end
+    
+    
+end
+--]]
+
+-- Debug opcional (deixe comentado se não precisar)
+function sysCall_actuation()
+    local t  = sim.getSimulationTime()
+    local dt = sim.getSimulationTimeStep()
+
+    if math.floor(t*5) ~= math.floor((t-dt)*5) then
+        if attachPoint and attachPoint ~= -1 and segments and segments[1] then
+            local pA = sim.getObjectPosition(attachPoint, -1)
+            local p1 = sim.getObjectPosition(segments[1], -1)
+            local dx,dy,dz = p1[1]-pA[1], p1[2]-pA[2], p1[3]-pA[3]
+            local dist = math.sqrt(dx*dx + dy*dy + dz*dz)
+            print(string.format("dist(attach->seg1)=%.3f m", dist))
+            
+            local pB = sim.getObjectPosition(droneBody, -1)  -- base (shape)
+            local dxB,dyB,dzB = pA[1]-pB[1], pA[2]-pB[2], pA[3]-pB[3]
+            local distAB = math.sqrt(dxB*dxB+dyB*dyB+dzB*dzB)
+
+            local p1 = sim.getObjectPosition(segments[1], -1)
+            local dxC,dyC,dzC = p1[1]-pB[1], p1[2]-pB[2], p1[3]-pB[3]
+            local distB1 = math.sqrt(dxC*dxC+dyC*dyC+dzC*dzC)
+
+            print(string.format("dist(dummy->base)=%.3f  dist(base->seg1)=%.3f  dist(dummy->seg1)=%.3f",
+                distAB, distB1, dist))
+        
+        end
+    end
+
+end
+
+function sysCall_sensing()
+    -- Verifica se OS DOIS sensores existem
+    if fs and fs_ground then
+        local resultDrone, forceDrone, torqueDrone = sim.readForceSensor(fs)
+        local resultOrigem, forceOrigem, torqueOrigem = sim.readForceSensor(fs_ground)
+
+        if resultDrone > 0 and resultOrigem > 0 then
+            -- Tensão no Drone
+            local T_drone = math.sqrt(forceDrone[1]^2 + forceDrone[2]^2 + forceDrone[3]^2)
+            
+            -- Tensão na Origem (Chão)
+            local T_origem = math.sqrt(forceOrigem[1]^2 + forceOrigem[2]^2 + forceOrigem[3]^2)
+
+            -- =========================================
+            -- PRINT DAS TENSÕES (5 vezes por segundo)
+            -- =========================================
+            local t = sim.getSimulationTime()
+            local dt = sim.getSimulationTimeStep()
+            if math.floor(t*5) ~= math.floor((t-dt)*5) then
+                print(string.format("Tensão Drone: %7.3f N  |  Tensão Base: %7.3f N", T_drone, T_origem))
+            end
+
+            -- Pega a posição do drone em relação à origem do mundo (-1)
+            local pos = sim.getObjectPosition(droneBody, -1)
+            
+            -- Pega a matriz de transformação do segmento 2 em relação ao segmento 1
+            local m = sim.getObjectMatrix(segments[2], segments[1])
+            
+            -- Extrai o vetor unitário do Eixo Z do cabo
+            local vx = m[3]
+            local vy = m[7]
+            local vz = m[11]
+
+            -- Calcula os ângulos
+            local anguloX = math.deg(math.atan2(vx, vz))
+            local anguloY = math.deg(math.atan2(vy, vz))
+            local anguloZ = math.deg(math.acos(vz))
+
+            -- Salva os dados no CSV
+            if arquivo_csv then
+                arquivo_csv:write(string.format("%.3f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f\n", 
+                    t, T_drone, T_origem, pos[1], pos[2], pos[3], anguloX, anguloY, anguloZ))
+            end
+        end
+    end
+end
+
+function sysCall_cleanup()
+    -- Fecha o arquivo quando a simulação é parada
+    if arquivo_csv then
+        arquivo_csv:close()
+        print("Arquivo CSV salvo e fechado com sucesso.")
+    end
+end
