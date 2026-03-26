@@ -1,0 +1,82 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="cabo_flexivel">
+
+  <xacro:property name="segment_length" value="0.2" />
+  <xacro:property name="segment_radius" value="0.02" />
+  <xacro:property name="segment_mass" value="0.01" />
+
+  <xacro:macro name="cylinder_inertia" params="m r h">
+    <inertial>
+      <mass value="${m}" />
+      <inertia  ixx="${m*(3*r*r+h*h)/12}" ixy = "0" ixz = "0"
+                iyy="${m*(3*r*r+h*h)/12}" iyz = "0"
+                izz="${m*r*r/2}" />
+    </inertial>
+  </xacro:macro>
+
+  <xacro:macro name="cable_link" params="index num_links parent_link">
+    
+    <link name="dummy_${index}">
+      <inertial>
+        <mass value="0.001"/>
+        <inertia ixx="0.000001" ixy="0" ixz="0" iyy="0.000001" iyz="0" izz="0.000001"/>
+      </inertial>
+    </link>
+
+    <joint name="joint_${index}_y" type="continuous">
+      <parent link="${parent_link}"/>
+      <child link="dummy_${index}"/>
+      <origin xyz="0 0 ${segment_length}" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+      <dynamics damping="0.2" friction="0.005"/> 
+    </joint>
+
+    <link name="segment_${index}">
+      <visual>
+        <geometry><cylinder radius="${segment_radius}" length="${segment_length}"/></geometry>
+        <origin xyz="0 0 ${segment_length/2}" rpy="0 0 0"/>
+        <material name="black"><color rgba="0 0 0 1"/></material>
+      </visual>
+      <collision>
+        <geometry><cylinder radius="${segment_radius}" length="${segment_length}"/></geometry>
+        <origin xyz="0 0 ${segment_length/2}" rpy="0 0 0"/>
+      </collision>
+      <xacro:cylinder_inertia m="${segment_mass}" r="${segment_radius}" h="${segment_length}" />
+    </link>
+
+    <joint name="joint_${index}_x" type="continuous">
+      <parent link="dummy_${index}"/>
+      <child link="segment_${index}"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <axis xyz="1 0 0"/>
+      <dynamics damping="0.02" friction="0.005"/>
+    </joint>
+
+    <xacro:if value="${index &lt; num_links}">
+      <xacro:cable_link index="${index+1}" num_links="${num_links}" parent_link="segment_${index}"/>
+    </xacro:if>
+
+  </xacro:macro>
+
+  <link name="world"/>
+
+  <link name="base_link">
+    <visual>
+      <geometry><box size="0.05 0.05 0.05"/></geometry>
+      <material name="red"><color rgba="1 0 0 1"/></material>
+    </visual>
+    <inertial>
+      <mass value="1.0" />
+      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001" />
+    </inertial>
+  </link>
+
+  <joint name="fixed_base" type="fixed">
+    <parent link="world"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 1.0" rpy="0 1.57 0"/> 
+  </joint>
+
+  <xacro:cable_link index="1" num_links="10" parent_link="base_link"/>
+
+</robot>
