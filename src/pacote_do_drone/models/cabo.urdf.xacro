@@ -2,7 +2,7 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="cabo_flexivel">
 
   <xacro:property name="segment_length" value="0.02" />
-  <xacro:property name="segment_radius" value="0.008" />
+  <xacro:property name="segment_radius" value="0.005" />
   <xacro:property name="segment_mass" value="0.01" />
 
   <xacro:macro name="cylinder_inertia" params="m r h">
@@ -21,13 +21,36 @@
         <mass value="0.01"/> <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/> </inertial>
     </link>
 
-    <joint name="joint_${index}_y" type="continuous">
-      <parent link="${parent_link}"/>
-      <child link="dummy_${index}"/>
-      <origin xyz="0 0 ${segment_length}" rpy="0 0 0"/>
-      <axis xyz="0 1 0"/>
-      <dynamics damping="0.2" friction="0.005"/> 
+    <joint name="joint_${index}_x" type="continuous">
+      <parent link="dummy_${index}"/>
+      <child link="segment_${index}"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <axis xyz="1 0 0"/>
+      <dynamics damping="0.02" friction="0.005"/>
     </joint>
+
+    <xacro:if value="${index == 1}">
+      <gazebo reference="joint_1_y">
+        <sensor name="sensor_tracao" type="force_torque">
+          <always_on>true</always_on>
+          <update_rate>50</update_rate>
+          <topic>/tensao_cabo</topic>
+        </sensor>
+      </gazebo>
+
+      <gazebo>
+        <plugin filename="gz-sim-forcetorque-system" name="gz::sim::systems::ForceTorque"/>
+
+        <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher">
+          <topic>/angulos_cabo</topic>
+          <joint_name>joint_1_x</joint_name>
+          <joint_name>joint_1_y</joint_name>
+        </plugin>
+      </gazebo>
+    </xacro:if>
+    <xacro:if value="${index &lt; num_links}">
+      <xacro:cable_link index="${index+1}" num_links="${num_links}" parent_link="segment_${index}"/>
+    </xacro:if>
 
     <link name="segment_${index}">
       <visual>
@@ -61,6 +84,6 @@
       <mass value="0.01"/> <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/> </inertial>
   </link>
 
-  <xacro:cable_link index="1" num_links="40" parent_link="raiz_cabo"/>
+  <xacro:cable_link index="1" num_links="10" parent_link="raiz_cabo"/>
 
 </robot>
