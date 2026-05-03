@@ -1,4 +1,5 @@
 import os
+import json # <-- Adicionado
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import IncludeLaunchDescription, AppendEnvironmentVariable
@@ -8,20 +9,34 @@ from launch_ros.actions import Node
 def generate_launch_description():
     pkg_share = get_package_share_directory('pacote_do_drone')
     models_path = os.path.join(pkg_share, 'models')
+    
+    # Caminho para o seu novo arquivo de mundo
+    world_path = os.path.join(pkg_share, 'worlds', 'my_world.sdf')
+
+    # Usando o mesmo caminho absoluto que usamos no gerar_cabo.py
+    caminho_json = '/home/joseubu/IC/src/pacote_do_drone/tether_parameters.json'
+    
+    try:
+        with open(caminho_json, 'r') as f:
+            params = json.load(f)
+        # Multiplica quantidade de elos pelo tamanho de cada um
+        tamanho_total_cabo = params["num_links"] * params["length"]
+        # Usa 85% do tamanho do cabo para dar uma "barriga" (catenária) natural e evitar tensão infinita
+        altura_x = str(tamanho_total_cabo * 0.85)
+        print(f"Calculado altura_x automático: {altura_x}m")
+    except FileNotFoundError:
+        print("AVISO: tether_parameters.json não encontrado. Usando z=0.3 como segurança.")
+        altura_x = '0.3'
+    # ------------------------------------------------
 
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([
             os.path.join(get_package_share_directory('ros_gz_sim'), 'launch', 'gz_sim.launch.py')
         ]),
-        launch_arguments={'gz_args': 'empty.sdf -r'}.items()
+        # Passa o caminho do seu mundo aqui!
+        launch_arguments={'gz_args': f'{world_path} -v4'}.items() 
     )
 
-    spawn_drone = Node(
-        package='ros_gz_sim',
-        executable='create',
-        arguments=['-name', 'meu_drone', '-file', os.path.join(models_path, 'meu_drone', 'meu_drone.sdf'), '-x', '0.0', '-y', '0.0', '-z', '1'],
-        output='screen'
-    )
 
     bridge = Node(
         package='ros_gz_bridge',
@@ -37,6 +52,5 @@ def generate_launch_description():
     return LaunchDescription([
         AppendEnvironmentVariable(name='GZ_SIM_RESOURCE_PATH', value=models_path),
         gazebo,
-        spawn_drone,
         bridge
     ])

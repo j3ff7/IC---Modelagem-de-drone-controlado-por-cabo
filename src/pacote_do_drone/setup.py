@@ -13,23 +13,24 @@ setup(
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
         
-        # --- COMEÇO DO QUE VOCÊ PRECISA ADICIONAR ---
-        # Instala a pasta launch
+        # Instala os arquivos de Launch
         (os.path.join('share', package_name, 'launch'), glob('launch/*.py')),
         
-        # Instala a pasta worlds
+        # Procura qualquer .sdf dentro da pasta worlds e instala na pasta share do pacote
         (os.path.join('share', package_name, 'worlds'), glob('worlds/*.sdf')),
         
-        # Instala os arquivos soltos na pasta models (como o cabo.sdf e cabo.xacro)
+        # Instala o seu arquivo de parâmetros JSON que está na RAIZ do pacote
+        (os.path.join('share', package_name), ['tether_parameters.json']),
+
+        # Instala arquivos na pasta models (incluindo o cabo.sdf)
         (os.path.join('share', package_name, 'models'), glob('models/*.*')),
         
-        # Instala o model.sdf e config do drone
-        (os.path.join('share', package_name, 'models/meu_drone'), glob('models/meu_drone/*.*')),
-
+        # Instala a pasta Gazebo (onde o Python salva o cabo agora)
+        (os.path.join('share', package_name, 'models/Gazebo'), glob('models/Gazebo/*.*')),
         
-        # Instala os arquivos 3D (.stl) das hélices e do corpo
+        # Instala a pasta do drone e suas malhas (meshes)
+        (os.path.join('share', package_name, 'models/meu_drone'), glob('models/meu_drone/*.*')),
         (os.path.join('share', package_name, 'models/meu_drone/meshes'), glob('models/meu_drone/meshes/*.*')),
-        # --- FIM DO QUE VOCÊ PRECISA ADICIONAR ---
     ],
     install_requires=['setuptools'],
     zip_safe=True,
