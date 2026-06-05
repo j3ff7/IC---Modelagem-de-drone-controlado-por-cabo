@@ -32,50 +32,90 @@ drone_z   = params["drone_z"]
 
 comprimento_total = num_links * length
 ancora_z = 0.33
-ancora_x = 0
+ancora_x = 0.0
 ancora_y = 0.18
 
-# Distância e direção agora são relativas à âncora
+# Distância 3D total
 dist_2d = math.hypot(drone_x - ancora_x, drone_y - ancora_y)
 dist_3d = math.hypot(dist_2d, drone_z - ancora_z) 
-
-direcao_drone = math.atan2(drone_y - ancora_y, drone_x - ancora_x)
-pitch_base = math.atan2(drone_z - ancora_z, dist_2d)
+yaw_base = math.atan2(drone_y - ancora_y, drone_x - ancora_x)
 
 # ============================================================
-# BUSCA BINÁRIA PARA CURVATURA (CATENÁRIA DISCRETA)
+# CURVA DE BÉZIER 3D E POSICIONAMENTO DOS ELOS
 # ============================================================
-target = dist_3d / comprimento_total
-alpha = 0.0
-delta_theta = 0.0
+def calcular_bezier(p0, p1, p2, p3, t):
+    u = 1.0 - t
+    tt = t * t
+    uu = u * u
+    uuu = uu * u
+    ttt = tt * t
 
-ALPHA_MAX = math.pi * 0.90  # limite seguro — sem loops
+    px = uuu * p0[0] + 3 * uu * t * p1[0] + 3 * u * tt * p2[0] + ttt * p3[0]
+    py = uuu * p0[1] + 3 * uu * t * p1[1] + 3 * u * tt * p2[1] + ttt * p3[1]
+    pz = uuu * p0[2] + 3 * uu * t * p1[2] + 3 * u * tt * p2[2] + ttt * p3[2]
+    return (px, py, pz)
 
-if target >= 1.0:
-    alpha = 0.0
-    delta_theta = 0.0
-    print("Cabo esticado — sem catenária.")
-elif target >= 2 / math.pi:
-    low, high = 0.00001, math.pi
-    for _ in range(50):
-        mid = (low + high) / 2.0
-        # CORREÇÃO: Usando a fórmula exata para links discretos
-        razao_discreta = math.sin(mid) / (num_links * math.sin(mid / num_links))
+# P0 e P3 são as pontas exatas
+P0 = (ancora_x, ancora_y, ancora_z)
+P3 = (drone_x, drone_y, drone_z)
+
+dx = drone_x - ancora_x
+dy = drone_y - ancora_y
+
+# Quanto maior a folga do cabo, mais "funda" é a barriga da curva
+folga = max(0.0, comprimento_total - dist_3d)
+sag_z = folga * 0.7  
+
+# Ponto 1: Fica a 1/3 do caminho horizontal
+p1_x = ancora_x + dx * 0.333
+p1_y = ancora_y + dy * 0.333
+# Trava: Z desce, mas NUNCA passa do raio do cabo + margem de segurança (chão)
+p1_z = max(radius + 0.05, ancora_z - sag_z)
+
+# Ponto 2: Fica a 2/3 do caminho horizontal
+p2_x = ancora_x + dx * 0.666
+p2_y = ancora_y + dy * 0.666
+# Trava: Mesmo sistema de proteção contra o chão
+p2_z = max(radius + 0.05, drone_z - sag_z)
+
+P1 = (p1_x, p1_y, p1_z)
+P2 = (p2_x, p2_y, p2_z)
+
+# Mantendo as variáveis do loop intactas
+pontos_cabo = [P0]
+t_atual = 0.0
+passo_t = 0.0001 # Precisão da caminhada pela curva
+
+print("Calculando posições usando Curva de Bézier 3D...")
+
+for i in range(num_links):
+    p_anterior = pontos_cabo[-1]
+    achou_ponto = False
+    
+    while t_atual <= 1.0:
+        t_atual += passo_t
         
-        if razao_discreta > target:
-            low = mid
-        else:
-            high = mid
+        # Trava de segurança contra Loop Infinito:
+        # Se passamos do limite da curva, forçamos a conexão final e saímos.
+        if t_atual >= 1.0:
+            pontos_cabo.append(P3) # Conecta exatamente no drone
+            achou_ponto = True
+            break
             
-    alpha = 2.0 * low
-    delta_theta = alpha / num_links
-    print(f"Catenária discreta calculada — alpha={math.degrees(alpha):.1f}°")
-else:
-    alpha = ALPHA_MAX
-    delta_theta = alpha / num_links
-    print(f"⚠️  Cabo muito frouxo — alpha clampado em {math.degrees(ALPHA_MAX):.1f}°")
-
-yaw_base = direcao_drone
+        p_teste = calcular_bezier(P0, P1, P2, P3, t_atual)
+        
+        # Usando math.sqrt clássico para máxima compatibilidade entre versões de Python
+        dist = math.sqrt((p_teste[0]-p_anterior[0])**2 + (p_teste[1]-p_anterior[1])**2 + (p_teste[2]-p_anterior[2])**2)
+        
+        if dist >= length:
+            pontos_cabo.append(p_teste)
+            achou_ponto = True
+            break
+            
+    # Se a curva inteira acabou, mas ainda faltam elos (ex: o cabo é muito mais longo que a distância),
+    # nós apenas empilhamos os elos restantes na posição final para o Gazebo resolver.
+    if not achou_ponto:
+        pontos_cabo.append(P3)
 
 # ============================================================
 # INÉRCIAS
@@ -84,33 +124,12 @@ ixx_elo    = (1/2) * mass * radius**2
 iyy_zz_elo = (1/12) * mass * (3 * radius**2 + length**2)
 ixx_raiz   = (2/5) * 0.02 * (0.01**2)
 
-# ============================================================
-# CINEMÁTICA DIRETA
-# ============================================================
-# CORREÇÃO: + (delta_theta / 2.0) alinha a curvatura perfeitamente com a direção do drone
-running_angle = pitch_base - (alpha / 2.0) + (delta_theta / 2.0)
-x_tip_local = 0.0
-z_tip_local = 0.0
-
-for i in range(num_links): 
-    x_tip_local += length * math.cos(running_angle)
-    z_tip_local += length * math.sin(running_angle)
-    running_angle += delta_theta
-
-# Mapeamento 3D correto do Gazebo (mantendo sua lógica original de projeção)
-drone_spawn_x = ancora_x + (x_tip_local * math.cos(yaw_base) + z_tip_local * math.sin(yaw_base))
-drone_spawn_y = ancora_y + (x_tip_local * math.sin(yaw_base) - z_tip_local * math.cos(yaw_base))
-drone_spawn_z = drone_z
-
-print(f"  Origem do final_segment (mundo): ({drone_spawn_x:.4f}, {drone_spawn_y:.4f}, {drone_spawn_z:.4f})")
-print(f"  Alvo do drone (JSON):            ({drone_x:.4f}, {drone_y:.4f}, {drone_z:.4f})")
+raio_esfera = radius * 6.0  
+ixx_esfera = (2/5) * mass * (raio_esfera**2)
 
 # ============================================================
 # GERAR CABO.SDF 
 # ============================================================
-raio_esfera = radius * 6.0  
-ixx_esfera = (2/5) * mass * (raio_esfera**2)
-
 sdf = f"""<?xml version="1.0" ?>
 <sdf version="1.8">
   <model name="cabo_flexivel">
@@ -129,16 +148,30 @@ sdf = f"""<?xml version="1.0" ?>
     </link>
 """
 
-# Inicializamos com a mesma correção de fase angular
-running_angle = pitch_base - (alpha / 2.0) + (delta_theta / 2.0)
-x_tip_local = 0.0
-z_tip_local = 0.0
-
 parent_link = "raiz_cabo"
+
 for i in range(1, num_links + 1):
     nome_elo = "final_segment" if i == num_links else f"segment_{i}"
-    pose_pitch = -running_angle
     
+    # Pegar os pontos do elo atual
+    p_atual = pontos_cabo[i-1]
+    # Se faltou ponto (cabo curto demais na matemática), usa o último conhecido
+    p_prox = pontos_cabo[i] if i < len(pontos_cabo) else pontos_cabo[-1]
+    
+    # Calcular rotação 3D do cilindro para ele apontar para p_prox
+    dx = p_prox[0] - p_atual[0]
+    dy = p_prox[1] - p_atual[1]
+    dz = p_prox[2] - p_atual[2]
+    
+    elo_yaw = math.atan2(dy, dx)
+    elo_pitch = -math.atan2(dz, math.hypot(dx, dy))
+    
+    # As coordenadas X e Y do modelo principal agora começam de (0,0,0) global
+    # Então subtraímos a âncora para manter o modelo relativo à raiz
+    pose_x = p_atual[0] - ancora_x
+    pose_y = p_atual[1] - ancora_y
+    pose_z = p_atual[2] - ancora_z
+
     sensor_xml = ""
     if i == 1:
         sensor_xml = """
@@ -192,7 +225,7 @@ for i in range(1, num_links + 1):
 
     sdf += f"""
     <link name="{nome_elo}">
-      <pose>{x_tip_local:.6f} 0 {z_tip_local:.6f} 0 {pose_pitch:.6f} 0</pose>
+      <pose>{pose_x:.6f} {pose_y:.6f} {pose_z:.6f} 0 {elo_pitch:.6f} {elo_yaw:.6f}</pose>
       <visual name="visual">
         {pose_vis_col}
         <geometry>{geom_xml}</geometry>
@@ -213,14 +246,17 @@ for i in range(1, num_links + 1):
     </link>
     {joint_xml}
 """
-    x_tip_local += length * math.cos(running_angle)
-    z_tip_local += length * math.sin(running_angle)
-    running_angle += delta_theta
     parent_link = nome_elo
+
+# Última ponta de fixação para o drone
+p_final = pontos_cabo[-1]
+ponta_x = p_final[0] - ancora_x
+ponta_y = p_final[1] - ancora_y
+ponta_z = p_final[2] - ancora_z
 
 sdf += f"""
     <link name="ponta_cabo">
-      <pose>{x_tip_local:.6f} 0 {z_tip_local:.6f} 0 0 0</pose>
+      <pose>{ponta_x:.6f} {ponta_y:.6f} {ponta_z:.6f} 0 0 0</pose>
       <inertial>
         <mass>0.001</mass>
         <inertia>
@@ -241,11 +277,13 @@ sdf += f"""
 with open(caminho_sdf, "w") as f:
     f.write(sdf)
 
-print(f"✓ cabo.sdf gerado direto com sucesso!")
+print(f"✓ cabo.sdf gerado direto com sucesso usando Bézier!")
 
 # ============================================================
 # GERAR my_world.sdf
 # ============================================================
+# Note que a pose do cabo_dinamico agora não recebe mais Yaw extra, 
+# pois a Bézier já posicionou os elos no espaço 3D global absoluto.
 world = f"""<?xml version="1.0" ?>
 <sdf version="1.8">
   <world name="mundo_ic">
@@ -290,7 +328,7 @@ world = f"""<?xml version="1.0" ?>
     <include>
       <uri>file:///home/joseubu/IC/src/pacote_do_drone/models/cabo.sdf</uri>
       <name>cabo_dinamico</name>
-      <pose>{ancora_x} {ancora_y} {ancora_z} 1.5708 0 {yaw_base}</pose>
+      <pose>{ancora_x} {ancora_y} {ancora_z} 0 0 0</pose>
       <static>false</static>
     </include>
 
@@ -303,7 +341,7 @@ world = f"""<?xml version="1.0" ?>
     <include>
       <uri>file:///home/joseubu/IC/src/pacote_do_drone/models/meu_drone/meu_drone.sdf</uri>
       <name>meu_drone</name>
-      <pose>{drone_spawn_x} {drone_spawn_y} {drone_spawn_z} 0 0 {yaw_base}</pose>
+      <pose>{drone_x} {drone_y} {drone_z} 0 0 {yaw_base}</pose>
     </include>
 
     <joint name="cabo_drone_joint" type="ball">

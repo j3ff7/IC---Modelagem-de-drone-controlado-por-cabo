@@ -3,7 +3,7 @@
   "length": 0.05,
   "radius": 0.002,
   "mass": 0.0005,
-  "drone_x": 0.4,
+  "drone_x": 0.8,
   "drone_y": 0.18,
-  "drone_z": 0.37
+  "drone_z": 0.05
 }
