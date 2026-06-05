@@ -33,39 +33,33 @@
       </link>
     </model>
 
-    <model name="ancora_chao">
-      <static>true</static>
-      <pose>0 0 0.03 0 0 0</pose>
-      <link name="ancora_link">
-        <visual name="vis">
-          <geometry><sphere><radius>0.02</radius></sphere></geometry>
-          <material><ambient>1 0 0 1</ambient></material>
-        </visual>
-      </link>
-    </model>
+    <include>
+      <uri>file:///home/joseubu/IC/src/pacote_do_drone/models/carretel/carretel.sdf</uri>
+      <name>meu_carretel</name>
+      <pose>0 0 0 0 0 0</pose> 
+    </include>
 
     <include>
       <uri>file:///home/joseubu/IC/src/pacote_do_drone/models/cabo.sdf</uri>
       <name>cabo_dinamico</name>
-      <pose>0 0 0.03 1.5708 0 0.3805063771123649</pose>
+      <pose>0 0.18 0.33 1.5708 0 0.0</pose>
       <static>false</static>
     </include>
 
-    <joint name="ancora_chao_cabo" type="ball">
-      <parent>world</parent>
+    <joint name="ancora_carretel_cabo" type="ball">
+      <parent>meu_carretel::cilindro_carretel</parent>
       <child>cabo_dinamico::raiz_cabo</child>
+      <pose>0 0 0 0 0 0</pose>
     </joint>
 
     <include>
       <uri>file:///home/joseubu/IC/src/pacote_do_drone/models/meu_drone/meu_drone.sdf</uri>
       <name>meu_drone</name>
-      <pose>1.2499004910150147 0.6056096837234758 0.03 0 0 0.3805063771123649</pose>
+      <pose>1.3906481666523327 0.04093518333476659 0.37 0 0 0.0</pose>
     </include>
 
-    <!-- Drone spawnado exatamente na origem do final_segment:
-         a junta não precisa mover nada, rotores ficam no lugar certo -->
     <joint name="cabo_drone_joint" type="ball">
-      <parent>cabo_dinamico::final_segment</parent>
+      <parent>cabo_dinamico::ponta_cabo</parent>
       <child>meu_drone::base_link</child>
     </joint>
 

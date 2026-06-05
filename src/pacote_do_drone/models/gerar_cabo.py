@@ -28,47 +28,52 @@ radius    = params["radius"]
 mass      = params["mass"]
 drone_x   = params["drone_x"]
 drone_y   = params["drone_y"]
+drone_z   = params["drone_z"]
 
 comprimento_total = num_links * length
-ancora_z = 0.03
+ancora_z = 0.33
+ancora_x = 0
+ancora_y = 0.18
 
-dist_xy = math.hypot(drone_x, drone_y)
-direcao_drone = math.atan2(drone_y, drone_x)
+# Distância e direção agora são relativas à âncora
+dist_2d = math.hypot(drone_x - ancora_x, drone_y - ancora_y)
+dist_3d = math.hypot(dist_2d, drone_z - ancora_z) 
+
+direcao_drone = math.atan2(drone_y - ancora_y, drone_x - ancora_x)
+pitch_base = math.atan2(drone_z - ancora_z, dist_2d)
 
 # ============================================================
-# BUSCA BINÁRIA PARA CURVATURA (CATENÁRIA)
+# BUSCA BINÁRIA PARA CURVATURA (CATENÁRIA DISCRETA)
 # ============================================================
-target = dist_xy / comprimento_total
+target = dist_3d / comprimento_total
 alpha = 0.0
 delta_theta = 0.0
 
 ALPHA_MAX = math.pi * 0.90  # limite seguro — sem loops
 
 if target >= 1.0:
-    # Cabo esticado — reto, sem curva
     alpha = 0.0
     delta_theta = 0.0
     print("Cabo esticado — sem catenária.")
-
 elif target >= 2 / math.pi:
-    # Zona normal — catenária válida
     low, high = 0.00001, math.pi
     for _ in range(50):
         mid = (low + high) / 2.0
-        if (math.sin(mid) / mid) > target:
+        # CORREÇÃO: Usando a fórmula exata para links discretos
+        razao_discreta = math.sin(mid) / (num_links * math.sin(mid / num_links))
+        
+        if razao_discreta > target:
             low = mid
         else:
             high = mid
+            
     alpha = 2.0 * low
     delta_theta = alpha / num_links
-    print(f"Catenária normal — alpha={math.degrees(alpha):.1f}°")
-
+    print(f"Catenária discreta calculada — alpha={math.degrees(alpha):.1f}°")
 else:
-    # Cabo muito frouxo — clamp para evitar loop
     alpha = ALPHA_MAX
     delta_theta = alpha / num_links
     print(f"⚠️  Cabo muito frouxo — alpha clampado em {math.degrees(ALPHA_MAX):.1f}°")
-    print(f"   Curva aproximada. Reduza num_links ou aumente drone_x/drone_y para catenária exata.")
 
 yaw_base = direcao_drone
 
@@ -80,93 +85,163 @@ iyy_zz_elo = (1/12) * mass * (3 * radius**2 + length**2)
 ixx_raiz   = (2/5) * 0.02 * (0.01**2)
 
 # ============================================================
-# CINEMÁTICA DIRETA — origem do final_segment no frame local do cabo
-# Itera num_links-1 vezes: para na ORIGEM do final_segment,
-# que é onde a junta cabo_drone_joint se ancora
+# CINEMÁTICA DIRETA
 # ============================================================
-running_angle = -(alpha / 2.0)
+# CORREÇÃO: + (delta_theta / 2.0) alinha a curvatura perfeitamente com a direção do drone
+running_angle = pitch_base - (alpha / 2.0) + (delta_theta / 2.0)
 x_tip_local = 0.0
 z_tip_local = 0.0
 
-for i in range(1, num_links):  # num_links - 1 iterações
+for i in range(num_links): 
     x_tip_local += length * math.cos(running_angle)
     z_tip_local += length * math.sin(running_angle)
     running_angle += delta_theta
 
-# Transformar do frame local do cabo para o frame do mundo
-# Pose do cabo no mundo: roll=pi/2, pitch=0, yaw=yaw_base
-# Rx(pi/2): (x, 0, z) -> (x, -z, 0)
-# Rz(yaw):  rotaciona no plano XY
-drone_spawn_x = x_tip_local * math.cos(yaw_base) + z_tip_local * math.sin(yaw_base)
-drone_spawn_y = x_tip_local * math.sin(yaw_base) - z_tip_local * math.cos(yaw_base)
-drone_spawn_z = ancora_z
+# Mapeamento 3D correto do Gazebo (mantendo sua lógica original de projeção)
+drone_spawn_x = ancora_x + (x_tip_local * math.cos(yaw_base) + z_tip_local * math.sin(yaw_base))
+drone_spawn_y = ancora_y + (x_tip_local * math.sin(yaw_base) - z_tip_local * math.cos(yaw_base))
+drone_spawn_z = drone_z
 
 print(f"  Origem do final_segment (mundo): ({drone_spawn_x:.4f}, {drone_spawn_y:.4f}, {drone_spawn_z:.4f})")
-print(f"  Alvo do drone (JSON):            ({drone_x:.4f}, {drone_y:.4f})")
+print(f"  Alvo do drone (JSON):            ({drone_x:.4f}, {drone_y:.4f}, {drone_z:.4f})")
 
 # ============================================================
-# GERAR CABO.URDF
+# GERAR CABO.SDF 
 # ============================================================
-urdf = f"""<?xml version="1.0"?>
-<robot name="cabo_flexivel">
-  <link name="raiz_cabo">
-    <inertial>
-      <mass value="0.02"/>
-      <inertia ixx="{ixx_raiz}" ixy="0" ixz="0" iyy="{ixx_raiz}" iyz="0" izz="{ixx_raiz}"/>
-    </inertial>
-    <collision>
-      <geometry><sphere><radius>0.01</radius></sphere></geometry>
-    </collision>
-  </link>
+raio_esfera = radius * 6.0  
+ixx_esfera = (2/5) * mass * (raio_esfera**2)
+
+sdf = f"""<?xml version="1.0" ?>
+<sdf version="1.8">
+  <model name="cabo_flexivel">
+    <link name="raiz_cabo">
+      <pose>0 0 0 0 0 0</pose>
+      <inertial>
+        <mass>0.02</mass>
+        <inertia>
+          <ixx>{ixx_raiz}</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>{ixx_raiz}</iyy><iyz>0</iyz><izz>{ixx_raiz}</izz>
+        </inertia>
+      </inertial>
+      <collision name="col_raiz">
+        <geometry><sphere><radius>0.01</radius></sphere></geometry>
+      </collision>
+    </link>
 """
+
+# Inicializamos com a mesma correção de fase angular
+running_angle = pitch_base - (alpha / 2.0) + (delta_theta / 2.0)
+x_tip_local = 0.0
+z_tip_local = 0.0
 
 parent_link = "raiz_cabo"
 for i in range(1, num_links + 1):
     nome_elo = "final_segment" if i == num_links else f"segment_{i}"
-
+    pose_pitch = -running_angle
+    
+    sensor_xml = ""
     if i == 1:
-        origem_x    = 0.0
-        pitch_junta = -(alpha / 2.0)
+        sensor_xml = """
+        <sensor name="sensor_tensao_carretel" type="force_torque">
+          <always_on>true</always_on>
+          <update_rate>50</update_rate>
+          <topic>/cabo/tensao_carretel</topic>
+        </sensor>"""
+    elif i == num_links:
+        sensor_xml = """
+        <sensor name="sensor_tensao_drone" type="force_torque">
+          <always_on>true</always_on>
+          <update_rate>50</update_rate>
+          <topic>/cabo/tensao_drone</topic>
+        </sensor>"""
+
+    if i < num_links:
+        geom_xml = f"<cylinder><radius>{radius}</radius><length>{length}</length></cylinder>"
+        pose_vis_col = f"<pose>{length/2} 0 0 0 1.5708 0</pose>"
+        cor_material = "<ambient>0 0 0 1</ambient><diffuse>0 0 0 1</diffuse>"
+        ixx_str, iyy_str, izz_str = ixx_elo, iyy_zz_elo, iyy_zz_elo
+        
+        joint_xml = f"""
+    <joint name="joint_{i}" type="universal">
+      <parent>{parent_link}</parent>
+      <child>{nome_elo}</child>
+      <pose>0 0 0 0 0 0</pose>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
+        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
+      </axis>
+      <axis2>
+        <xyz>0 0 1</xyz>
+        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
+        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
+      </axis2>{sensor_xml}
+    </joint>"""
     else:
-        origem_x    = length
-        pitch_junta = delta_theta
+        geom_xml = f"<sphere><radius>{raio_esfera}</radius></sphere>"
+        pose_vis_col = f"<pose>{length/2} 0 0 0 0 0</pose>"
+        cor_material = "<ambient>0.8 0.1 0.1 1</ambient><diffuse>0.8 0.1 0.1 1</diffuse>"
+        ixx_str, iyy_str, izz_str = ixx_esfera, ixx_esfera, ixx_esfera
+        
+        joint_xml = f"""
+    <joint name="joint_{i}" type="ball">
+      <parent>{parent_link}</parent>
+      <child>{nome_elo}</child>
+      <pose>0 0 0 0 0 0</pose>{sensor_xml}
+    </joint>"""
 
-    urdf += f"""
-  <link name="{nome_elo}">
-    <visual>
-      <geometry><cylinder radius="{radius}" length="{length}"/></geometry>
-      <origin xyz="{length/2} 0 0" rpy="0 1.5708 0"/>
-      <material name="black"><color rgba="0 0 0 1"/></material>
-    </visual>
-    <collision>
-      <geometry><cylinder radius="{radius}" length="{length * 0.85}"/></geometry>
-      <origin xyz="{length/2} 0 0" rpy="0 1.5708 0"/>
-    </collision>
-    <inertial>
-      <mass value="{mass}"/>
-      <origin xyz="{length/2} 0 0" rpy="0 1.5708 0"/>
-      <inertia ixx="{ixx_elo}" ixy="0" ixz="0" iyy="{iyy_zz_elo}" iyz="0" izz="{iyy_zz_elo}"/>
-    </inertial>
-  </link>
-
-  <joint name="joint_{i}" type="revolute">
-    <parent link="{parent_link}"/>
-    <child link="{nome_elo}"/>
-    <origin xyz="{origem_x} 0 0" rpy="0 {pitch_junta} 0"/>
-    <axis xyz="0 1 0"/>
-    <limit lower="-2.0" upper="2.0" effort="5" velocity="10"/>
-    <dynamics damping="0.002" friction="0.0"/>
-  </joint>
+    sdf += f"""
+    <link name="{nome_elo}">
+      <pose>{x_tip_local:.6f} 0 {z_tip_local:.6f} 0 {pose_pitch:.6f} 0</pose>
+      <visual name="visual">
+        {pose_vis_col}
+        <geometry>{geom_xml}</geometry>
+        <material>{cor_material}</material>
+      </visual>
+      <collision name="collision">
+        {pose_vis_col}
+        <geometry>{geom_xml}</geometry>
+      </collision>
+      <inertial>
+        <pose>{length/2} 0 0 0 0 0</pose>
+        <mass>{mass}</mass>
+        <inertia>
+          <ixx>{ixx_str}</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>{iyy_str}</iyy><iyz>0</iyz><izz>{izz_str}</izz>
+        </inertia>
+      </inertial>
+    </link>
+    {joint_xml}
 """
+    x_tip_local += length * math.cos(running_angle)
+    z_tip_local += length * math.sin(running_angle)
+    running_angle += delta_theta
     parent_link = nome_elo
 
-urdf += """</robot>"""
+sdf += f"""
+    <link name="ponta_cabo">
+      <pose>{x_tip_local:.6f} 0 {z_tip_local:.6f} 0 0 0</pose>
+      <inertial>
+        <mass>0.001</mass>
+        <inertia>
+          <ixx>1e-6</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>1e-6</iyy><iyz>0</iyz><izz>1e-6</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name="joint_ponta" type="fixed">
+      <parent>final_segment</parent>
+      <child>ponta_cabo</child>
+      <pose>0 0 0 0 0 0</pose>
+    </joint>
+  </model>
+</sdf>
+"""
 
-with open(caminho_urdf, "w") as f:
-    f.write(urdf)
+with open(caminho_sdf, "w") as f:
+    f.write(sdf)
 
-subprocess.run(['gz', 'sdf', '-p', caminho_urdf],
-               stdout=open(caminho_sdf, "w"), check=True)
+print(f"✓ cabo.sdf gerado direto com sucesso!")
 
 # ============================================================
 # GERAR my_world.sdf
@@ -206,27 +281,23 @@ world = f"""<?xml version="1.0" ?>
       </link>
     </model>
 
-    <model name="ancora_chao">
-      <static>true</static>
-      <pose>0 0 {ancora_z} 0 0 0</pose>
-      <link name="ancora_link">
-        <visual name="vis">
-          <geometry><sphere><radius>0.02</radius></sphere></geometry>
-          <material><ambient>1 0 0 1</ambient></material>
-        </visual>
-      </link>
-    </model>
+    <include>
+      <uri>file:///home/joseubu/IC/src/pacote_do_drone/models/carretel/carretel.sdf</uri>
+      <name>meu_carretel</name>
+      <pose>0 0 0 0 0 0</pose> 
+    </include>
 
     <include>
       <uri>file:///home/joseubu/IC/src/pacote_do_drone/models/cabo.sdf</uri>
       <name>cabo_dinamico</name>
-      <pose>0 0 {ancora_z} 1.5708 0 {yaw_base}</pose>
+      <pose>{ancora_x} {ancora_y} {ancora_z} 1.5708 0 {yaw_base}</pose>
       <static>false</static>
     </include>
 
-    <joint name="ancora_chao_cabo" type="ball">
-      <parent>world</parent>
+    <joint name="ancora_carretel_cabo" type="ball">
+      <parent>meu_carretel::cilindro_carretel</parent>
       <child>cabo_dinamico::raiz_cabo</child>
+      <pose>0 0 0 0 0 0</pose>
     </joint>
 
     <include>
@@ -235,10 +306,8 @@ world = f"""<?xml version="1.0" ?>
       <pose>{drone_spawn_x} {drone_spawn_y} {drone_spawn_z} 0 0 {yaw_base}</pose>
     </include>
 
-    <!-- Drone spawnado exatamente na origem do final_segment:
-         a junta não precisa mover nada, rotores ficam no lugar certo -->
     <joint name="cabo_drone_joint" type="ball">
-      <parent>cabo_dinamico::final_segment</parent>
+      <parent>cabo_dinamico::ponta_cabo</parent>
       <child>meu_drone::base_link</child>
     </joint>
 
@@ -249,4 +318,4 @@ world = f"""<?xml version="1.0" ?>
 with open(caminho_world, "w") as f:
     f.write(world)
 
-print(f"✓ Sucesso! Drone spawnado em ({drone_spawn_x:.4f}, {drone_spawn_y:.4f}, {drone_spawn_z:.4f})")
+print(f"✓ Sucesso! Drone spawnado na posição exata requerida: ({drone_x:.4f}, {drone_y:.4f}, {drone_z:.4f})")

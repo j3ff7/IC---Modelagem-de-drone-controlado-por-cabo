@@ -2,7 +2,8 @@
   "num_links": 40,
   "length": 0.05,
   "radius": 0.002,
-  "mass": 0.002,
-  "drone_x": 0.5,
-  "drone_y": 0.2
+  "mass": 0.0005,
+  "drone_x": 0.4,
+  "drone_y": 0.18,
+  "drone_z": 0.37
 }
