@@ -4,7 +4,7 @@ import os
 import math
 
 # ============================================================
-# CAMINHOS
+# CAMINHOS E PASTAS
 # ============================================================
 caminho_json   = '/home/joseubu/IC/src/pacote_do_drone/tether_parameters.json'
 pasta_models   = '/home/joseubu/IC/src/pacote_do_drone/models/'
@@ -31,17 +31,16 @@ drone_y   = params["drone_y"]
 drone_z   = params["drone_z"]
 
 comprimento_total = num_links * length
-ancora_z = 0.33
 ancora_x = 0.0
 ancora_y = 0.18
+ancora_z = 0.33
 
-# Distância 3D total
 dist_2d = math.hypot(drone_x - ancora_x, drone_y - ancora_y)
 dist_3d = math.hypot(dist_2d, drone_z - ancora_z) 
 yaw_base = math.atan2(drone_y - ancora_y, drone_x - ancora_x)
 
 # ============================================================
-# CURVA DE BÉZIER 3D COM TAMANHO EXATO (ANTI-TRAVAMENTO)
+# CURVA DE BÉZIER 3D (GUIA DE DIREÇÃO E POSICIONAMENTO)
 # ============================================================
 def calcular_bezier(p0, p1, p2, p3, t):
     u = 1.0 - t
@@ -59,51 +58,26 @@ P3 = (drone_x, drone_y, drone_z)
 
 dx_full = drone_x - ancora_x
 dy_full = drone_y - ancora_y
-dz_full = drone_z - ancora_z
 
-print("Calculando curvatura ideal para evitar sobreposições...")
+# Cria a barriga suave para a curva
+folga = max(0.0, comprimento_total - dist_3d)
+sag_z = folga * 0.7  
 
-# 1. Busca Binária para encontrar a barriga (sag) que deixa a curva com o tamanho EXATO do cabo
-low_sag = 0.0
-high_sag = comprimento_total * 2.0
-best_sag = 0.0
+p1_z = max(radius + 0.05, ancora_z - sag_z)
+p2_z = max(radius + 0.05, drone_z - sag_z)
 
-for _ in range(30): # 30 iterações garantem precisão milimétrica
-    sag_z = (low_sag + high_sag) / 2.0
-    
-    p1_z = max(radius + 0.05, ancora_z - sag_z)
-    p2_z = max(radius + 0.05, drone_z - sag_z)
-    
-    P1_teste = (ancora_x + dx_full * 0.333, ancora_y + dy_full * 0.333, p1_z)
-    P2_teste = (ancora_x + dx_full * 0.666, ancora_y + dy_full * 0.666, p2_z)
-    
-    # Medir tamanho da curva gerada
-    arc_len = 0.0
-    prev_p = P0
-    for step in range(1, 51):
-        t = step / 50.0
-        p_t = calcular_bezier(P0, P1_teste, P2_teste, P3, t)
-        arc_len += math.hypot(p_t[0]-prev_p[0], p_t[1]-prev_p[1], p_t[2]-prev_p[2])
-        prev_p = p_t
-        
-    if arc_len < comprimento_total:
-        low_sag = sag_z # Curva está curta, precisa aprofundar a barriga
-    else:
-        high_sag = sag_z # Curva está longa, precisa achatar a barriga
+P1 = (ancora_x + dx_full * 0.333, ancora_y + dy_full * 0.333, p1_z)
+P2 = (ancora_x + dx_full * 0.666, ancora_y + dy_full * 0.666, p2_z)
 
-# Configura os pontos finais de controle com a barriga perfeita encontrada
-sag_z = (low_sag + high_sag) / 2.0
-P1 = (ancora_x + dx_full * 0.333, ancora_y + dy_full * 0.333, max(radius + 0.05, ancora_z - sag_z))
-P2 = (ancora_x + dx_full * 0.666, ancora_y + dy_full * 0.666, max(radius + 0.05, drone_z - sag_z))
-
-# 2. Caminhar pela curva cravando os elos com a distância exata 'length'
 pontos_cabo = [P0]
 t_atual = 0.0
-passo_t = 0.0001
+passo_t = 0.0001 
+
+print("Calculando elos com Bézier e Interpolação...")
 
 for i in range(num_links):
     p_anterior = pontos_cabo[-1]
-    achou_ponto = False
+    achou = False
     
     while t_atual <= 1.0:
         t_atual += passo_t
@@ -113,31 +87,47 @@ for i in range(num_links):
         p_teste = calcular_bezier(P0, P1, P2, P3, t_atual)
         dist = math.hypot(p_teste[0]-p_anterior[0], p_teste[1]-p_anterior[1], p_teste[2]-p_anterior[2])
         
+        # Interpolação fina: Crava a distância EXATA para evitar o efeito sanfona
         if dist >= length:
-            pontos_cabo.append(p_teste)
-            achou_ponto = True
+            razao = length / dist
+            p_cravado = (
+                p_anterior[0] + (p_teste[0] - p_anterior[0]) * razao,
+                p_anterior[1] + (p_teste[1] - p_anterior[1]) * razao,
+                p_anterior[2] + (p_teste[2] - p_anterior[2]) * razao
+            )
+            pontos_cabo.append(p_cravado)
+            achou = True
             break
             
-    # Trava antibug extrema: Se a matemática falhar na margem de erro e faltar curva, 
-    # projeta o elo no ar na mesma direção do elo passado. NUNCA sobrepõe coordenadas!
-    if not achou_ponto:
+    # Se a curva matemática acabar antes de alocar todos os elos do cabo, 
+    # apenas continua esticando os que sobraram na mesma direção.
+    if not achou:
         if len(pontos_cabo) >= 2:
             p_ante = pontos_cabo[-2]
             dir_x = p_anterior[0] - p_ante[0]
             dir_y = p_anterior[1] - p_ante[1]
             dir_z = p_anterior[2] - p_ante[2]
         else:
-            dir_x, dir_y, dir_z = dx_full, dy_full, dz_full
+            dir_x, dir_y, dir_z = P3[0]-P0[0], P3[1]-P0[1], P3[2]-P0[2]
             
         norm = math.hypot(dir_x, dir_y, dir_z)
         if norm == 0: norm = 1.0
-        
         p_ext = (
             p_anterior[0] + (dir_x/norm) * length,
             p_anterior[1] + (dir_y/norm) * length,
             p_anterior[2] + (dir_z/norm) * length
         )
         pontos_cabo.append(p_ext)
+
+# ============================================================
+# DEFINIR SPAWN DO DRONE BASEADO NO CABO
+# ============================================================
+drone_spawn_x = pontos_cabo[-1][0]
+drone_spawn_y = pontos_cabo[-1][1]
+drone_spawn_z = pontos_cabo[-1][2]
+
+print(f"Alvo original (JSON):  ({drone_x:.4f}, {drone_y:.4f}, {drone_z:.4f})")
+print(f"Spawn real do Drone:   ({drone_spawn_x:.4f}, {drone_spawn_y:.4f}, {drone_spawn_z:.4f})")
 
 # ============================================================
 # INÉRCIAS
@@ -175,12 +165,9 @@ parent_link = "raiz_cabo"
 for i in range(1, num_links + 1):
     nome_elo = "final_segment" if i == num_links else f"segment_{i}"
     
-    # Pegar os pontos do elo atual
     p_atual = pontos_cabo[i-1]
-    # Se faltou ponto (cabo curto demais na matemática), usa o último conhecido
-    p_prox = pontos_cabo[i] if i < len(pontos_cabo) else pontos_cabo[-1]
+    p_prox = pontos_cabo[i]
     
-    # Calcular rotação 3D do cilindro para ele apontar para p_prox
     dx = p_prox[0] - p_atual[0]
     dy = p_prox[1] - p_atual[1]
     dz = p_prox[2] - p_atual[2]
@@ -188,8 +175,6 @@ for i in range(1, num_links + 1):
     elo_yaw = math.atan2(dy, dx)
     elo_pitch = -math.atan2(dz, math.hypot(dx, dy))
     
-    # As coordenadas X e Y do modelo principal agora começam de (0,0,0) global
-    # Então subtraímos a âncora para manter o modelo relativo à raiz
     pose_x = p_atual[0] - ancora_x
     pose_y = p_atual[1] - ancora_y
     pose_z = p_atual[2] - ancora_z
@@ -270,7 +255,6 @@ for i in range(1, num_links + 1):
 """
     parent_link = nome_elo
 
-# Última ponta de fixação para o drone
 p_final = pontos_cabo[-1]
 ponta_x = p_final[0] - ancora_x
 ponta_y = p_final[1] - ancora_y
@@ -299,13 +283,11 @@ sdf += f"""
 with open(caminho_sdf, "w") as f:
     f.write(sdf)
 
-print(f"✓ cabo.sdf gerado direto com sucesso usando Bézier!")
+print(f"✓ cabo.sdf gerado com sucesso!")
 
 # ============================================================
 # GERAR my_world.sdf
 # ============================================================
-# Note que a pose do cabo_dinamico agora não recebe mais Yaw extra, 
-# pois a Bézier já posicionou os elos no espaço 3D global absoluto.
 world = f"""<?xml version="1.0" ?>
 <sdf version="1.8">
   <world name="mundo_ic">
@@ -363,7 +345,7 @@ world = f"""<?xml version="1.0" ?>
     <include>
       <uri>file:///home/joseubu/IC/src/pacote_do_drone/models/meu_drone/meu_drone.sdf</uri>
       <name>meu_drone</name>
-      <pose>{drone_x} {drone_y} {drone_z} 0 0 {yaw_base}</pose>
+      <pose>{drone_spawn_x} {drone_spawn_y} {drone_spawn_z} 0 0 {yaw_base}</pose>
     </include>
 
     <joint name="cabo_drone_joint" type="ball">
@@ -378,4 +360,4 @@ world = f"""<?xml version="1.0" ?>
 with open(caminho_world, "w") as f:
     f.write(world)
 
-print(f"✓ Sucesso! Drone spawnado na posição exata requerida: ({drone_x:.4f}, {drone_y:.4f}, {drone_z:.4f})")
+print(f"✓ Sucesso! my_world.sdf atualizado para o spawn coordenado.")

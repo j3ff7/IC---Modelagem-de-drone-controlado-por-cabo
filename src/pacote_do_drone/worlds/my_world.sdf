@@ -55,7 +55,7 @@
     <include>
       <uri>file:///home/joseubu/IC/src/pacote_do_drone/models/meu_drone/meu_drone.sdf</uri>
       <name>meu_drone</name>
-      <pose>1.5 0.18 0.2 0 0 0.0</pose>
+      <pose>1.9355859746553368 0.17999999999999972 0.3152388922402048 0 0 0.0</pose>
     </include>
 
     <joint name="cabo_drone_joint" type="ball">

@@ -58,7 +58,7 @@
     </joint>
 
     <link name="segment_2">
-      <pose>0.044056 0.000000 -0.023802 0 0.469846 0.000000</pose>
+      <pose>0.043990 0.000000 -0.023767 0 0.469884 0.000000</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -95,7 +95,7 @@
     </joint>
 
     <link name="segment_3">
-      <pose>0.088712 0.000000 -0.046477 0 0.443694 0.000000</pose>
+      <pose>0.088571 0.000000 -0.046406 0 0.443819 0.000000</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -132,7 +132,7 @@
     </joint>
 
     <link name="segment_4">
-      <pose>0.133967 0.000000 -0.067987 0 0.416911 0.000000</pose>
+      <pose>0.133727 0.000000 -0.067875 0 0.417097 0.000000</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -169,7 +169,7 @@
     </joint>
 
     <link name="segment_5">
-      <pose>0.179823 0.000000 -0.088295 0 0.389575 -0.000000</pose>
+      <pose>0.179441 0.000000 -0.088131 0 0.389803 -0.000000</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -206,7 +206,7 @@
     </joint>
 
     <link name="segment_6">
-      <pose>0.226129 -0.000000 -0.107306 0 0.361728 0.000000</pose>
+      <pose>0.225690 0.000000 -0.107131 0 0.362036 -0.000000</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -243,7 +243,7 @@
     </joint>
 
     <link name="segment_7">
-      <pose>0.273036 0.000000 -0.125055 0 0.333414 0.000000</pose>
+      <pose>0.272449 -0.000000 -0.124840 0 0.333813 0.000000</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -280,7 +280,7 @@
     </joint>
 
     <link name="segment_8">
-      <pose>0.320394 0.000000 -0.141457 0 0.304732 -0.000000</pose>
+      <pose>0.319689 0.000000 -0.141222 0 0.305203 0.000000</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -317,7 +317,7 @@
     </joint>
 
     <link name="segment_9">
-      <pose>0.368204 0.000000 -0.156495 0 0.275783 0.000000</pose>
+      <pose>0.367378 0.000000 -0.156247 0 0.276282 -0.000000</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -354,7 +354,7 @@
     </joint>
 
     <link name="segment_10">
-      <pose>0.416315 0.000000 -0.170110 0 0.246629 -0.000000</pose>
+      <pose>0.415482 0.000000 -0.169886 0 0.247177 0.000000</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -391,7 +391,7 @@
     </joint>
 
     <link name="segment_11">
-      <pose>0.464879 -0.000000 -0.182336 0 0.217334 0.000000</pose>
+      <pose>0.463962 0.000000 -0.182119 0 0.217884 0.000000</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -428,7 +428,7 @@
     </joint>
 
     <link name="segment_12">
-      <pose>0.513746 -0.000000 -0.193127 0 0.188009 0.000000</pose>
+      <pose>0.512780 0.000000 -0.192927 0 0.188585 0.000000</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -465,7 +465,7 @@
     </joint>
 
     <link name="segment_13">
-      <pose>0.562916 -0.000000 -0.202482 0 0.158721 0.000000</pose>
+      <pose>0.561894 0.000000 -0.202301 0 0.159370 -0.000000</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -502,7 +502,7 @@
     </joint>
 
     <link name="segment_14">
-      <pose>0.612389 0.000000 -0.210401 0 0.129582 -0.000000</pose>
+      <pose>0.611260 0.000000 -0.210236 0 0.130243 0.000000</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -539,7 +539,7 @@
     </joint>
 
     <link name="segment_15">
-      <pose>0.662017 0.000000 -0.216868 0 0.100700 0.000000</pose>
+      <pose>0.660837 0.000000 -0.216729 0 0.101425 0.000000</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -576,7 +576,7 @@
     </joint>
 
     <link name="segment_16">
-      <pose>0.711798 0.000000 -0.221898 0 0.072136 0.000000</pose>
+      <pose>0.710580 0.000000 -0.221792 0 0.072829 0.000000</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -613,7 +613,7 @@
     </joint>
 
     <link name="segment_17">
-      <pose>0.761735 0.000000 -0.225507 0 0.043950 -0.000000</pose>
+      <pose>0.760447 0.000000 -0.225430 0 0.044711 -0.000000</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -650,7 +650,7 @@
     </joint>
 
     <link name="segment_18">
-      <pose>0.811826 0.000000 -0.227710 0 0.016236 0.000000</pose>
+      <pose>0.810397 0.000000 -0.227665 0 0.017060 0.000000</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -687,7 +687,7 @@
     </joint>
 
     <link name="segment_19">
-      <pose>0.861923 0.000000 -0.228523 0 -0.010917 0.000000</pose>
+      <pose>0.860390 0.000000 -0.228518 0 -0.010095 0.000000</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -724,7 +724,7 @@
     </joint>
 
     <link name="segment_20">
-      <pose>0.912025 0.000000 -0.227976 0 -0.037468 0.000000</pose>
+      <pose>0.910387 0.000000 -0.228013 0 -0.036570 0.000000</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -761,7 +761,7 @@
     </joint>
 
     <link name="segment_21">
-      <pose>0.962134 0.000000 -0.226098 0 -0.063344 0.000000</pose>
+      <pose>0.960354 0.000000 -0.226185 0 -0.062395 0.000000</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -798,7 +798,7 @@
     </joint>
 
     <link name="segment_22">
-      <pose>1.012099 0.000000 -0.222928 0 -0.088480 -0.000000</pose>
+      <pose>1.010257 0.000000 -0.223067 0 -0.087563 0.000000</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -835,7 +835,7 @@
     </joint>
 
     <link name="segment_23">
-      <pose>1.061921 -0.000000 -0.218509 0 -0.112893 0.000000</pose>
+      <pose>1.060065 0.000000 -0.218695 0 -0.111960 0.000000</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -872,7 +872,7 @@
     </joint>
 
     <link name="segment_24">
-      <pose>1.111749 0.000000 -0.212859 0 -0.136532 0.000000</pose>
+      <pose>1.109752 0.000000 -0.213109 0 -0.135595 0.000000</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -909,7 +909,7 @@
     </joint>
 
     <link name="segment_25">
-      <pose>1.161285 0.000000 -0.206054 0 -0.159353 0.000000</pose>
+      <pose>1.159293 0.000000 -0.206350 0 -0.158447 0.000000</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -946,7 +946,7 @@
     </joint>
 
     <link name="segment_26">
-      <pose>1.210678 0.000000 -0.198116 0 -0.181388 0.000000</pose>
+      <pose>1.208667 0.000000 -0.198460 0 -0.180503 0.000000</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -983,7 +983,7 @@
     </joint>
 
     <link name="segment_27">
-      <pose>1.259929 0.000000 -0.189083 0 -0.202637 0.000000</pose>
+      <pose>1.257854 0.000000 -0.189484 0 -0.201723 0.000000</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -1020,7 +1020,7 @@
     </joint>
 
     <link name="segment_28">
-      <pose>1.309038 0.000000 -0.178993 0 -0.223073 0.000000</pose>
+      <pose>1.306840 0.000000 -0.179466 0 -0.222170 0.000000</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -1057,7 +1057,7 @@
     </joint>
 
     <link name="segment_29">
-      <pose>1.357855 0.000000 -0.167919 0 -0.242703 0.000000</pose>
+      <pose>1.355612 0.000000 -0.168449 0 -0.241784 0.000000</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -1094,7 +1094,7 @@
     </joint>
 
     <link name="segment_30">
-      <pose>1.406530 0.000000 -0.155868 0 -0.261540 0.000000</pose>
+      <pose>1.404157 0.000000 -0.156477 0 -0.260605 -0.000000</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -1131,7 +1131,7 @@
     </joint>
 
     <link name="segment_31">
-      <pose>1.454914 0.000000 -0.142917 0 -0.261540 0.000000</pose>
+      <pose>1.452469 0.000000 -0.143594 0 -0.260605 -0.000000</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -1168,7 +1168,7 @@
     </joint>
 
     <link name="segment_32">
-      <pose>1.503214 0.000000 -0.129988 0 -0.261540 0.000000</pose>
+      <pose>1.500781 -0.000000 -0.130711 0 -0.260605 -0.000000</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -1205,7 +1205,7 @@
     </joint>
 
     <link name="segment_33">
-      <pose>1.551513 0.000000 -0.117060 0 -0.261540 0.000000</pose>
+      <pose>1.549092 -0.000000 -0.117827 0 -0.260605 -0.000000</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -1242,7 +1242,7 @@
     </joint>
 
     <link name="segment_34">
-      <pose>1.599813 0.000000 -0.104132 0 -0.261540 0.000000</pose>
+      <pose>1.597404 -0.000000 -0.104944 0 -0.260605 -0.000000</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -1279,7 +1279,7 @@
     </joint>
 
     <link name="segment_35">
-      <pose>1.648113 0.000000 -0.091203 0 -0.261540 0.000000</pose>
+      <pose>1.645716 -0.000000 -0.092061 0 -0.260605 -0.000000</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -1316,7 +1316,7 @@
     </joint>
 
     <link name="segment_36">
-      <pose>1.696412 0.000000 -0.078275 0 -0.261540 0.000000</pose>
+      <pose>1.694027 -0.000000 -0.079177 0 -0.260605 -0.000000</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -1353,7 +1353,7 @@
     </joint>
 
     <link name="segment_37">
-      <pose>1.744712 0.000000 -0.065346 0 -0.261540 0.000000</pose>
+      <pose>1.742339 -0.000000 -0.066294 0 -0.260605 -0.000000</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -1390,7 +1390,7 @@
     </joint>
 
     <link name="segment_38">
-      <pose>1.793012 0.000000 -0.052418 0 -0.261540 0.000000</pose>
+      <pose>1.790651 -0.000000 -0.053411 0 -0.260605 -0.000000</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -1427,7 +1427,7 @@
     </joint>
 
     <link name="segment_39">
-      <pose>1.841311 0.000000 -0.039490 0 -0.261540 0.000000</pose>
+      <pose>1.838963 -0.000000 -0.040528 0 -0.260605 -0.000000</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -1464,7 +1464,7 @@
     </joint>
 
     <link name="final_segment">
-      <pose>1.889611 0.000000 -0.026561 0 -0.261540 0.000000</pose>
+      <pose>1.887274 -0.000000 -0.027644 0 -0.260605 -0.000000</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 0 0</pose>
         <geometry><sphere><radius>0.012</radius></sphere></geometry>
@@ -1496,7 +1496,7 @@
     </joint>
 
     <link name="ponta_cabo">
-      <pose>1.937911 0.000000 -0.013633 0 0 0</pose>
+      <pose>1.935586 -0.000000 -0.014761 0 0 0</pose>
       <inertial>
         <mass>0.001</mass>
         <inertia>
