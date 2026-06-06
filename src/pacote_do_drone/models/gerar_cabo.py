@@ -41,7 +41,7 @@ dist_3d = math.hypot(dist_2d, drone_z - ancora_z)
 yaw_base = math.atan2(drone_y - ancora_y, drone_x - ancora_x)
 
 # ============================================================
-# CURVA DE BÉZIER 3D E POSICIONAMENTO DOS ELOS
+# CURVA DE BÉZIER 3D COM TAMANHO EXATO (ANTI-TRAVAMENTO)
 # ============================================================
 def calcular_bezier(p0, p1, p2, p3, t):
     u = 1.0 - t
@@ -49,44 +49,57 @@ def calcular_bezier(p0, p1, p2, p3, t):
     uu = u * u
     uuu = uu * u
     ttt = tt * t
-
     px = uuu * p0[0] + 3 * uu * t * p1[0] + 3 * u * tt * p2[0] + ttt * p3[0]
     py = uuu * p0[1] + 3 * uu * t * p1[1] + 3 * u * tt * p2[1] + ttt * p3[1]
     pz = uuu * p0[2] + 3 * uu * t * p1[2] + 3 * u * tt * p2[2] + ttt * p3[2]
     return (px, py, pz)
 
-# P0 e P3 são as pontas exatas
 P0 = (ancora_x, ancora_y, ancora_z)
 P3 = (drone_x, drone_y, drone_z)
 
-dx = drone_x - ancora_x
-dy = drone_y - ancora_y
+dx_full = drone_x - ancora_x
+dy_full = drone_y - ancora_y
+dz_full = drone_z - ancora_z
 
-# Quanto maior a folga do cabo, mais "funda" é a barriga da curva
-folga = max(0.0, comprimento_total - dist_3d)
-sag_z = folga * 0.7  
+print("Calculando curvatura ideal para evitar sobreposições...")
 
-# Ponto 1: Fica a 1/3 do caminho horizontal
-p1_x = ancora_x + dx * 0.333
-p1_y = ancora_y + dy * 0.333
-# Trava: Z desce, mas NUNCA passa do raio do cabo + margem de segurança (chão)
-p1_z = max(radius + 0.05, ancora_z - sag_z)
+# 1. Busca Binária para encontrar a barriga (sag) que deixa a curva com o tamanho EXATO do cabo
+low_sag = 0.0
+high_sag = comprimento_total * 2.0
+best_sag = 0.0
 
-# Ponto 2: Fica a 2/3 do caminho horizontal
-p2_x = ancora_x + dx * 0.666
-p2_y = ancora_y + dy * 0.666
-# Trava: Mesmo sistema de proteção contra o chão
-p2_z = max(radius + 0.05, drone_z - sag_z)
+for _ in range(30): # 30 iterações garantem precisão milimétrica
+    sag_z = (low_sag + high_sag) / 2.0
+    
+    p1_z = max(radius + 0.05, ancora_z - sag_z)
+    p2_z = max(radius + 0.05, drone_z - sag_z)
+    
+    P1_teste = (ancora_x + dx_full * 0.333, ancora_y + dy_full * 0.333, p1_z)
+    P2_teste = (ancora_x + dx_full * 0.666, ancora_y + dy_full * 0.666, p2_z)
+    
+    # Medir tamanho da curva gerada
+    arc_len = 0.0
+    prev_p = P0
+    for step in range(1, 51):
+        t = step / 50.0
+        p_t = calcular_bezier(P0, P1_teste, P2_teste, P3, t)
+        arc_len += math.hypot(p_t[0]-prev_p[0], p_t[1]-prev_p[1], p_t[2]-prev_p[2])
+        prev_p = p_t
+        
+    if arc_len < comprimento_total:
+        low_sag = sag_z # Curva está curta, precisa aprofundar a barriga
+    else:
+        high_sag = sag_z # Curva está longa, precisa achatar a barriga
 
-P1 = (p1_x, p1_y, p1_z)
-P2 = (p2_x, p2_y, p2_z)
+# Configura os pontos finais de controle com a barriga perfeita encontrada
+sag_z = (low_sag + high_sag) / 2.0
+P1 = (ancora_x + dx_full * 0.333, ancora_y + dy_full * 0.333, max(radius + 0.05, ancora_z - sag_z))
+P2 = (ancora_x + dx_full * 0.666, ancora_y + dy_full * 0.666, max(radius + 0.05, drone_z - sag_z))
 
-# Mantendo as variáveis do loop intactas
+# 2. Caminhar pela curva cravando os elos com a distância exata 'length'
 pontos_cabo = [P0]
 t_atual = 0.0
-passo_t = 0.0001 # Precisão da caminhada pela curva
-
-print("Calculando posições usando Curva de Bézier 3D...")
+passo_t = 0.0001
 
 for i in range(num_links):
     p_anterior = pontos_cabo[-1]
@@ -94,28 +107,37 @@ for i in range(num_links):
     
     while t_atual <= 1.0:
         t_atual += passo_t
-        
-        # Trava de segurança contra Loop Infinito:
-        # Se passamos do limite da curva, forçamos a conexão final e saímos.
-        if t_atual >= 1.0:
-            pontos_cabo.append(P3) # Conecta exatamente no drone
-            achou_ponto = True
+        if t_atual > 1.0: 
             break
             
         p_teste = calcular_bezier(P0, P1, P2, P3, t_atual)
-        
-        # Usando math.sqrt clássico para máxima compatibilidade entre versões de Python
-        dist = math.sqrt((p_teste[0]-p_anterior[0])**2 + (p_teste[1]-p_anterior[1])**2 + (p_teste[2]-p_anterior[2])**2)
+        dist = math.hypot(p_teste[0]-p_anterior[0], p_teste[1]-p_anterior[1], p_teste[2]-p_anterior[2])
         
         if dist >= length:
             pontos_cabo.append(p_teste)
             achou_ponto = True
             break
             
-    # Se a curva inteira acabou, mas ainda faltam elos (ex: o cabo é muito mais longo que a distância),
-    # nós apenas empilhamos os elos restantes na posição final para o Gazebo resolver.
+    # Trava antibug extrema: Se a matemática falhar na margem de erro e faltar curva, 
+    # projeta o elo no ar na mesma direção do elo passado. NUNCA sobrepõe coordenadas!
     if not achou_ponto:
-        pontos_cabo.append(P3)
+        if len(pontos_cabo) >= 2:
+            p_ante = pontos_cabo[-2]
+            dir_x = p_anterior[0] - p_ante[0]
+            dir_y = p_anterior[1] - p_ante[1]
+            dir_z = p_anterior[2] - p_ante[2]
+        else:
+            dir_x, dir_y, dir_z = dx_full, dy_full, dz_full
+            
+        norm = math.hypot(dir_x, dir_y, dir_z)
+        if norm == 0: norm = 1.0
+        
+        p_ext = (
+            p_anterior[0] + (dir_x/norm) * length,
+            p_anterior[1] + (dir_y/norm) * length,
+            p_anterior[2] + (dir_z/norm) * length
+        )
+        pontos_cabo.append(p_ext)
 
 # ============================================================
 # INÉRCIAS
