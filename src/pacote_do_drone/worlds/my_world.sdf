@@ -5,7 +5,7 @@
     <gravity>0 0 -9.81</gravity>
 
     <physics name="1ms" type="ignored">
-      <max_step_size>0.0004</max_step_size>
+      <max_step_size>0.001</max_step_size>
       <real_time_factor>1.0</real_time_factor>
     </physics>
 
@@ -42,20 +42,18 @@
     <include>
       <uri>file:///home/joseubu/IC/src/pacote_do_drone/models/cabo.sdf</uri>
       <name>cabo_dinamico</name>
-      <pose>0.0 0.18 0.33 0 0 0</pose>
-      <static>false</static>
+      <pose>0.078217 0.180000 0.210000 0 0 0</pose>
     </include>
 
-    <joint name="ancora_carretel_cabo" type="ball">
+    <joint name="ancora_carretel_cabo" type="fixed">
       <parent>meu_carretel::cilindro_carretel</parent>
       <child>cabo_dinamico::raiz_cabo</child>
-      <pose>0 0 0 0 0 0</pose>
     </joint>
 
     <include>
       <uri>file:///home/joseubu/IC/src/pacote_do_drone/models/meu_drone/meu_drone.sdf</uri>
       <name>meu_drone</name>
-      <pose>1.9355859746553368 0.17999999999999972 0.3152388922402048 0 0 0.0</pose>
+      <pose>0.527389 0.161623 0.060320 0 0 -2.844221</pose>
     </include>
 
     <joint name="cabo_drone_joint" type="ball">

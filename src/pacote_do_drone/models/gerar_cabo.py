@@ -1,7 +1,6 @@
 import json
-import subprocess
-import os
 import math
+import os
 
 # ============================================================
 # CAMINHOS E PASTAS
@@ -9,7 +8,6 @@ import math
 caminho_json   = '/home/joseubu/IC/src/pacote_do_drone/tether_parameters.json'
 pasta_models   = '/home/joseubu/IC/src/pacote_do_drone/models/'
 pasta_worlds   = '/home/joseubu/IC/src/pacote_do_drone/worlds/'
-caminho_urdf   = os.path.join(pasta_models, 'cabo.urdf')
 caminho_sdf    = os.path.join(pasta_models, 'cabo.sdf')
 caminho_world  = os.path.join(pasta_worlds, 'my_world.sdf')
 
@@ -19,129 +17,153 @@ os.makedirs(pasta_worlds, exist_ok=True)
 # ============================================================
 # LER PARÂMETROS
 # ============================================================
-with open(caminho_json, 'r') as f:
-    params = json.load(f)
+try:
+    with open(caminho_json, 'r') as f:
+        params = json.load(f)
+except FileNotFoundError:
+    print("Aviso: JSON não encontrado. Usando valores padrão de teste.")
+    params = {
+        "num_links": 250, "length": 0.01, "radius": 0.003, "mass": 0.002,
+        "drone_x": 0.0, "drone_y": 0.0, "drone_z": 0.0,
+        "voltas_desejadas": 3.75 
+    }
 
-num_links = params["num_links"]
-length    = params["length"]
-radius    = params["radius"]
-mass      = params["mass"]
-drone_x   = params["drone_x"]
-drone_y   = params["drone_y"]
-drone_z   = params["drone_z"]
+num_links        = params["num_links"]
+length           = params["length"]
+radius           = params["radius"]
+densidade_linear = 0.04  # kg por metro de cabo
+mass = densidade_linear * length  # A massa diminui se o elo diminuir
+voltas_input     = params.get("voltas_desejadas", 3.75)
 
+# ============================================================
+# PARÂMETROS DO CARRETEL (Geometria Fixa do seu SDF)
+# ============================================================
+spool_x = 0.0
+spool_y_center = 0.0
+spool_z = 0.26
+spool_radius = 0.07
+
+R_min = spool_radius + radius
+R_eff = math.sqrt(R_min**2 + (length / 2)**2) + 0.002
+
+start_y = 0.18 
+passo_helice_y = radius * 2.2 
 comprimento_total = num_links * length
-ancora_x = 0.0
-ancora_y = 0.18
-ancora_z = 0.33
 
-dist_2d = math.hypot(drone_x - ancora_x, drone_y - ancora_y)
-dist_3d = math.hypot(dist_2d, drone_z - ancora_z) 
-yaw_base = math.atan2(drone_y - ancora_y, drone_x - ancora_x)
+Z_MINIMO_CHAO = 0.05  
 
 # ============================================================
-# CURVA DE BÉZIER 3D (GUIA DE DIREÇÃO E POSICIONAMENTO)
+# AJUSTE E VALIDAÇÃO DAS VOLTAS (CORREÇÃO DA FOLGA EM METROS)
 # ============================================================
-def calcular_bezier(p0, p1, p2, p3, t):
-    u = 1.0 - t
-    tt = t * t
-    uu = u * u
-    uuu = uu * u
-    ttt = tt * t
-    px = uuu * p0[0] + 3 * uu * t * p1[0] + 3 * u * tt * p2[0] + ttt * p3[0]
-    py = uuu * p0[1] + 3 * uu * t * p1[1] + 3 * u * tt * p2[1] + ttt * p3[1]
-    pz = uuu * p0[2] + 3 * uu * t * p1[2] + 3 * u * tt * p2[2] + ttt * p3[2]
-    return (px, py, pz)
+base_voltas = math.floor(voltas_input)
+voltas = base_voltas + 0.75
+if voltas > voltas_input + 0.25:
+    voltas -= 1.0
+if voltas < 0.75: 
+    voltas = 0.75
 
-P0 = (ancora_x, ancora_y, ancora_z)
-P3 = (drone_x, drone_y, drone_z)
+comprimento_uma_volta = math.sqrt((2 * math.pi * R_eff)**2 + passo_helice_y**2)
 
-dx_full = drone_x - ancora_x
-dy_full = drone_y - ancora_y
+# MODIFICAÇÃO CRÍTICA: Trava de segurança definida em METROS (35 cm)
+# Garante que o drone fique fora do carretel mesmo com elos muito pequenos
+DIST_MIN_CONEXAO_METROS = 0.35  
+min_elos_conexao = math.ceil(DIST_MIN_CONEXAO_METROS / length)
+comprimento_max_carretel = comprimento_total - (min_elos_conexao * length)
 
-# Cria a barriga suave para a curva
-folga = max(0.0, comprimento_total - dist_3d)
-sag_z = folga * 0.7  
+# Reduz as voltas se o comprimento total do cabo não conseguir garantir os 35cm externos
+while (voltas * comprimento_uma_volta) + length > comprimento_max_carretel and voltas > 0.75:
+    voltas -= 1.0
 
-p1_z = max(radius + 0.05, ancora_z - sag_z)
-p2_z = max(radius + 0.05, drone_z - sag_z)
+theta_total = voltas * 2 * math.pi
+print(f"Configuração definida: {voltas} voltas aplicadas no carretel.")
 
-P1 = (ancora_x + dx_full * 0.333, ancora_y + dy_full * 0.333, p1_z)
-P2 = (ancora_x + dx_full * 0.666, ancora_y + dy_full * 0.666, p2_z)
+# ============================================================
+# GERADOR DE PONTOS (VERTICAL + HÉLICE + EXTENSÃO PROTEGIDA)
+# ============================================================
+pontos_cabo = []
 
-pontos_cabo = [P0]
-t_atual = 0.0
-passo_t = 0.0001 
+p0 = (spool_x + R_eff, start_y, spool_z - length)
+p1 = (spool_x + R_eff, start_y, spool_z)
+pontos_cabo.append(p0)
+pontos_cabo.append(p1)
 
-print("Calculando elos com Bézier e Interpolação...")
+p_anterior = p1
+theta_atual = 0.0
 
-for i in range(num_links):
-    p_anterior = pontos_cabo[-1]
-    achou = False
+# MODIFICAÇÃO CRÍTICA: O passo do ângulo encolhe proporcionalmente ao elo
+# Isso previne erros numéricos de amostragem em resoluções altas
+passo_theta = min(0.001, length / (10 * R_eff))
+
+print("1. Enrolando o cabo no carretel (Hélice)...")
+while theta_atual <= theta_total and len(pontos_cabo) < num_links:
+    theta_atual += passo_theta
     
-    while t_atual <= 1.0:
-        t_atual += passo_t
-        if t_atual > 1.0: 
-            break
-            
-        p_teste = calcular_bezier(P0, P1, P2, P3, t_atual)
-        dist = math.hypot(p_teste[0]-p_anterior[0], p_teste[1]-p_anterior[1], p_teste[2]-p_anterior[2])
-        
-        # Interpolação fina: Crava a distância EXATA para evitar o efeito sanfona
-        if dist >= length:
-            razao = length / dist
-            p_cravado = (
-                p_anterior[0] + (p_teste[0] - p_anterior[0]) * razao,
-                p_anterior[1] + (p_teste[1] - p_anterior[1]) * razao,
-                p_anterior[2] + (p_teste[2] - p_anterior[2]) * razao
-            )
-            pontos_cabo.append(p_cravado)
-            achou = True
-            break
-            
-    # Se a curva matemática acabar antes de alocar todos os elos do cabo, 
-    # apenas continua esticando os que sobraram na mesma direção.
-    if not achou:
-        if len(pontos_cabo) >= 2:
-            p_ante = pontos_cabo[-2]
-            dir_x = p_anterior[0] - p_ante[0]
-            dir_y = p_anterior[1] - p_ante[1]
-            dir_z = p_anterior[2] - p_ante[2]
-        else:
-            dir_x, dir_y, dir_z = P3[0]-P0[0], P3[1]-P0[1], P3[2]-P0[2]
-            
-        norm = math.hypot(dir_x, dir_y, dir_z)
-        if norm == 0: norm = 1.0
-        p_ext = (
-            p_anterior[0] + (dir_x/norm) * length,
-            p_anterior[1] + (dir_y/norm) * length,
-            p_anterior[2] + (dir_z/norm) * length
+    hx = spool_x + R_eff * math.cos(theta_atual)
+    hy = start_y - (theta_atual / (2 * math.pi)) * passo_helice_y
+    hz = spool_z + R_eff * math.sin(theta_atual)
+    
+    dist = math.hypot(hx - p_anterior[0], hy - p_anterior[1], hz - p_anterior[2])
+    
+    if dist >= length:
+        razao = length / dist
+        p_cravado = (
+            p_anterior[0] + (hx - p_anterior[0]) * razao,
+            p_anterior[1] + (hy - p_anterior[1]) * razao,
+            p_anterior[2] + (hz - p_anterior[2]) * razao
         )
-        pontos_cabo.append(p_ext)
+        pontos_cabo.append(p_cravado)
+        p_anterior = p_cravado
+
+if len(pontos_cabo) >= 2:
+    p_ante_saida = pontos_cabo[-2]
+    dir_x = p_anterior[0] - p_ante_saida[0]
+    dir_y = p_anterior[1] - p_ante_saida[1]
+    dir_z = p_anterior[2] - p_ante_saida[2]
+else:
+    dir_x, dir_y, dir_z = 1.0, 0.0, 0.0
+
+norm = math.hypot(dir_x, dir_y, dir_z) or 1.0
+vx, vy, vz = dir_x / norm, dir_y / norm, dir_z / norm
+
+elos_restantes = num_links - len(pontos_cabo)
+print(f"2. Estendendo {elos_restantes} elos restantes com trava de segurança contra o chão...")
+
+while len(pontos_cabo) < num_links:
+    proximo_z = p_anterior[2] + vz * length
+    
+    if proximo_z < Z_MINIMO_CHAO:
+        vz_adaptado = 0.0
+        norm_horizontal = math.hypot(vx, vy) or 1.0
+        vx_adaptado = vx / norm_horizontal
+        vy_adaptado = vy / norm_horizontal
+        
+        p_ext = (
+            p_anterior[0] + vx_adaptado * length,
+            p_anterior[1] + vy_adaptado * length,
+            max(Z_MINIMO_CHAO, p_anterior[2])
+        )
+    else:
+        p_ext = (
+            p_anterior[0] + vx * length,
+            p_anterior[1] + vy * length,
+            proximo_z
+        )
+        
+    pontos_cabo.append(p_ext)
+    p_anterior = p_ext
+
+p_final = pontos_cabo[-1]
+print(f"   ✓ Drone configurado para nascer no chão seguro: ({p_final[0]:.3f}, {p_final[1]:.3f}, {p_final[2]:.3f})")
 
 # ============================================================
-# DEFINIR SPAWN DO DRONE BASEADO NO CABO
-# ============================================================
-drone_spawn_x = pontos_cabo[-1][0]
-drone_spawn_y = pontos_cabo[-1][1]
-drone_spawn_z = pontos_cabo[-1][2]
-
-print(f"Alvo original (JSON):  ({drone_x:.4f}, {drone_y:.4f}, {drone_z:.4f})")
-print(f"Spawn real do Drone:   ({drone_spawn_x:.4f}, {drone_spawn_y:.4f}, {drone_spawn_z:.4f})")
-
-# ============================================================
-# INÉRCIAS
+# GERAR CABO.SDF
 # ============================================================
 ixx_elo    = (1/2) * mass * radius**2
 iyy_zz_elo = (1/12) * mass * (3 * radius**2 + length**2)
 ixx_raiz   = (2/5) * 0.02 * (0.01**2)
 
-raio_esfera = radius * 6.0  
-ixx_esfera = (2/5) * mass * (raio_esfera**2)
+origem_modelo = pontos_cabo[0] 
 
-# ============================================================
-# GERAR CABO.SDF 
-# ============================================================
 sdf = f"""<?xml version="1.0" ?>
 <sdf version="1.8">
   <model name="cabo_flexivel">
@@ -166,7 +188,7 @@ for i in range(1, num_links + 1):
     nome_elo = "final_segment" if i == num_links else f"segment_{i}"
     
     p_atual = pontos_cabo[i-1]
-    p_prox = pontos_cabo[i]
+    p_prox = pontos_cabo[i] if i < num_links else pontos_cabo[-1]
     
     dx = p_prox[0] - p_atual[0]
     dy = p_prox[1] - p_atual[1]
@@ -175,31 +197,14 @@ for i in range(1, num_links + 1):
     elo_yaw = math.atan2(dy, dx)
     elo_pitch = -math.atan2(dz, math.hypot(dx, dy))
     
-    pose_x = p_atual[0] - ancora_x
-    pose_y = p_atual[1] - ancora_y
-    pose_z = p_atual[2] - ancora_z
-
-    sensor_xml = ""
-    if i == 1:
-        sensor_xml = """
-        <sensor name="sensor_tensao_carretel" type="force_torque">
-          <always_on>true</always_on>
-          <update_rate>50</update_rate>
-          <topic>/cabo/tensao_carretel</topic>
-        </sensor>"""
-    elif i == num_links:
-        sensor_xml = """
-        <sensor name="sensor_tensao_drone" type="force_torque">
-          <always_on>true</always_on>
-          <update_rate>50</update_rate>
-          <topic>/cabo/tensao_drone</topic>
-        </sensor>"""
+    pose_x = p_atual[0] - origem_modelo[0]
+    pose_y = p_atual[1] - origem_modelo[1]
+    pose_z = p_atual[2] - origem_modelo[2]
 
     if i < num_links:
         geom_xml = f"<cylinder><radius>{radius}</radius><length>{length}</length></cylinder>"
         pose_vis_col = f"<pose>{length/2} 0 0 0 1.5708 0</pose>"
         cor_material = "<ambient>0 0 0 1</ambient><diffuse>0 0 0 1</diffuse>"
-        ixx_str, iyy_str, izz_str = ixx_elo, iyy_zz_elo, iyy_zz_elo
         
         joint_xml = f"""
     <joint name="joint_{i}" type="universal">
@@ -215,19 +220,19 @@ for i in range(1, num_links + 1):
         <xyz>0 0 1</xyz>
         <limit><lower>-2.0</lower><upper>2.0</upper></limit>
         <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis2>{sensor_xml}
+      </axis2>
     </joint>"""
     else:
+        raio_esfera = radius * 4.0
         geom_xml = f"<sphere><radius>{raio_esfera}</radius></sphere>"
         pose_vis_col = f"<pose>{length/2} 0 0 0 0 0</pose>"
         cor_material = "<ambient>0.8 0.1 0.1 1</ambient><diffuse>0.8 0.1 0.1 1</diffuse>"
-        ixx_str, iyy_str, izz_str = ixx_esfera, ixx_esfera, ixx_esfera
         
         joint_xml = f"""
     <joint name="joint_{i}" type="ball">
       <parent>{parent_link}</parent>
       <child>{nome_elo}</child>
-      <pose>0 0 0 0 0 0</pose>{sensor_xml}
+      <pose>0 0 0 0 0 0</pose>
     </joint>"""
 
     sdf += f"""
@@ -246,8 +251,8 @@ for i in range(1, num_links + 1):
         <pose>{length/2} 0 0 0 0 0</pose>
         <mass>{mass}</mass>
         <inertia>
-          <ixx>{ixx_str}</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>{iyy_str}</iyy><iyz>0</iyz><izz>{izz_str}</izz>
+          <ixx>{ixx_elo}</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>{iyy_zz_elo}</iyy><iyz>0</iyz><izz>{iyy_zz_elo}</izz>
         </inertia>
       </inertial>
     </link>
@@ -256,25 +261,21 @@ for i in range(1, num_links + 1):
     parent_link = nome_elo
 
 p_final = pontos_cabo[-1]
-ponta_x = p_final[0] - ancora_x
-ponta_y = p_final[1] - ancora_y
-ponta_z = p_final[2] - ancora_z
+ponta_x = p_final[0] - origem_modelo[0]
+ponta_y = p_final[1] - origem_modelo[1]
+ponta_z = p_final[2] - origem_modelo[2]
 
 sdf += f"""
     <link name="ponta_cabo">
       <pose>{ponta_x:.6f} {ponta_y:.6f} {ponta_z:.6f} 0 0 0</pose>
       <inertial>
         <mass>0.001</mass>
-        <inertia>
-          <ixx>1e-6</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>1e-6</iyy><iyz>0</iyz><izz>1e-6</izz>
-        </inertia>
+        <inertia><ixx>1e-6</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1e-6</iyy><iyz>0</iyz><izz>1e-6</izz></inertia>
       </inertial>
     </link>
     <joint name="joint_ponta" type="fixed">
       <parent>final_segment</parent>
       <child>ponta_cabo</child>
-      <pose>0 0 0 0 0 0</pose>
     </joint>
   </model>
 </sdf>
@@ -282,12 +283,21 @@ sdf += f"""
 
 with open(caminho_sdf, "w") as f:
     f.write(sdf)
-
-print(f"✓ cabo.sdf gerado com sucesso!")
+print("✓ cabo.sdf gerado com sucesso!")
 
 # ============================================================
 # GERAR my_world.sdf
 # ============================================================
+spawn_cabo_x = origem_modelo[0]
+spawn_cabo_y = origem_modelo[1]
+spawn_cabo_z = origem_modelo[2]
+
+drone_spawn_x = p_final[0]
+drone_spawn_y = p_final[1]
+drone_spawn_z = p_final[2]
+
+yaw_base = math.atan2(spool_y_center - drone_spawn_y, spool_x - drone_spawn_x)
+
 world = f"""<?xml version="1.0" ?>
 <sdf version="1.8">
   <world name="mundo_ic">
@@ -295,7 +305,7 @@ world = f"""<?xml version="1.0" ?>
     <gravity>0 0 -9.81</gravity>
 
     <physics name="1ms" type="ignored">
-      <max_step_size>0.0004</max_step_size>
+      <max_step_size>0.001</max_step_size>
       <real_time_factor>1.0</real_time_factor>
     </physics>
 
@@ -324,28 +334,26 @@ world = f"""<?xml version="1.0" ?>
     </model>
 
     <include>
-      <uri>file:///home/joseubu/IC/src/pacote_do_drone/models/carretel/carretel.sdf</uri>
+      <uri>file://{pasta_models}carretel/carretel.sdf</uri>
       <name>meu_carretel</name>
       <pose>0 0 0 0 0 0</pose> 
     </include>
 
     <include>
-      <uri>file:///home/joseubu/IC/src/pacote_do_drone/models/cabo.sdf</uri>
+      <uri>file://{caminho_sdf}</uri>
       <name>cabo_dinamico</name>
-      <pose>{ancora_x} {ancora_y} {ancora_z} 0 0 0</pose>
-      <static>false</static>
+      <pose>{spawn_cabo_x:.6f} {spawn_cabo_y:.6f} {spawn_cabo_z:.6f} 0 0 0</pose>
     </include>
 
-    <joint name="ancora_carretel_cabo" type="ball">
+    <joint name="ancora_carretel_cabo" type="fixed">
       <parent>meu_carretel::cilindro_carretel</parent>
       <child>cabo_dinamico::raiz_cabo</child>
-      <pose>0 0 0 0 0 0</pose>
     </joint>
 
     <include>
-      <uri>file:///home/joseubu/IC/src/pacote_do_drone/models/meu_drone/meu_drone.sdf</uri>
+      <uri>file://{pasta_models}meu_drone/meu_drone.sdf</uri>
       <name>meu_drone</name>
-      <pose>{drone_spawn_x} {drone_spawn_y} {drone_spawn_z} 0 0 {yaw_base}</pose>
+      <pose>{drone_spawn_x:.6f} {drone_spawn_y:.6f} {drone_spawn_z:.6f} 0 0 {yaw_base:.6f}</pose>
     </include>
 
     <joint name="cabo_drone_joint" type="ball">
@@ -360,4 +368,4 @@ world = f"""<?xml version="1.0" ?>
 with open(caminho_world, "w") as f:
     f.write(world)
 
-print(f"✓ Sucesso! my_world.sdf atualizado para o spawn coordenado.")
+print(f"✓ my_world.sdf gerado com caminhos e folgas adaptativas completas!")
