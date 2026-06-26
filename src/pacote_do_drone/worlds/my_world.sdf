@@ -12,15 +12,15 @@
       <ode>
         <solver>
           <type>quick</type>
-          <iters>150</iters>
+          <iters>400</iters>
           <sor>1.0</sor>
         </solver>
 
         <constraints>
-          <cfm>1e-5</cfm>
-          <erp>0.2</erp>
+          <cfm>1e-4</cfm>
+          <erp>0.8</erp>
           <contact_max_correcting_vel>0.5</contact_max_correcting_vel>
-          <contact_surface_layer>0.001</contact_surface_layer>
+          <contact_surface_layer>0.01</contact_surface_layer>
         </constraints>
       </ode>
     </physics>
@@ -38,6 +38,7 @@
 
     <model name="ground_plane">
       <static>true</static>
+
       <link name="link">
         <collision name="collision">
           <geometry>
@@ -73,7 +74,7 @@
       <uri>file:///home/joseubu/IC/src/pacote_do_drone/models/cabo.sdf</uri>
       <name>cabo_dinamico</name>
       <pose>0.0 0.18 0.35 0 0 0</pose>
-      <static>false</static>
+      <static>true</static>
     </include>
 
     <joint name="ancora_carretel_cabo" type="ball">
@@ -82,5 +83,5 @@
       <pose>0 0 0 0 0 0</pose>
     </joint>
 
-    </world>
+  </world>
 </sdf>

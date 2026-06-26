@@ -74,10 +74,79 @@ def yaw_pitch_do_segmento(p0, p1):
 def rotacionar_offset_yaw(x, y, yaw):
     c = math.cos(yaw)
     s = math.sin(yaw)
+
     return (
         c * x - s * y,
         s * x + c * y
     )
+
+
+def gerar_pontos_bezier(P0, P1, P2, P3, num_amostras):
+    curva = []
+
+    for k in range(num_amostras + 1):
+        t = k / num_amostras
+        curva.append(calcular_bezier(P0, P1, P2, P3, t))
+
+    cum = [0.0]
+
+    for k in range(1, len(curva)):
+        cum.append(cum[-1] + dist3(curva[k - 1], curva[k]))
+
+    return curva, cum
+
+
+def comprimento_bezier(P0, P1, P2, P3, num_amostras):
+    curva, cum = gerar_pontos_bezier(P0, P1, P2, P3, num_amostras)
+    return cum[-1]
+
+
+def montar_bezier_com_sag(P0, P3, sag):
+    dx = P3[0] - P0[0]
+    dy = P3[1] - P0[1]
+    dz = P3[2] - P0[2]
+
+    P1 = (
+        P0[0] + 0.333 * dx,
+        P0[1] + 0.333 * dy,
+        P0[2] + 0.333 * dz - sag
+    )
+
+    P2 = (
+        P0[0] + 0.666 * dx,
+        P0[1] + 0.666 * dy,
+        P0[2] + 0.666 * dz - sag
+    )
+
+    return P1, P2
+
+
+def reamostrar_curva_por_comprimento(curva, cum, num_links, length, P3):
+    pontos = []
+    j = 1
+
+    for i in range(num_links + 1):
+        if i == num_links:
+            pontos.append(P3)
+            continue
+
+        alvo_s = i * length
+
+        while j < len(cum) - 1 and cum[j] < alvo_s:
+            j += 1
+
+        s0 = cum[j - 1]
+        s1 = cum[j]
+
+        if abs(s1 - s0) < 1e-12:
+            a = 0.0
+        else:
+            a = (alvo_s - s0) / (s1 - s0)
+
+        p = lerp(curva[j - 1], curva[j], a)
+        pontos.append(p)
+
+    return pontos
 
 
 # ============================================================
@@ -89,24 +158,14 @@ with open(caminho_json, 'r') as f:
 
 num_links = max(3, int(params.get("num_links", 40)))
 
-# Valores mínimos para evitar elos fisicamente ruins no solver
 length = clamp_min(params.get("length", 0.05), 0.01)
 radius = clamp_min(params.get("radius", 0.003), 0.001)
 
-# Cálculo da massa do elo
 densidade_linear = float(params.get("densidade_linear", 0.04))
-mass_elo = float(params.get("mass", densidade_linear * length))
-mass_elo = max(mass_elo, 0.001)
 
-# Parâmetros focados estritamente na meta geométrica do cabo
-cabo_fim_x = float(params.get("cabo_fim_x", 1.0))
-cabo_fim_y = float(params.get("cabo_fim_y", 0.18))
-cabo_fim_z = float(params.get("cabo_fim_z", 0.35))
-
-parent_ancora_carretel = params.get(
-    "parent_ancora_carretel",
-    "meu_carretel::base_link"
-)
+cabo_fim_x_original = float(params.get("cabo_fim_x", 1.0))
+cabo_fim_y_original = float(params.get("cabo_fim_y", 0.18))
+cabo_fim_z_original = float(params.get("cabo_fim_z", 0.35))
 
 # ============================================================
 # CONFIGURAÇÕES FÍSICAS DO CABO
@@ -118,131 +177,174 @@ ancora_x = 0.0
 ancora_y = 0.18
 ancora_z = 0.35
 
-# Ponto de conexão do cabo no drone, em coordenadas locais do base_link.
 offset_conexao_drone_x = float(params.get("offset_conexao_drone_x", 0.0))
 offset_conexao_drone_y = float(params.get("offset_conexao_drone_y", 0.0))
 offset_conexao_drone_z = float(params.get("offset_conexao_drone_z", -0.10))
 
-# Colisões e dinâmicas
-collision_radius = 0.50 * radius
-collision_length = 0.60 * length
 damping_junta = float(params.get("damping_junta", 0.05))
 friction_junta = float(params.get("friction_junta", 0.001))
 limite_junta = float(params.get("limite_junta", 2.0))
+
 z_minimo_chao = max(radius + 0.02, 0.03)
 
 # ============================================================
-# CURVA DE BÉZIER 3D (Com Auto-Ajuste de Distância)
+# AJUSTAR A BÉZIER PARA NÃO EXTRAPOLAR OS ÚLTIMOS ELOS
 # ============================================================
 
 P0 = (ancora_x, ancora_y, ancora_z)
-P3 = (cabo_fim_x, cabo_fim_y, cabo_fim_z)
+P3_original = (cabo_fim_x_original, cabo_fim_y_original, cabo_fim_z_original)
 
-dx_full = cabo_fim_x - ancora_x
-dy_full = cabo_fim_y - ancora_y
+num_amostras = max(4000, num_links * 250)
 
-dist_2d = math.hypot(dx_full, dy_full)
-dist_3d = dist3(P0, P3)
+dist_reta_original = dist3(P0, P3_original)
 
-# 1. Determinar o limite de queda
-z_base = min(ancora_z, cabo_fim_z)
-queda_maxima = z_base - z_minimo_chao
+dx_xy = cabo_fim_x_original - ancora_x
+dy_xy = cabo_fim_y_original - ancora_y
+dist_xy_original = math.hypot(dx_xy, dy_xy)
 
-# 2. Calcular a folga máxima permitida para não bater no chão
-folga_maxima = max(0.0, queda_maxima * 2.0)
-dist_3d_minima = comprimento_total - folga_maxima
+if dist_xy_original < 1e-9:
+    dir_x = 1.0
+    dir_y = 0.0
+else:
+    dir_x = dx_xy / dist_xy_original
+    dir_y = dy_xy / dist_xy_original
 
-# 3. Correção: Se a distância for muito curta para o cabo, esticamos o alvo
-if dist_3d < dist_3d_minima:
-    dz = cabo_fim_z - ancora_z
-    
-    # Evita raiz negativa caso a distância mínima seja menor que a própria altura (quase impossível aqui)
-    if dist_3d_minima > abs(dz):
-        novo_dist_2d = math.sqrt(dist_3d_minima**2 - dz**2)
-        
-        # Descobre o ângulo original no plano XY
-        yaw_original = math.atan2(dy_full, dx_full)
-        
-        # Empurra o alvo para a nova distância, mantendo a direção
-        cabo_fim_x = ancora_x + math.cos(yaw_original) * novo_dist_2d
-        cabo_fim_y = ancora_y + math.sin(yaw_original) * novo_dist_2d
-        
-        # Atualiza as variáveis que serão usadas pelo resto do código
-        dx_full = cabo_fim_x - ancora_x
-        dy_full = cabo_fim_y - ancora_y
-        P3 = (cabo_fim_x, cabo_fim_y, cabo_fim_z)
-        dist_3d = dist3(P0, P3)
-        dist_2d = math.hypot(dx_full, dy_full)
-        
-        print(f"⚠️ Alvo esticado automaticamente para (X: {cabo_fim_x:.2f}, Y: {cabo_fim_y:.2f}) para evitar atravessar o chão.")
+z_base = min(ancora_z, cabo_fim_z_original)
+sag_maximo = max(0.0, z_base - z_minimo_chao)
 
-# Agora calculamos a folga final de forma segura
-folga = max(0.0, comprimento_total - dist_3d)
-sag_z = folga * 0.50
+# Caso 1: o alvo está mais longe que o cabo. O cabo não alcança.
+if dist_reta_original > comprimento_total:
+    direcao_3d = norm3((
+        P3_original[0] - P0[0],
+        P3_original[1] - P0[1],
+        P3_original[2] - P0[2]
+    ))
 
-p1_z = ancora_z - sag_z
-p2_z = cabo_fim_z - sag_z
+    P3 = (
+        P0[0] + direcao_3d[0] * comprimento_total,
+        P0[1] + direcao_3d[1] * comprimento_total,
+        P0[2] + direcao_3d[2] * comprimento_total
+    )
 
-P1 = (ancora_x + dx_full * 0.333, ancora_y + dy_full * 0.333, p1_z)
-P2 = (ancora_x + dx_full * 0.666, ancora_y + dy_full * 0.666, p2_z)
+    sag_final = 0.0
 
-# ============================================================
-# AMOSTRAR A CURVA E DISTRIBUIR OS ELOS POR COMPRIMENTO
-# ============================================================
+    print("⚠️ O alvo estava mais longe que o comprimento total do cabo.")
+    print("⚠️ O ponto final foi aproximado para o cabo conseguir alcançar.")
 
-print("Calculando elos com Bézier e reamostragem por comprimento...")
+else:
+    # Primeiro tentamos manter o alvo original e só aumentar a barriga da curva.
+    P1_max, P2_max = montar_bezier_com_sag(P0, P3_original, sag_maximo)
+    comprimento_com_sag_maximo = comprimento_bezier(P0, P1_max, P2_max, P3_original, num_amostras)
 
-num_amostras = max(2000, num_links * 200)
+    if comprimento_com_sag_maximo >= comprimento_total:
+        # Dá para manter o alvo original.
+        P3 = P3_original
 
-curva = []
-for k in range(num_amostras + 1):
-    t = k / num_amostras
-    curva.append(calcular_bezier(P0, P1, P2, P3, t))
+        baixo = 0.0
+        alto = sag_maximo
 
-cum = [0.0]
-for k in range(1, len(curva)):
-    cum.append(cum[-1] + dist3(curva[k - 1], curva[k]))
+        for _ in range(60):
+            meio = 0.5 * (baixo + alto)
+            P1_teste, P2_teste = montar_bezier_com_sag(P0, P3, meio)
+            comp_teste = comprimento_bezier(P0, P1_teste, P2_teste, P3, num_amostras)
 
-comprimento_curva = cum[-1]
+            if comp_teste < comprimento_total:
+                baixo = meio
+            else:
+                alto = meio
 
-pontos_cabo = []
-j = 1
+        sag_final = 0.5 * (baixo + alto)
 
-for i in range(num_links + 1):
-    alvo_s = i * length
-
-    if alvo_s <= comprimento_curva:
-        while j < len(cum) - 1 and cum[j] < alvo_s:
-            j += 1
-
-        s0 = cum[j - 1]
-        s1 = cum[j]
-        if abs(s1 - s0) < 1e-12:
-            a = 0.0
-        else:
-            a = (alvo_s - s0) / (s1 - s0)
-
-        p = lerp(curva[j - 1], curva[j], a)
-        pontos_cabo.append(p)
+        print("✓ O alvo original foi mantido.")
+        print(f"✓ Sag ajustado automaticamente: {sag_final:.4f} m")
 
     else:
-        excesso = alvo_s - comprimento_curva
-        direcao_final = norm3((
-            curva[-1][0] - curva[-2][0],
-            curva[-1][1] - curva[-2][1],
-            curva[-1][2] - curva[-2][2]
-        ))
+        # Nem com a barriga máxima a curva consome todo o comprimento do cabo.
+        # Então o alvo precisa ser esticado na direção horizontal.
+        sag_final = sag_maximo
 
-        p = (
-            curva[-1][0] + direcao_final[0] * excesso,
-            curva[-1][1] + direcao_final[1] * excesso,
-            curva[-1][2] + direcao_final[2] * excesso
+        baixo = dist_xy_original
+        alto = max(dist_xy_original + 0.10, comprimento_total)
+
+        while True:
+            P3_teste = (
+                ancora_x + dir_x * alto,
+                ancora_y + dir_y * alto,
+                cabo_fim_z_original
+            )
+
+            P1_teste, P2_teste = montar_bezier_com_sag(P0, P3_teste, sag_final)
+            comp_teste = comprimento_bezier(P0, P1_teste, P2_teste, P3_teste, num_amostras)
+
+            if comp_teste >= comprimento_total:
+                break
+
+            alto *= 1.5
+
+        for _ in range(70):
+            meio = 0.5 * (baixo + alto)
+
+            P3_teste = (
+                ancora_x + dir_x * meio,
+                ancora_y + dir_y * meio,
+                cabo_fim_z_original
+            )
+
+            P1_teste, P2_teste = montar_bezier_com_sag(P0, P3_teste, sag_final)
+            comp_teste = comprimento_bezier(P0, P1_teste, P2_teste, P3_teste, num_amostras)
+
+            if comp_teste < comprimento_total:
+                baixo = meio
+            else:
+                alto = meio
+
+        dist_xy_final = 0.5 * (baixo + alto)
+
+        P3 = (
+            ancora_x + dir_x * dist_xy_final,
+            ancora_y + dir_y * dist_xy_final,
+            cabo_fim_z_original
         )
 
-        if p[2] < z_minimo_chao:
-            p = (p[0], p[1], z_minimo_chao)
+        print("⚠️ O cabo era longo demais para terminar no alvo original sem atravessar o chão.")
+        print("⚠️ O ponto final foi esticado na direção horizontal.")
+        print(f"⚠️ Distância XY original: {dist_xy_original:.4f} m")
+        print(f"⚠️ Distância XY ajustada: {dist_xy_final:.4f} m")
 
-        pontos_cabo.append(p)
+P1, P2 = montar_bezier_com_sag(P0, P3, sag_final)
+
+curva, cum = gerar_pontos_bezier(P0, P1, P2, P3, num_amostras)
+comprimento_curva = cum[-1]
+
+pontos_cabo = reamostrar_curva_por_comprimento(
+    curva=curva,
+    cum=cum,
+    num_links=num_links,
+    length=length,
+    P3=P3
+)
+
+# ============================================================
+# DIAGNÓSTICO DOS ELOS
+# ============================================================
+
+comprimentos_reais = [
+    dist3(pontos_cabo[i - 1], pontos_cabo[i])
+    for i in range(1, len(pontos_cabo))
+]
+
+print("============================================================")
+print("DIAGNÓSTICO DO CABO")
+print("============================================================")
+print(f"Número de elos: {num_links}")
+print(f"Comprimento nominal de cada elo: {length:.6f} m")
+print(f"Comprimento total nominal: {comprimento_total:.6f} m")
+print(f"Comprimento aproximado da Bézier final: {comprimento_curva:.6f} m")
+print(f"Menor elo real: {min(comprimentos_reais):.6f} m")
+print(f"Maior elo real: {max(comprimentos_reais):.6f} m")
+print(f"Ponto final original: ({cabo_fim_x_original:.4f}, {cabo_fim_y_original:.4f}, {cabo_fim_z_original:.4f})")
+print(f"Ponto final usado:     ({P3[0]:.4f}, {P3[1]:.4f}, {P3[2]:.4f})")
+print("============================================================")
 
 # ============================================================
 # DEFINIR SPAWN DO DRONE BASEADO NA PONTA REAL DO CABO
@@ -250,7 +352,7 @@ for i in range(num_links + 1):
 
 p_final = pontos_cabo[-1]
 
-yaw_base = math.atan2(cabo_fim_y - ancora_y, cabo_fim_x - ancora_x)
+yaw_base = math.atan2(P3[1] - ancora_y, P3[0] - ancora_x)
 
 offset_world_x, offset_world_y = rotacionar_offset_yaw(
     offset_conexao_drone_x,
@@ -258,31 +360,30 @@ offset_world_x, offset_world_y = rotacionar_offset_yaw(
     yaw_base
 )
 
-# O drone nasce de forma que o ponto de conexão local fique na ponta do cabo.
 drone_spawn_x = p_final[0] - offset_world_x
 drone_spawn_y = p_final[1] - offset_world_y
 drone_spawn_z = p_final[2] - offset_conexao_drone_z
 
-print(f"Comprimento total do cabo: {comprimento_total:.4f} m")
-print(f"Comprimento aproximado da Bézier: {comprimento_curva:.4f} m")
-print(f"Meta final do Cabo JSON/Ajustada: ({cabo_fim_x:.4f}, {cabo_fim_y:.4f}, {cabo_fim_z:.4f})")
 print(f"Ponta real física do cabo:  ({p_final[0]:.4f}, {p_final[1]:.4f}, {p_final[2]:.4f})")
 print(f"Spawn calculado para o drone: ({drone_spawn_x:.4f}, {drone_spawn_y:.4f}, {drone_spawn_z:.4f})")
 
 # ============================================================
-# INÉRCIAS
+# INÉRCIAS GERAIS
 # ============================================================
 
-ixx_elo    = 0.5 * mass_elo * radius ** 2
-iyy_zz_elo = (1.0 / 12.0) * mass_elo * (3.0 * radius ** 2 + length ** 2)
+limite_inercia_minima = 1e-5
 
 massa_raiz = 0.02
 raio_raiz_visual = 0.01
-ixx_raiz = (2.0 / 5.0) * massa_raiz * raio_raiz_visual ** 2
+
+ixx_raiz_calc = (2.0 / 5.0) * massa_raiz * raio_raiz_visual ** 2
+ixx_raiz = max(ixx_raiz_calc, limite_inercia_minima)
 
 massa_ponta = 0.001
 raio_ponta = max(2.5 * radius, 0.006)
-ixx_ponta = (2.0 / 5.0) * massa_ponta * raio_ponta ** 2
+
+ixx_ponta_calc = (2.0 / 5.0) * massa_ponta * raio_ponta ** 2
+ixx_ponta = max(ixx_ponta_calc, limite_inercia_minima)
 
 # ============================================================
 # GERAR CABO.SDF
@@ -326,11 +427,30 @@ for i in range(1, num_links + 1):
     p_atual = pontos_cabo[i - 1]
     p_prox = pontos_cabo[i]
 
+    seg_len = dist3(p_atual, p_prox)
+
+    if seg_len < 1e-6:
+        raise ValueError(
+            f"Elo {i} com comprimento quase zero. "
+            f"Verifique a geração dos pontos do cabo."
+        )
+
     yaw, pitch = yaw_pitch_do_segmento(p_atual, p_prox)
 
     pose_x = p_atual[0] - ancora_x
     pose_y = p_atual[1] - ancora_y
     pose_z = p_atual[2] - ancora_z
+
+    mass_seg = max(densidade_linear * seg_len, 0.001)
+
+    ixx_seg_calc = 0.5 * mass_seg * radius ** 2
+    iyy_zz_seg_calc = (1.0 / 12.0) * mass_seg * (3.0 * radius ** 2 + seg_len ** 2)
+
+    ixx_seg = max(ixx_seg_calc, limite_inercia_minima)
+    iyy_zz_seg = max(iyy_zz_seg_calc, limite_inercia_minima)
+
+    collision_radius_seg = 0.50 * radius
+    collision_length_seg = max(0.001, 0.60 * seg_len)
 
     sensor_xml = ""
 
@@ -350,16 +470,39 @@ for i in range(1, num_links + 1):
         <topic>/cabo/tensao_drone</topic>
       </sensor>"""
 
+    visual_ponta_xml = ""
+
+    if i == num_links:
+        visual_ponta_xml = f"""
+      <!-- Esfera vermelha desenhada diretamente no final do último elo.
+           Assim ela fica garantidamente na ponta visual do cabo. -->
+      <visual name="visual_ponta_vermelha">
+        <pose>{seg_len:.6f} 0 0 0 0 0</pose>
+        <geometry>
+          <sphere>
+            <radius>{raio_ponta}</radius>
+          </sphere>
+        </geometry>
+        <material>
+          <ambient>0.8 0.1 0.1 1</ambient>
+          <diffuse>0.8 0.1 0.1 1</diffuse>
+        </material>
+      </visual>
+"""
+
     sdf += f"""
     <link name="{nome_elo}">
       <pose>{pose_x:.6f} {pose_y:.6f} {pose_z:.6f} 0 {pitch:.6f} {yaw:.6f}</pose>
 
+      <enable_wind>false</enable_wind>
+      <self_collide>false</self_collide>
+
       <visual name="visual">
-        <pose>{length / 2:.6f} 0 0 0 1.5708 0</pose>
+        <pose>{seg_len / 2:.6f} 0 0 0 1.5708 0</pose>
         <geometry>
           <cylinder>
             <radius>{radius}</radius>
-            <length>{length}</length>
+            <length>{seg_len:.6f}</length>
           </cylinder>
         </geometry>
         <material>
@@ -367,56 +510,32 @@ for i in range(1, num_links + 1):
           <diffuse>0 0 0 1</diffuse>
         </material>
       </visual>
-
+{visual_ponta_xml}
       <collision name="collision">
-        <pose>{length / 2:.6f} 0 0 0 1.5708 0</pose>
+        <pose>{seg_len / 2:.6f} 0 0 0 1.5708 0</pose>
         <geometry>
           <cylinder>
-            <radius>{collision_radius}</radius>
-            <length>{collision_length}</length>
+            <radius>{collision_radius_seg}</radius>
+            <length>{collision_length_seg:.6f}</length>
           </cylinder>
         </geometry>
       </collision>
 
       <inertial>
-        <pose>{length / 2:.6f} 0 0 0 0 0</pose>
-        <mass>{mass_elo}</mass>
+        <pose>{seg_len / 2:.6f} 0 0 0 0 0</pose>
+        <mass>{mass_seg}</mass>
         <inertia>
-          <ixx>{ixx_elo}</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>{iyy_zz_elo}</iyy><iyz>0</iyz><izz>{iyy_zz_elo}</izz>
+          <ixx>{ixx_seg}</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>{iyy_zz_seg}</iyy><iyz>0</iyz><izz>{iyy_zz_seg}</izz>
         </inertia>
       </inertial>
     </link>
 
-    <joint name="joint_{i}" type="universal">
+    <joint name="joint_{i}" type="ball">
       <parent>{parent_link}</parent>
       <child>{nome_elo}</child>
       <pose>0 0 0 0 0 0</pose>
-
-      <axis>
-        <xyz>0 1 0</xyz>
-        <limit>
-          <lower>{-limite_junta}</lower>
-          <upper>{limite_junta}</upper>
-        </limit>
-        <dynamics>
-          <damping>{damping_junta}</damping>
-          <friction>{friction_junta}</friction>
-        </dynamics>
-      </axis>
-
-      <axis2>
-        <xyz>0 0 1</xyz>
-        <limit>
-          <lower>{-limite_junta}</lower>
-          <upper>{limite_junta}</upper>
-        </limit>
-        <dynamics>
-          <damping>{damping_junta}</damping>
-          <friction>{friction_junta}</friction>
-        </dynamics>
-      </axis2>
-{sensor_xml}
+  {sensor_xml}
     </joint>
 """
 
@@ -426,6 +545,9 @@ ponta_x = p_final[0] - ancora_x
 ponta_y = p_final[1] - ancora_y
 ponta_z = p_final[2] - ancora_z
 
+# A ponta_cabo continua existindo como link físico para você poder usar em juntas,
+# sensores ou conexão futura com o drone. Mas a esfera vermelha visual foi colocada
+# no final_segment para não aparecer deslocada.
 sdf += f"""
     <link name="ponta_cabo">
       <pose>{ponta_x:.6f} {ponta_y:.6f} {ponta_z:.6f} 0 0 0</pose>
@@ -438,17 +560,13 @@ sdf += f"""
         </inertia>
       </inertial>
 
-      <visual name="visual_ponta">
+      <collision name="collision_ponta">
         <geometry>
           <sphere>
             <radius>{raio_ponta}</radius>
           </sphere>
         </geometry>
-        <material>
-          <ambient>0.8 0.1 0.1 1</ambient>
-          <diffuse>0.8 0.1 0.1 1</diffuse>
-        </material>
-      </visual>
+      </collision>
     </link>
 
     <joint name="joint_ponta" type="fixed">
@@ -484,15 +602,15 @@ world = f"""<?xml version="1.0" ?>
       <ode>
         <solver>
           <type>quick</type>
-          <iters>150</iters>
+          <iters>400</iters>
           <sor>1.0</sor>
         </solver>
 
         <constraints>
-          <cfm>1e-5</cfm>
-          <erp>0.2</erp>
+          <cfm>1e-4</cfm>
+          <erp>0.8</erp>
           <contact_max_correcting_vel>0.5</contact_max_correcting_vel>
-          <contact_surface_layer>0.001</contact_surface_layer>
+          <contact_surface_layer>0.01</contact_surface_layer>
         </constraints>
       </ode>
     </physics>
@@ -510,6 +628,7 @@ world = f"""<?xml version="1.0" ?>
 
     <model name="ground_plane">
       <static>true</static>
+
       <link name="link">
         <collision name="collision">
           <geometry>
@@ -545,7 +664,7 @@ world = f"""<?xml version="1.0" ?>
       <uri>file:///home/joseubu/IC/src/pacote_do_drone/models/cabo.sdf</uri>
       <name>cabo_dinamico</name>
       <pose>{ancora_x} {ancora_y} {ancora_z} 0 0 0</pose>
-      <static>false</static>
+      <static>true</static>
     </include>
 
     <joint name="ancora_carretel_cabo" type="ball">
@@ -554,12 +673,11 @@ world = f"""<?xml version="1.0" ?>
       <pose>0 0 0 0 0 0</pose>
     </joint>
 
-    </world>
+  </world>
 </sdf>
 """
 
 with open(caminho_world, "w") as f:
     f.write(world)
 
-with open(caminho_world, "w") as f:
-    f.write(world)
+print("✓ my_world.sdf gerado com sucesso!")
