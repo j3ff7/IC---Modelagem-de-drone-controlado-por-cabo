@@ -1,9 +1,11 @@
 {
-  "num_links": 40,
+  "num_links": 70,
   "length": 0.05,
   "radius": 0.002,
-  "mass": 0.0005,
-  "drone_x": 1.5,
-  "drone_y": 0.18,
-  "drone_z": 0.1
+  "mass": 0.01,
+  "cabo_fim_x": 1.5,
+  "cabo_fim_y": 0.18,
+  "cabo_fim_z": 0.2,
+  "offset_conexao_drone_z": -0.05,
+  "damping_junta": 0.08
 }
