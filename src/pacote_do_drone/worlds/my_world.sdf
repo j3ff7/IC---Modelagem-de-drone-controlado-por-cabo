@@ -58,7 +58,7 @@
     <include>
       <uri>file:///home/joseubu/IC/src/pacote_do_drone/models/cabo.sdf</uri>
       <name>cabo_dinamico</name>
-      <pose>0.0 0.18 0.35 0 0 0</pose>
+      <pose>0.0 0.18 0.26 0 0 0</pose>
       <static>false</static>
     </include>
 
@@ -66,17 +66,6 @@
       <parent>meu_carretel::cilindro_carretel</parent>
       <child>cabo_dinamico::raiz_cabo</child>
       <pose>0 0 0 0 0 0</pose>
-    </joint>
-    
-    <include>
-      <uri>file:///home/joseubu/IC/src/pacote_do_drone/models/meu_drone/meu_drone.sdf</uri>
-      <name>meu_drone</name>
-      <pose>2.396508 0.180000 0.227589 0 0 0.000000</pose>
-    </include>
-
-    <joint name="cabo_drone_joint" type="ball">
-      <parent>cabo_dinamico::ponta_cabo</parent>
-      <child>meu_drone::base_link</child>
     </joint>
   </world>
 </sdf>
