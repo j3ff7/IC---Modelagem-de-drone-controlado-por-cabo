@@ -1,0 +1,3538 @@
+<sdf version='1.11'>
+  <model name='cabo_flexivel'>
+    <link name='raiz_cabo'>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='joint_1_y' type='revolute'>
+      <pose relative_to='raiz_cabo'>0 0 0.02 0 0 0</pose>
+      <parent>raiz_cabo</parent>
+      <child>dummy_1</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.20000000000000001</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='dummy_1'>
+      <pose relative_to='joint_1_y'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='joint_1_x' type='revolute'>
+      <pose relative_to='dummy_1'>0 0 0 0 0 0</pose>
+      <parent>dummy_1</parent>
+      <child>segment_1</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.02</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='segment_1'>
+      <pose relative_to='joint_1_x'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>4.9333333333333341e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4.9333333333333341e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2000000000000001e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='segment_1_collision'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='segment_1_visual'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='joint_2_y' type='revolute'>
+      <pose relative_to='segment_1'>0 0 0.02 0 0 0</pose>
+      <parent>segment_1</parent>
+      <child>dummy_2</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.20000000000000001</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='dummy_2'>
+      <pose relative_to='joint_2_y'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='joint_2_x' type='revolute'>
+      <pose relative_to='dummy_2'>0 0 0 0 0 0</pose>
+      <parent>dummy_2</parent>
+      <child>segment_2</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.02</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='segment_2'>
+      <pose relative_to='joint_2_x'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>4.9333333333333341e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4.9333333333333341e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2000000000000001e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='segment_2_collision'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='segment_2_visual'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='joint_3_y' type='revolute'>
+      <pose relative_to='segment_2'>0 0 0.02 0 0 0</pose>
+      <parent>segment_2</parent>
+      <child>dummy_3</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.20000000000000001</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='dummy_3'>
+      <pose relative_to='joint_3_y'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='joint_3_x' type='revolute'>
+      <pose relative_to='dummy_3'>0 0 0 0 0 0</pose>
+      <parent>dummy_3</parent>
+      <child>segment_3</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.02</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='segment_3'>
+      <pose relative_to='joint_3_x'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>4.9333333333333341e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4.9333333333333341e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2000000000000001e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='segment_3_collision'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='segment_3_visual'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='joint_4_y' type='revolute'>
+      <pose relative_to='segment_3'>0 0 0.02 0 0 0</pose>
+      <parent>segment_3</parent>
+      <child>dummy_4</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.20000000000000001</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='dummy_4'>
+      <pose relative_to='joint_4_y'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='joint_4_x' type='revolute'>
+      <pose relative_to='dummy_4'>0 0 0 0 0 0</pose>
+      <parent>dummy_4</parent>
+      <child>segment_4</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.02</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='segment_4'>
+      <pose relative_to='joint_4_x'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>4.9333333333333341e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4.9333333333333341e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2000000000000001e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='segment_4_collision'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='segment_4_visual'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='joint_5_y' type='revolute'>
+      <pose relative_to='segment_4'>0 0 0.02 0 0 0</pose>
+      <parent>segment_4</parent>
+      <child>dummy_5</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.20000000000000001</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='dummy_5'>
+      <pose relative_to='joint_5_y'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='joint_5_x' type='revolute'>
+      <pose relative_to='dummy_5'>0 0 0 0 0 0</pose>
+      <parent>dummy_5</parent>
+      <child>segment_5</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.02</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='segment_5'>
+      <pose relative_to='joint_5_x'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>4.9333333333333341e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4.9333333333333341e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2000000000000001e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='segment_5_collision'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='segment_5_visual'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='joint_6_y' type='revolute'>
+      <pose relative_to='segment_5'>0 0 0.02 0 0 0</pose>
+      <parent>segment_5</parent>
+      <child>dummy_6</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.20000000000000001</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='dummy_6'>
+      <pose relative_to='joint_6_y'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='joint_6_x' type='revolute'>
+      <pose relative_to='dummy_6'>0 0 0 0 0 0</pose>
+      <parent>dummy_6</parent>
+      <child>segment_6</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.02</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='segment_6'>
+      <pose relative_to='joint_6_x'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>4.9333333333333341e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4.9333333333333341e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2000000000000001e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='segment_6_collision'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='segment_6_visual'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='joint_7_y' type='revolute'>
+      <pose relative_to='segment_6'>0 0 0.02 0 0 0</pose>
+      <parent>segment_6</parent>
+      <child>dummy_7</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.20000000000000001</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='dummy_7'>
+      <pose relative_to='joint_7_y'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='joint_7_x' type='revolute'>
+      <pose relative_to='dummy_7'>0 0 0 0 0 0</pose>
+      <parent>dummy_7</parent>
+      <child>segment_7</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.02</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='segment_7'>
+      <pose relative_to='joint_7_x'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>4.9333333333333341e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4.9333333333333341e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2000000000000001e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='segment_7_collision'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='segment_7_visual'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='joint_8_y' type='revolute'>
+      <pose relative_to='segment_7'>0 0 0.02 0 0 0</pose>
+      <parent>segment_7</parent>
+      <child>dummy_8</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.20000000000000001</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='dummy_8'>
+      <pose relative_to='joint_8_y'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='joint_8_x' type='revolute'>
+      <pose relative_to='dummy_8'>0 0 0 0 0 0</pose>
+      <parent>dummy_8</parent>
+      <child>segment_8</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.02</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='segment_8'>
+      <pose relative_to='joint_8_x'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>4.9333333333333341e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4.9333333333333341e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2000000000000001e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='segment_8_collision'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='segment_8_visual'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='joint_9_y' type='revolute'>
+      <pose relative_to='segment_8'>0 0 0.02 0 0 0</pose>
+      <parent>segment_8</parent>
+      <child>dummy_9</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.20000000000000001</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='dummy_9'>
+      <pose relative_to='joint_9_y'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='joint_9_x' type='revolute'>
+      <pose relative_to='dummy_9'>0 0 0 0 0 0</pose>
+      <parent>dummy_9</parent>
+      <child>segment_9</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.02</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='segment_9'>
+      <pose relative_to='joint_9_x'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>4.9333333333333341e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4.9333333333333341e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2000000000000001e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='segment_9_collision'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='segment_9_visual'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='joint_10_y' type='revolute'>
+      <pose relative_to='segment_9'>0 0 0.02 0 0 0</pose>
+      <parent>segment_9</parent>
+      <child>dummy_10</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.20000000000000001</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='dummy_10'>
+      <pose relative_to='joint_10_y'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='joint_10_x' type='revolute'>
+      <pose relative_to='dummy_10'>0 0 0 0 0 0</pose>
+      <parent>dummy_10</parent>
+      <child>segment_10</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.02</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='segment_10'>
+      <pose relative_to='joint_10_x'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>4.9333333333333341e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4.9333333333333341e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2000000000000001e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='segment_10_collision'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='segment_10_visual'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='joint_11_y' type='revolute'>
+      <pose relative_to='segment_10'>0 0 0.02 0 0 0</pose>
+      <parent>segment_10</parent>
+      <child>dummy_11</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.20000000000000001</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='dummy_11'>
+      <pose relative_to='joint_11_y'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='joint_11_x' type='revolute'>
+      <pose relative_to='dummy_11'>0 0 0 0 0 0</pose>
+      <parent>dummy_11</parent>
+      <child>segment_11</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.02</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='segment_11'>
+      <pose relative_to='joint_11_x'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>4.9333333333333341e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4.9333333333333341e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2000000000000001e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='segment_11_collision'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='segment_11_visual'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='joint_12_y' type='revolute'>
+      <pose relative_to='segment_11'>0 0 0.02 0 0 0</pose>
+      <parent>segment_11</parent>
+      <child>dummy_12</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.20000000000000001</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='dummy_12'>
+      <pose relative_to='joint_12_y'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='joint_12_x' type='revolute'>
+      <pose relative_to='dummy_12'>0 0 0 0 0 0</pose>
+      <parent>dummy_12</parent>
+      <child>segment_12</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.02</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='segment_12'>
+      <pose relative_to='joint_12_x'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>4.9333333333333341e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4.9333333333333341e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2000000000000001e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='segment_12_collision'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='segment_12_visual'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='joint_13_y' type='revolute'>
+      <pose relative_to='segment_12'>0 0 0.02 0 0 0</pose>
+      <parent>segment_12</parent>
+      <child>dummy_13</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.20000000000000001</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='dummy_13'>
+      <pose relative_to='joint_13_y'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='joint_13_x' type='revolute'>
+      <pose relative_to='dummy_13'>0 0 0 0 0 0</pose>
+      <parent>dummy_13</parent>
+      <child>segment_13</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.02</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='segment_13'>
+      <pose relative_to='joint_13_x'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>4.9333333333333341e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4.9333333333333341e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2000000000000001e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='segment_13_collision'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='segment_13_visual'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='joint_14_y' type='revolute'>
+      <pose relative_to='segment_13'>0 0 0.02 0 0 0</pose>
+      <parent>segment_13</parent>
+      <child>dummy_14</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.20000000000000001</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='dummy_14'>
+      <pose relative_to='joint_14_y'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='joint_14_x' type='revolute'>
+      <pose relative_to='dummy_14'>0 0 0 0 0 0</pose>
+      <parent>dummy_14</parent>
+      <child>segment_14</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.02</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='segment_14'>
+      <pose relative_to='joint_14_x'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>4.9333333333333341e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4.9333333333333341e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2000000000000001e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='segment_14_collision'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='segment_14_visual'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='joint_15_y' type='revolute'>
+      <pose relative_to='segment_14'>0 0 0.02 0 0 0</pose>
+      <parent>segment_14</parent>
+      <child>dummy_15</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.20000000000000001</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='dummy_15'>
+      <pose relative_to='joint_15_y'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='joint_15_x' type='revolute'>
+      <pose relative_to='dummy_15'>0 0 0 0 0 0</pose>
+      <parent>dummy_15</parent>
+      <child>segment_15</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.02</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='segment_15'>
+      <pose relative_to='joint_15_x'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>4.9333333333333341e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4.9333333333333341e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2000000000000001e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='segment_15_collision'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='segment_15_visual'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='joint_16_y' type='revolute'>
+      <pose relative_to='segment_15'>0 0 0.02 0 0 0</pose>
+      <parent>segment_15</parent>
+      <child>dummy_16</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.20000000000000001</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='dummy_16'>
+      <pose relative_to='joint_16_y'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='joint_16_x' type='revolute'>
+      <pose relative_to='dummy_16'>0 0 0 0 0 0</pose>
+      <parent>dummy_16</parent>
+      <child>segment_16</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.02</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='segment_16'>
+      <pose relative_to='joint_16_x'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>4.9333333333333341e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4.9333333333333341e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2000000000000001e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='segment_16_collision'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='segment_16_visual'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='joint_17_y' type='revolute'>
+      <pose relative_to='segment_16'>0 0 0.02 0 0 0</pose>
+      <parent>segment_16</parent>
+      <child>dummy_17</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.20000000000000001</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='dummy_17'>
+      <pose relative_to='joint_17_y'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='joint_17_x' type='revolute'>
+      <pose relative_to='dummy_17'>0 0 0 0 0 0</pose>
+      <parent>dummy_17</parent>
+      <child>segment_17</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.02</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='segment_17'>
+      <pose relative_to='joint_17_x'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>4.9333333333333341e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4.9333333333333341e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2000000000000001e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='segment_17_collision'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='segment_17_visual'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='joint_18_y' type='revolute'>
+      <pose relative_to='segment_17'>0 0 0.02 0 0 0</pose>
+      <parent>segment_17</parent>
+      <child>dummy_18</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.20000000000000001</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='dummy_18'>
+      <pose relative_to='joint_18_y'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='joint_18_x' type='revolute'>
+      <pose relative_to='dummy_18'>0 0 0 0 0 0</pose>
+      <parent>dummy_18</parent>
+      <child>segment_18</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.02</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='segment_18'>
+      <pose relative_to='joint_18_x'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>4.9333333333333341e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4.9333333333333341e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2000000000000001e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='segment_18_collision'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='segment_18_visual'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='joint_19_y' type='revolute'>
+      <pose relative_to='segment_18'>0 0 0.02 0 0 0</pose>
+      <parent>segment_18</parent>
+      <child>dummy_19</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.20000000000000001</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='dummy_19'>
+      <pose relative_to='joint_19_y'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='joint_19_x' type='revolute'>
+      <pose relative_to='dummy_19'>0 0 0 0 0 0</pose>
+      <parent>dummy_19</parent>
+      <child>segment_19</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.02</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='segment_19'>
+      <pose relative_to='joint_19_x'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>4.9333333333333341e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4.9333333333333341e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2000000000000001e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='segment_19_collision'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='segment_19_visual'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='joint_20_y' type='revolute'>
+      <pose relative_to='segment_19'>0 0 0.02 0 0 0</pose>
+      <parent>segment_19</parent>
+      <child>dummy_20</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.20000000000000001</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='dummy_20'>
+      <pose relative_to='joint_20_y'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='joint_20_x' type='revolute'>
+      <pose relative_to='dummy_20'>0 0 0 0 0 0</pose>
+      <parent>dummy_20</parent>
+      <child>segment_20</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.02</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='segment_20'>
+      <pose relative_to='joint_20_x'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>4.9333333333333341e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4.9333333333333341e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2000000000000001e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='segment_20_collision'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='segment_20_visual'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='joint_21_y' type='revolute'>
+      <pose relative_to='segment_20'>0 0 0.02 0 0 0</pose>
+      <parent>segment_20</parent>
+      <child>dummy_21</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.20000000000000001</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='dummy_21'>
+      <pose relative_to='joint_21_y'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='joint_21_x' type='revolute'>
+      <pose relative_to='dummy_21'>0 0 0 0 0 0</pose>
+      <parent>dummy_21</parent>
+      <child>segment_21</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.02</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='segment_21'>
+      <pose relative_to='joint_21_x'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>4.9333333333333341e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4.9333333333333341e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2000000000000001e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='segment_21_collision'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='segment_21_visual'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='joint_22_y' type='revolute'>
+      <pose relative_to='segment_21'>0 0 0.02 0 0 0</pose>
+      <parent>segment_21</parent>
+      <child>dummy_22</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.20000000000000001</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='dummy_22'>
+      <pose relative_to='joint_22_y'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='joint_22_x' type='revolute'>
+      <pose relative_to='dummy_22'>0 0 0 0 0 0</pose>
+      <parent>dummy_22</parent>
+      <child>segment_22</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.02</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='segment_22'>
+      <pose relative_to='joint_22_x'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>4.9333333333333341e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4.9333333333333341e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2000000000000001e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='segment_22_collision'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='segment_22_visual'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='joint_23_y' type='revolute'>
+      <pose relative_to='segment_22'>0 0 0.02 0 0 0</pose>
+      <parent>segment_22</parent>
+      <child>dummy_23</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.20000000000000001</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='dummy_23'>
+      <pose relative_to='joint_23_y'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='joint_23_x' type='revolute'>
+      <pose relative_to='dummy_23'>0 0 0 0 0 0</pose>
+      <parent>dummy_23</parent>
+      <child>segment_23</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.02</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='segment_23'>
+      <pose relative_to='joint_23_x'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>4.9333333333333341e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4.9333333333333341e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2000000000000001e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='segment_23_collision'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='segment_23_visual'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='joint_24_y' type='revolute'>
+      <pose relative_to='segment_23'>0 0 0.02 0 0 0</pose>
+      <parent>segment_23</parent>
+      <child>dummy_24</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.20000000000000001</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='dummy_24'>
+      <pose relative_to='joint_24_y'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='joint_24_x' type='revolute'>
+      <pose relative_to='dummy_24'>0 0 0 0 0 0</pose>
+      <parent>dummy_24</parent>
+      <child>segment_24</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.02</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='segment_24'>
+      <pose relative_to='joint_24_x'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>4.9333333333333341e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4.9333333333333341e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2000000000000001e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='segment_24_collision'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='segment_24_visual'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='joint_25_y' type='revolute'>
+      <pose relative_to='segment_24'>0 0 0.02 0 0 0</pose>
+      <parent>segment_24</parent>
+      <child>dummy_25</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.20000000000000001</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='dummy_25'>
+      <pose relative_to='joint_25_y'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='joint_25_x' type='revolute'>
+      <pose relative_to='dummy_25'>0 0 0 0 0 0</pose>
+      <parent>dummy_25</parent>
+      <child>segment_25</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.02</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='segment_25'>
+      <pose relative_to='joint_25_x'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>4.9333333333333341e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4.9333333333333341e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2000000000000001e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='segment_25_collision'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='segment_25_visual'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='joint_26_y' type='revolute'>
+      <pose relative_to='segment_25'>0 0 0.02 0 0 0</pose>
+      <parent>segment_25</parent>
+      <child>dummy_26</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.20000000000000001</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='dummy_26'>
+      <pose relative_to='joint_26_y'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='joint_26_x' type='revolute'>
+      <pose relative_to='dummy_26'>0 0 0 0 0 0</pose>
+      <parent>dummy_26</parent>
+      <child>segment_26</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.02</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='segment_26'>
+      <pose relative_to='joint_26_x'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>4.9333333333333341e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4.9333333333333341e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2000000000000001e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='segment_26_collision'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='segment_26_visual'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='joint_27_y' type='revolute'>
+      <pose relative_to='segment_26'>0 0 0.02 0 0 0</pose>
+      <parent>segment_26</parent>
+      <child>dummy_27</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.20000000000000001</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='dummy_27'>
+      <pose relative_to='joint_27_y'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='joint_27_x' type='revolute'>
+      <pose relative_to='dummy_27'>0 0 0 0 0 0</pose>
+      <parent>dummy_27</parent>
+      <child>segment_27</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.02</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='segment_27'>
+      <pose relative_to='joint_27_x'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>4.9333333333333341e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4.9333333333333341e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2000000000000001e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='segment_27_collision'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='segment_27_visual'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='joint_28_y' type='revolute'>
+      <pose relative_to='segment_27'>0 0 0.02 0 0 0</pose>
+      <parent>segment_27</parent>
+      <child>dummy_28</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.20000000000000001</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='dummy_28'>
+      <pose relative_to='joint_28_y'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='joint_28_x' type='revolute'>
+      <pose relative_to='dummy_28'>0 0 0 0 0 0</pose>
+      <parent>dummy_28</parent>
+      <child>segment_28</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.02</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='segment_28'>
+      <pose relative_to='joint_28_x'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>4.9333333333333341e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4.9333333333333341e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2000000000000001e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='segment_28_collision'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='segment_28_visual'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='joint_29_y' type='revolute'>
+      <pose relative_to='segment_28'>0 0 0.02 0 0 0</pose>
+      <parent>segment_28</parent>
+      <child>dummy_29</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.20000000000000001</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='dummy_29'>
+      <pose relative_to='joint_29_y'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='joint_29_x' type='revolute'>
+      <pose relative_to='dummy_29'>0 0 0 0 0 0</pose>
+      <parent>dummy_29</parent>
+      <child>segment_29</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.02</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='segment_29'>
+      <pose relative_to='joint_29_x'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>4.9333333333333341e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4.9333333333333341e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2000000000000001e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='segment_29_collision'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='segment_29_visual'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='joint_30_y' type='revolute'>
+      <pose relative_to='segment_29'>0 0 0.02 0 0 0</pose>
+      <parent>segment_29</parent>
+      <child>dummy_30</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.20000000000000001</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='dummy_30'>
+      <pose relative_to='joint_30_y'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='joint_30_x' type='revolute'>
+      <pose relative_to='dummy_30'>0 0 0 0 0 0</pose>
+      <parent>dummy_30</parent>
+      <child>segment_30</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.02</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='segment_30'>
+      <pose relative_to='joint_30_x'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>4.9333333333333341e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4.9333333333333341e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2000000000000001e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='segment_30_collision'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='segment_30_visual'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='joint_31_y' type='revolute'>
+      <pose relative_to='segment_30'>0 0 0.02 0 0 0</pose>
+      <parent>segment_30</parent>
+      <child>dummy_31</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.20000000000000001</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='dummy_31'>
+      <pose relative_to='joint_31_y'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='joint_31_x' type='revolute'>
+      <pose relative_to='dummy_31'>0 0 0 0 0 0</pose>
+      <parent>dummy_31</parent>
+      <child>segment_31</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.02</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='segment_31'>
+      <pose relative_to='joint_31_x'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>4.9333333333333341e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4.9333333333333341e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2000000000000001e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='segment_31_collision'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='segment_31_visual'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='joint_32_y' type='revolute'>
+      <pose relative_to='segment_31'>0 0 0.02 0 0 0</pose>
+      <parent>segment_31</parent>
+      <child>dummy_32</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.20000000000000001</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='dummy_32'>
+      <pose relative_to='joint_32_y'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='joint_32_x' type='revolute'>
+      <pose relative_to='dummy_32'>0 0 0 0 0 0</pose>
+      <parent>dummy_32</parent>
+      <child>segment_32</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.02</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='segment_32'>
+      <pose relative_to='joint_32_x'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>4.9333333333333341e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4.9333333333333341e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2000000000000001e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='segment_32_collision'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='segment_32_visual'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='joint_33_y' type='revolute'>
+      <pose relative_to='segment_32'>0 0 0.02 0 0 0</pose>
+      <parent>segment_32</parent>
+      <child>dummy_33</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.20000000000000001</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='dummy_33'>
+      <pose relative_to='joint_33_y'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='joint_33_x' type='revolute'>
+      <pose relative_to='dummy_33'>0 0 0 0 0 0</pose>
+      <parent>dummy_33</parent>
+      <child>segment_33</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.02</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='segment_33'>
+      <pose relative_to='joint_33_x'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>4.9333333333333341e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4.9333333333333341e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2000000000000001e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='segment_33_collision'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='segment_33_visual'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='joint_34_y' type='revolute'>
+      <pose relative_to='segment_33'>0 0 0.02 0 0 0</pose>
+      <parent>segment_33</parent>
+      <child>dummy_34</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.20000000000000001</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='dummy_34'>
+      <pose relative_to='joint_34_y'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='joint_34_x' type='revolute'>
+      <pose relative_to='dummy_34'>0 0 0 0 0 0</pose>
+      <parent>dummy_34</parent>
+      <child>segment_34</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.02</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='segment_34'>
+      <pose relative_to='joint_34_x'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>4.9333333333333341e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4.9333333333333341e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2000000000000001e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='segment_34_collision'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='segment_34_visual'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='joint_35_y' type='revolute'>
+      <pose relative_to='segment_34'>0 0 0.02 0 0 0</pose>
+      <parent>segment_34</parent>
+      <child>dummy_35</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.20000000000000001</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='dummy_35'>
+      <pose relative_to='joint_35_y'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='joint_35_x' type='revolute'>
+      <pose relative_to='dummy_35'>0 0 0 0 0 0</pose>
+      <parent>dummy_35</parent>
+      <child>segment_35</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.02</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='segment_35'>
+      <pose relative_to='joint_35_x'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>4.9333333333333341e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4.9333333333333341e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2000000000000001e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='segment_35_collision'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='segment_35_visual'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='joint_36_y' type='revolute'>
+      <pose relative_to='segment_35'>0 0 0.02 0 0 0</pose>
+      <parent>segment_35</parent>
+      <child>dummy_36</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.20000000000000001</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='dummy_36'>
+      <pose relative_to='joint_36_y'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='joint_36_x' type='revolute'>
+      <pose relative_to='dummy_36'>0 0 0 0 0 0</pose>
+      <parent>dummy_36</parent>
+      <child>segment_36</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.02</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='segment_36'>
+      <pose relative_to='joint_36_x'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>4.9333333333333341e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4.9333333333333341e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2000000000000001e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='segment_36_collision'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='segment_36_visual'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='joint_37_y' type='revolute'>
+      <pose relative_to='segment_36'>0 0 0.02 0 0 0</pose>
+      <parent>segment_36</parent>
+      <child>dummy_37</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.20000000000000001</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='dummy_37'>
+      <pose relative_to='joint_37_y'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='joint_37_x' type='revolute'>
+      <pose relative_to='dummy_37'>0 0 0 0 0 0</pose>
+      <parent>dummy_37</parent>
+      <child>segment_37</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.02</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='segment_37'>
+      <pose relative_to='joint_37_x'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>4.9333333333333341e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4.9333333333333341e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2000000000000001e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='segment_37_collision'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='segment_37_visual'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='joint_38_y' type='revolute'>
+      <pose relative_to='segment_37'>0 0 0.02 0 0 0</pose>
+      <parent>segment_37</parent>
+      <child>dummy_38</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.20000000000000001</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='dummy_38'>
+      <pose relative_to='joint_38_y'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='joint_38_x' type='revolute'>
+      <pose relative_to='dummy_38'>0 0 0 0 0 0</pose>
+      <parent>dummy_38</parent>
+      <child>segment_38</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.02</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='segment_38'>
+      <pose relative_to='joint_38_x'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>4.9333333333333341e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4.9333333333333341e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2000000000000001e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='segment_38_collision'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='segment_38_visual'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='joint_39_y' type='revolute'>
+      <pose relative_to='segment_38'>0 0 0.02 0 0 0</pose>
+      <parent>segment_38</parent>
+      <child>dummy_39</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.20000000000000001</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='dummy_39'>
+      <pose relative_to='joint_39_y'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='joint_39_x' type='revolute'>
+      <pose relative_to='dummy_39'>0 0 0 0 0 0</pose>
+      <parent>dummy_39</parent>
+      <child>segment_39</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.02</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='segment_39'>
+      <pose relative_to='joint_39_x'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>4.9333333333333341e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4.9333333333333341e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2000000000000001e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='segment_39_collision'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='segment_39_visual'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='joint_40_y' type='revolute'>
+      <pose relative_to='segment_39'>0 0 0.02 0 0 0</pose>
+      <parent>segment_39</parent>
+      <child>dummy_40</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.20000000000000001</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='dummy_40'>
+      <pose relative_to='joint_40_y'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>0.0001</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0001</iyy>
+          <iyz>0</iyz>
+          <izz>0.0001</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='joint_40_x' type='revolute'>
+      <pose relative_to='dummy_40'>0 0 0 0 0 0</pose>
+      <parent>dummy_40</parent>
+      <child>segment_40</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.02</damping>
+          <friction>0.0050000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='segment_40'>
+      <pose relative_to='joint_40_x'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>4.9333333333333341e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4.9333333333333341e-07</iyy>
+          <iyz>0</iyz>
+          <izz>3.2000000000000001e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='segment_40_collision'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='segment_40_visual'>
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.02</length>
+            <radius>0.0080000000000000002</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+  </model>
+</sdf>
