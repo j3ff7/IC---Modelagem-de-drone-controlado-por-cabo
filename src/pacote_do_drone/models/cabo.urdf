@@ -1,0 +1,1088 @@
+<?xml version="1.0"?>
+<robot name="cabo_flexivel">
+  <link name="raiz_cabo">
+    <inertial>
+      <mass value="0.02"/>
+      <inertia ixx="8.000000000000001e-07" ixy="0" ixz="0" iyy="8.000000000000001e-07" iyz="0" izz="8.000000000000001e-07"/>
+    </inertial>
+    <collision>
+      <geometry><sphere><radius>0.01</radius></sphere></geometry>
+    </collision>
+  </link>
+
+  <link name="segment_1">
+    <visual>
+      <geometry><cylinder radius="0.002" length="0.05"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.002" length="0.0425"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.0005"/>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1.0466666666666668e-07" iyz="0" izz="1.0466666666666668e-07"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_1" type="ball">
+    <parent link="raiz_cabo"/>
+    <child link="segment_1"/>
+    <origin xyz="0.0 0 0" rpy="0 -2.036227962580655 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.0" upper="2.0" effort="5" velocity="10"/>
+    <dynamics damping="0.002" friction="0.0"/>
+  </joint>
+
+  <link name="segment_2">
+    <visual>
+      <geometry><cylinder radius="0.002" length="0.05"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.002" length="0.0425"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.0005"/>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1.0466666666666668e-07" iyz="0" izz="1.0466666666666668e-07"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_2" type="ball">
+    <parent link="segment_1"/>
+    <child link="segment_2"/>
+    <origin xyz="0.05 0 0" rpy="0 0.07068583470577035 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.0" upper="2.0" effort="5" velocity="10"/>
+    <dynamics damping="0.002" friction="0.0"/>
+  </joint>
+
+  <link name="segment_3">
+    <visual>
+      <geometry><cylinder radius="0.002" length="0.05"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.002" length="0.0425"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.0005"/>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1.0466666666666668e-07" iyz="0" izz="1.0466666666666668e-07"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_3" type="ball">
+    <parent link="segment_2"/>
+    <child link="segment_3"/>
+    <origin xyz="0.05 0 0" rpy="0 0.07068583470577035 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.0" upper="2.0" effort="5" velocity="10"/>
+    <dynamics damping="0.002" friction="0.0"/>
+  </joint>
+
+  <link name="segment_4">
+    <visual>
+      <geometry><cylinder radius="0.002" length="0.05"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.002" length="0.0425"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.0005"/>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1.0466666666666668e-07" iyz="0" izz="1.0466666666666668e-07"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_4" type="ball">
+    <parent link="segment_3"/>
+    <child link="segment_4"/>
+    <origin xyz="0.05 0 0" rpy="0 0.07068583470577035 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.0" upper="2.0" effort="5" velocity="10"/>
+    <dynamics damping="0.002" friction="0.0"/>
+  </joint>
+
+  <link name="segment_5">
+    <visual>
+      <geometry><cylinder radius="0.002" length="0.05"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.002" length="0.0425"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.0005"/>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1.0466666666666668e-07" iyz="0" izz="1.0466666666666668e-07"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_5" type="ball">
+    <parent link="segment_4"/>
+    <child link="segment_5"/>
+    <origin xyz="0.05 0 0" rpy="0 0.07068583470577035 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.0" upper="2.0" effort="5" velocity="10"/>
+    <dynamics damping="0.002" friction="0.0"/>
+  </joint>
+
+  <link name="segment_6">
+    <visual>
+      <geometry><cylinder radius="0.002" length="0.05"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.002" length="0.0425"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.0005"/>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1.0466666666666668e-07" iyz="0" izz="1.0466666666666668e-07"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_6" type="ball">
+    <parent link="segment_5"/>
+    <child link="segment_6"/>
+    <origin xyz="0.05 0 0" rpy="0 0.07068583470577035 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.0" upper="2.0" effort="5" velocity="10"/>
+    <dynamics damping="0.002" friction="0.0"/>
+  </joint>
+
+  <link name="segment_7">
+    <visual>
+      <geometry><cylinder radius="0.002" length="0.05"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.002" length="0.0425"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.0005"/>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1.0466666666666668e-07" iyz="0" izz="1.0466666666666668e-07"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_7" type="ball">
+    <parent link="segment_6"/>
+    <child link="segment_7"/>
+    <origin xyz="0.05 0 0" rpy="0 0.07068583470577035 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.0" upper="2.0" effort="5" velocity="10"/>
+    <dynamics damping="0.002" friction="0.0"/>
+  </joint>
+
+  <link name="segment_8">
+    <visual>
+      <geometry><cylinder radius="0.002" length="0.05"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.002" length="0.0425"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.0005"/>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1.0466666666666668e-07" iyz="0" izz="1.0466666666666668e-07"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_8" type="ball">
+    <parent link="segment_7"/>
+    <child link="segment_8"/>
+    <origin xyz="0.05 0 0" rpy="0 0.07068583470577035 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.0" upper="2.0" effort="5" velocity="10"/>
+    <dynamics damping="0.002" friction="0.0"/>
+  </joint>
+
+  <link name="segment_9">
+    <visual>
+      <geometry><cylinder radius="0.002" length="0.05"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.002" length="0.0425"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.0005"/>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1.0466666666666668e-07" iyz="0" izz="1.0466666666666668e-07"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_9" type="ball">
+    <parent link="segment_8"/>
+    <child link="segment_9"/>
+    <origin xyz="0.05 0 0" rpy="0 0.07068583470577035 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.0" upper="2.0" effort="5" velocity="10"/>
+    <dynamics damping="0.002" friction="0.0"/>
+  </joint>
+
+  <link name="segment_10">
+    <visual>
+      <geometry><cylinder radius="0.002" length="0.05"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.002" length="0.0425"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.0005"/>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1.0466666666666668e-07" iyz="0" izz="1.0466666666666668e-07"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_10" type="ball">
+    <parent link="segment_9"/>
+    <child link="segment_10"/>
+    <origin xyz="0.05 0 0" rpy="0 0.07068583470577035 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.0" upper="2.0" effort="5" velocity="10"/>
+    <dynamics damping="0.002" friction="0.0"/>
+  </joint>
+
+  <link name="segment_11">
+    <visual>
+      <geometry><cylinder radius="0.002" length="0.05"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.002" length="0.0425"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.0005"/>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1.0466666666666668e-07" iyz="0" izz="1.0466666666666668e-07"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_11" type="ball">
+    <parent link="segment_10"/>
+    <child link="segment_11"/>
+    <origin xyz="0.05 0 0" rpy="0 0.07068583470577035 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.0" upper="2.0" effort="5" velocity="10"/>
+    <dynamics damping="0.002" friction="0.0"/>
+  </joint>
+
+  <link name="segment_12">
+    <visual>
+      <geometry><cylinder radius="0.002" length="0.05"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.002" length="0.0425"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.0005"/>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1.0466666666666668e-07" iyz="0" izz="1.0466666666666668e-07"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_12" type="ball">
+    <parent link="segment_11"/>
+    <child link="segment_12"/>
+    <origin xyz="0.05 0 0" rpy="0 0.07068583470577035 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.0" upper="2.0" effort="5" velocity="10"/>
+    <dynamics damping="0.002" friction="0.0"/>
+  </joint>
+
+  <link name="segment_13">
+    <visual>
+      <geometry><cylinder radius="0.002" length="0.05"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.002" length="0.0425"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.0005"/>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1.0466666666666668e-07" iyz="0" izz="1.0466666666666668e-07"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_13" type="ball">
+    <parent link="segment_12"/>
+    <child link="segment_13"/>
+    <origin xyz="0.05 0 0" rpy="0 0.07068583470577035 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.0" upper="2.0" effort="5" velocity="10"/>
+    <dynamics damping="0.002" friction="0.0"/>
+  </joint>
+
+  <link name="segment_14">
+    <visual>
+      <geometry><cylinder radius="0.002" length="0.05"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.002" length="0.0425"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.0005"/>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1.0466666666666668e-07" iyz="0" izz="1.0466666666666668e-07"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_14" type="ball">
+    <parent link="segment_13"/>
+    <child link="segment_14"/>
+    <origin xyz="0.05 0 0" rpy="0 0.07068583470577035 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.0" upper="2.0" effort="5" velocity="10"/>
+    <dynamics damping="0.002" friction="0.0"/>
+  </joint>
+
+  <link name="segment_15">
+    <visual>
+      <geometry><cylinder radius="0.002" length="0.05"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.002" length="0.0425"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.0005"/>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1.0466666666666668e-07" iyz="0" izz="1.0466666666666668e-07"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_15" type="ball">
+    <parent link="segment_14"/>
+    <child link="segment_15"/>
+    <origin xyz="0.05 0 0" rpy="0 0.07068583470577035 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.0" upper="2.0" effort="5" velocity="10"/>
+    <dynamics damping="0.002" friction="0.0"/>
+  </joint>
+
+  <link name="segment_16">
+    <visual>
+      <geometry><cylinder radius="0.002" length="0.05"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.002" length="0.0425"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.0005"/>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1.0466666666666668e-07" iyz="0" izz="1.0466666666666668e-07"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_16" type="ball">
+    <parent link="segment_15"/>
+    <child link="segment_16"/>
+    <origin xyz="0.05 0 0" rpy="0 0.07068583470577035 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.0" upper="2.0" effort="5" velocity="10"/>
+    <dynamics damping="0.002" friction="0.0"/>
+  </joint>
+
+  <link name="segment_17">
+    <visual>
+      <geometry><cylinder radius="0.002" length="0.05"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.002" length="0.0425"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.0005"/>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1.0466666666666668e-07" iyz="0" izz="1.0466666666666668e-07"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_17" type="ball">
+    <parent link="segment_16"/>
+    <child link="segment_17"/>
+    <origin xyz="0.05 0 0" rpy="0 0.07068583470577035 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.0" upper="2.0" effort="5" velocity="10"/>
+    <dynamics damping="0.002" friction="0.0"/>
+  </joint>
+
+  <link name="segment_18">
+    <visual>
+      <geometry><cylinder radius="0.002" length="0.05"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.002" length="0.0425"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.0005"/>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1.0466666666666668e-07" iyz="0" izz="1.0466666666666668e-07"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_18" type="ball">
+    <parent link="segment_17"/>
+    <child link="segment_18"/>
+    <origin xyz="0.05 0 0" rpy="0 0.07068583470577035 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.0" upper="2.0" effort="5" velocity="10"/>
+    <dynamics damping="0.002" friction="0.0"/>
+  </joint>
+
+  <link name="segment_19">
+    <visual>
+      <geometry><cylinder radius="0.002" length="0.05"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.002" length="0.0425"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.0005"/>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1.0466666666666668e-07" iyz="0" izz="1.0466666666666668e-07"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_19" type="ball">
+    <parent link="segment_18"/>
+    <child link="segment_19"/>
+    <origin xyz="0.05 0 0" rpy="0 0.07068583470577035 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.0" upper="2.0" effort="5" velocity="10"/>
+    <dynamics damping="0.002" friction="0.0"/>
+  </joint>
+
+  <link name="segment_20">
+    <visual>
+      <geometry><cylinder radius="0.002" length="0.05"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.002" length="0.0425"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.0005"/>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1.0466666666666668e-07" iyz="0" izz="1.0466666666666668e-07"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_20" type="ball">
+    <parent link="segment_19"/>
+    <child link="segment_20"/>
+    <origin xyz="0.05 0 0" rpy="0 0.07068583470577035 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.0" upper="2.0" effort="5" velocity="10"/>
+    <dynamics damping="0.002" friction="0.0"/>
+  </joint>
+
+  <link name="segment_21">
+    <visual>
+      <geometry><cylinder radius="0.002" length="0.05"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.002" length="0.0425"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.0005"/>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1.0466666666666668e-07" iyz="0" izz="1.0466666666666668e-07"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_21" type="ball">
+    <parent link="segment_20"/>
+    <child link="segment_21"/>
+    <origin xyz="0.05 0 0" rpy="0 0.07068583470577035 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.0" upper="2.0" effort="5" velocity="10"/>
+    <dynamics damping="0.002" friction="0.0"/>
+  </joint>
+
+  <link name="segment_22">
+    <visual>
+      <geometry><cylinder radius="0.002" length="0.05"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.002" length="0.0425"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.0005"/>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1.0466666666666668e-07" iyz="0" izz="1.0466666666666668e-07"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_22" type="ball">
+    <parent link="segment_21"/>
+    <child link="segment_22"/>
+    <origin xyz="0.05 0 0" rpy="0 0.07068583470577035 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.0" upper="2.0" effort="5" velocity="10"/>
+    <dynamics damping="0.002" friction="0.0"/>
+  </joint>
+
+  <link name="segment_23">
+    <visual>
+      <geometry><cylinder radius="0.002" length="0.05"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.002" length="0.0425"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.0005"/>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1.0466666666666668e-07" iyz="0" izz="1.0466666666666668e-07"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_23" type="ball">
+    <parent link="segment_22"/>
+    <child link="segment_23"/>
+    <origin xyz="0.05 0 0" rpy="0 0.07068583470577035 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.0" upper="2.0" effort="5" velocity="10"/>
+    <dynamics damping="0.002" friction="0.0"/>
+  </joint>
+
+  <link name="segment_24">
+    <visual>
+      <geometry><cylinder radius="0.002" length="0.05"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.002" length="0.0425"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.0005"/>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1.0466666666666668e-07" iyz="0" izz="1.0466666666666668e-07"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_24" type="ball">
+    <parent link="segment_23"/>
+    <child link="segment_24"/>
+    <origin xyz="0.05 0 0" rpy="0 0.07068583470577035 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.0" upper="2.0" effort="5" velocity="10"/>
+    <dynamics damping="0.002" friction="0.0"/>
+  </joint>
+
+  <link name="segment_25">
+    <visual>
+      <geometry><cylinder radius="0.002" length="0.05"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.002" length="0.0425"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.0005"/>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1.0466666666666668e-07" iyz="0" izz="1.0466666666666668e-07"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_25" type="ball">
+    <parent link="segment_24"/>
+    <child link="segment_25"/>
+    <origin xyz="0.05 0 0" rpy="0 0.07068583470577035 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.0" upper="2.0" effort="5" velocity="10"/>
+    <dynamics damping="0.002" friction="0.0"/>
+  </joint>
+
+  <link name="segment_26">
+    <visual>
+      <geometry><cylinder radius="0.002" length="0.05"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.002" length="0.0425"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.0005"/>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1.0466666666666668e-07" iyz="0" izz="1.0466666666666668e-07"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_26" type="ball">
+    <parent link="segment_25"/>
+    <child link="segment_26"/>
+    <origin xyz="0.05 0 0" rpy="0 0.07068583470577035 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.0" upper="2.0" effort="5" velocity="10"/>
+    <dynamics damping="0.002" friction="0.0"/>
+  </joint>
+
+  <link name="segment_27">
+    <visual>
+      <geometry><cylinder radius="0.002" length="0.05"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.002" length="0.0425"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.0005"/>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1.0466666666666668e-07" iyz="0" izz="1.0466666666666668e-07"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_27" type="ball">
+    <parent link="segment_26"/>
+    <child link="segment_27"/>
+    <origin xyz="0.05 0 0" rpy="0 0.07068583470577035 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.0" upper="2.0" effort="5" velocity="10"/>
+    <dynamics damping="0.002" friction="0.0"/>
+  </joint>
+
+  <link name="segment_28">
+    <visual>
+      <geometry><cylinder radius="0.002" length="0.05"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.002" length="0.0425"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.0005"/>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1.0466666666666668e-07" iyz="0" izz="1.0466666666666668e-07"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_28" type="ball">
+    <parent link="segment_27"/>
+    <child link="segment_28"/>
+    <origin xyz="0.05 0 0" rpy="0 0.07068583470577035 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.0" upper="2.0" effort="5" velocity="10"/>
+    <dynamics damping="0.002" friction="0.0"/>
+  </joint>
+
+  <link name="segment_29">
+    <visual>
+      <geometry><cylinder radius="0.002" length="0.05"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.002" length="0.0425"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.0005"/>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1.0466666666666668e-07" iyz="0" izz="1.0466666666666668e-07"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_29" type="ball">
+    <parent link="segment_28"/>
+    <child link="segment_29"/>
+    <origin xyz="0.05 0 0" rpy="0 0.07068583470577035 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.0" upper="2.0" effort="5" velocity="10"/>
+    <dynamics damping="0.002" friction="0.0"/>
+  </joint>
+
+  <link name="segment_30">
+    <visual>
+      <geometry><cylinder radius="0.002" length="0.05"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.002" length="0.0425"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.0005"/>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1.0466666666666668e-07" iyz="0" izz="1.0466666666666668e-07"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_30" type="ball">
+    <parent link="segment_29"/>
+    <child link="segment_30"/>
+    <origin xyz="0.05 0 0" rpy="0 0.07068583470577035 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.0" upper="2.0" effort="5" velocity="10"/>
+    <dynamics damping="0.002" friction="0.0"/>
+  </joint>
+
+  <link name="segment_31">
+    <visual>
+      <geometry><cylinder radius="0.002" length="0.05"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.002" length="0.0425"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.0005"/>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1.0466666666666668e-07" iyz="0" izz="1.0466666666666668e-07"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_31" type="ball">
+    <parent link="segment_30"/>
+    <child link="segment_31"/>
+    <origin xyz="0.05 0 0" rpy="0 0.07068583470577035 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.0" upper="2.0" effort="5" velocity="10"/>
+    <dynamics damping="0.002" friction="0.0"/>
+  </joint>
+
+  <link name="segment_32">
+    <visual>
+      <geometry><cylinder radius="0.002" length="0.05"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.002" length="0.0425"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.0005"/>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1.0466666666666668e-07" iyz="0" izz="1.0466666666666668e-07"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_32" type="ball">
+    <parent link="segment_31"/>
+    <child link="segment_32"/>
+    <origin xyz="0.05 0 0" rpy="0 0.07068583470577035 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.0" upper="2.0" effort="5" velocity="10"/>
+    <dynamics damping="0.002" friction="0.0"/>
+  </joint>
+
+  <link name="segment_33">
+    <visual>
+      <geometry><cylinder radius="0.002" length="0.05"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.002" length="0.0425"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.0005"/>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1.0466666666666668e-07" iyz="0" izz="1.0466666666666668e-07"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_33" type="ball">
+    <parent link="segment_32"/>
+    <child link="segment_33"/>
+    <origin xyz="0.05 0 0" rpy="0 0.07068583470577035 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.0" upper="2.0" effort="5" velocity="10"/>
+    <dynamics damping="0.002" friction="0.0"/>
+  </joint>
+
+  <link name="segment_34">
+    <visual>
+      <geometry><cylinder radius="0.002" length="0.05"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.002" length="0.0425"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.0005"/>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1.0466666666666668e-07" iyz="0" izz="1.0466666666666668e-07"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_34" type="ball">
+    <parent link="segment_33"/>
+    <child link="segment_34"/>
+    <origin xyz="0.05 0 0" rpy="0 0.07068583470577035 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.0" upper="2.0" effort="5" velocity="10"/>
+    <dynamics damping="0.002" friction="0.0"/>
+  </joint>
+
+  <link name="segment_35">
+    <visual>
+      <geometry><cylinder radius="0.002" length="0.05"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.002" length="0.0425"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.0005"/>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1.0466666666666668e-07" iyz="0" izz="1.0466666666666668e-07"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_35" type="ball">
+    <parent link="segment_34"/>
+    <child link="segment_35"/>
+    <origin xyz="0.05 0 0" rpy="0 0.07068583470577035 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.0" upper="2.0" effort="5" velocity="10"/>
+    <dynamics damping="0.002" friction="0.0"/>
+  </joint>
+
+  <link name="segment_36">
+    <visual>
+      <geometry><cylinder radius="0.002" length="0.05"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.002" length="0.0425"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.0005"/>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1.0466666666666668e-07" iyz="0" izz="1.0466666666666668e-07"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_36" type="ball">
+    <parent link="segment_35"/>
+    <child link="segment_36"/>
+    <origin xyz="0.05 0 0" rpy="0 0.07068583470577035 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.0" upper="2.0" effort="5" velocity="10"/>
+    <dynamics damping="0.002" friction="0.0"/>
+  </joint>
+
+  <link name="segment_37">
+    <visual>
+      <geometry><cylinder radius="0.002" length="0.05"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.002" length="0.0425"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.0005"/>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1.0466666666666668e-07" iyz="0" izz="1.0466666666666668e-07"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_37" type="ball">
+    <parent link="segment_36"/>
+    <child link="segment_37"/>
+    <origin xyz="0.05 0 0" rpy="0 0.07068583470577035 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.0" upper="2.0" effort="5" velocity="10"/>
+    <dynamics damping="0.002" friction="0.0"/>
+  </joint>
+
+  <link name="segment_38">
+    <visual>
+      <geometry><cylinder radius="0.002" length="0.05"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.002" length="0.0425"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.0005"/>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1.0466666666666668e-07" iyz="0" izz="1.0466666666666668e-07"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_38" type="ball">
+    <parent link="segment_37"/>
+    <child link="segment_38"/>
+    <origin xyz="0.05 0 0" rpy="0 0.07068583470577035 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.0" upper="2.0" effort="5" velocity="10"/>
+    <dynamics damping="0.002" friction="0.0"/>
+  </joint>
+
+  <link name="segment_39">
+    <visual>
+      <geometry><cylinder radius="0.002" length="0.05"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.002" length="0.0425"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.0005"/>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1.0466666666666668e-07" iyz="0" izz="1.0466666666666668e-07"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_39" type="ball">
+    <parent link="segment_38"/>
+    <child link="segment_39"/>
+    <origin xyz="0.05 0 0" rpy="0 0.07068583470577035 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.0" upper="2.0" effort="5" velocity="10"/>
+    <dynamics damping="0.002" friction="0.0"/>
+  </joint>
+
+  <link name="final_segment">
+    <visual>
+      <geometry><cylinder radius="0.002" length="0.05"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.002" length="0.0425"/></geometry>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.0005"/>
+      <origin xyz="0.025 0 0" rpy="0 1.5708 0"/>
+      <inertia ixx="1e-09" ixy="0" ixz="0" iyy="1.0466666666666668e-07" iyz="0" izz="1.0466666666666668e-07"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_40" type="ball">
+    <parent link="segment_39"/>
+    <child link="final_segment"/>
+    <origin xyz="0.05 0 0" rpy="0 0.07068583470577035 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.0" upper="2.0" effort="5" velocity="10"/>
+    <dynamics damping="0.002" friction="0.0"/>
+  </joint>
+
+  <link name="ponta_cabo">
+    <inertial>
+      <mass value="0.001"/>
+      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
+    </inertial>
+  </link>
+  <joint name="joint_ponta" type="fixed">
+    <parent link="final_segment"/>
+    <child link="ponta_cabo"/>
+    <origin xyz="0.05 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <gazebo reference="joint_1">
+    <sensor name="sensor_tensao_carretel" type="force_torque">
+      <always_on>true</always_on>
+      <update_rate>50</update_rate>
+      <topic>/cabo/tensao_carretel</topic>
+      <force_torque>
+        <frame>child</frame>
+        <measure_direction>child_to_parent</measure_direction>
+      </force_torque>
+    </sensor>
+  </gazebo>
+
+  <gazebo reference="joint_40">
+    <sensor name="sensor_tensao_drone" type="force_torque">
+      <always_on>true</always_on>
+      <update_rate>50</update_rate>
+      <topic>/cabo/tensao_drone</topic>
+      <force_torque>
+        <frame>child</frame>
+        <measure_direction>child_to_parent</measure_direction>
+      </force_torque>
+    </sensor>
+  </gazebo>
+</robot>
