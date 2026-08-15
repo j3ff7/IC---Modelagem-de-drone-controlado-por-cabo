@@ -2,63 +2,58 @@
 <sdf version="1.8">
   <model name="cabo_flexivel">
     <link name="raiz_cabo">
-      <pose>0 0 0 0 0 0</pose>
       <inertial>
         <mass>0.02</mass>
         <inertia>
-          <ixx>8.000000000000001e-07</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>8.000000000000001e-07</iyy><iyz>0</iyz><izz>8.000000000000001e-07</izz>
+          <ixx>8e-7</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>8e-7</iyy><iyz>0</iyz><izz>8e-7</izz>
         </inertia>
       </inertial>
-      <collision name="col_raiz">
-        <geometry><sphere><radius>0.01</radius></sphere></geometry>
-      </collision>
+      <collision name="col_raiz"><geometry><sphere><radius>0.01</radius></sphere></geometry></collision>
+      <visual name="vis_raiz"><geometry><sphere><radius>0.01</radius></sphere></geometry><material><ambient>0.8 0.1 0.1 1</ambient><diffuse>0.8 0.1 0.1 1</diffuse></material></visual>
     </link>
 
-    <link name="segment_1">
-      <pose>0.000000 0.000000 0.000000 0 0.495341 0.000000</pose>
-      <visual name="visual">
-        <pose>0.025 0 0 0 1.5708 0</pose>
-        <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
-        <material><ambient>0 0 0 1</ambient><diffuse>0 0 0 1</diffuse></material>
-      </visual>
-      <collision name="collision">
-        <pose>0.025 0 0 0 1.5708 0</pose>
-        <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
-      </collision>
-      <inertial>
-        <pose>0.025 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
-        <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>1.0466666666666668e-07</iyy><iyz>0</iyz><izz>1.0466666666666668e-07</izz>
-        </inertia>
-      </inertial>
-    </link>
-    
-    <joint name="joint_1" type="universal">
+    <joint name="joint_1_y" type="revolute">
+      <pose relative_to="raiz_cabo">0.0 0 0 0 0 0</pose>
       <parent>raiz_cabo</parent>
-      <child>segment_1</child>
-      <pose>0 0 0 0 0 0</pose>
+      <child>dummy_1</child>
       <axis>
         <xyz>0 1 0</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
       </axis>
-      <axis2>
-        <xyz>0 0 1</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis2>
         <sensor name="sensor_tensao_carretel" type="force_torque">
           <always_on>true</always_on>
           <update_rate>50</update_rate>
           <topic>/cabo/tensao_carretel</topic>
         </sensor>
     </joint>
-
-    <link name="segment_2">
-      <pose>0.043990 0.000000 -0.023767 0 0.469884 0.000000</pose>
+    <link name="dummy_1">
+      <pose relative_to="joint_1_y">0 0 0 0 0 0</pose>
+      <inertial><mass>0.001</mass><inertia><ixx>1e-7</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1e-7</iyy><iyz>0</iyz><izz>1e-7</izz></inertia></inertial>
+    </link>
+    <joint name="joint_1_z" type="revolute">
+      <pose relative_to="dummy_1">0 0 0 0 0 0</pose>
+      <parent>dummy_1</parent>
+      <child>segment_1</child>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="segment_1">
+      <pose relative_to="joint_1_z">0 0 0 0 0 0</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -66,7 +61,7 @@
       </visual>
       <collision name="collision">
         <pose>0.025 0 0 0 1.5708 0</pose>
-        <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
+        <geometry><cylinder><radius>0.002</radius><length>0.045000000000000005</length></cylinder></geometry>
       </collision>
       <inertial>
         <pose>0.025 0 0 0 0 0</pose>
@@ -77,25 +72,43 @@
         </inertia>
       </inertial>
     </link>
-    
-    <joint name="joint_2" type="universal">
+
+    <joint name="joint_2_y" type="revolute">
+      <pose relative_to="segment_1">0.05 0 0 0 0 0</pose>
       <parent>segment_1</parent>
+      <child>dummy_2</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="dummy_2">
+      <pose relative_to="joint_2_y">0 0 0 0 0 0</pose>
+      <inertial><mass>0.001</mass><inertia><ixx>1e-7</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1e-7</iyy><iyz>0</iyz><izz>1e-7</izz></inertia></inertial>
+    </link>
+    <joint name="joint_2_z" type="revolute">
+      <pose relative_to="dummy_2">0 0 0 0 0 0</pose>
+      <parent>dummy_2</parent>
       <child>segment_2</child>
-      <pose>0 0 0 0 0 0</pose>
       <axis>
-        <xyz>0 1 0</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis>
-      <axis2>
         <xyz>0 0 1</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis2>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
     </joint>
-
-    <link name="segment_3">
-      <pose>0.088571 0.000000 -0.046406 0 0.443819 0.000000</pose>
+    <link name="segment_2">
+      <pose relative_to="joint_2_z">0 0 0 0 0 0</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -103,7 +116,7 @@
       </visual>
       <collision name="collision">
         <pose>0.025 0 0 0 1.5708 0</pose>
-        <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
+        <geometry><cylinder><radius>0.002</radius><length>0.045000000000000005</length></cylinder></geometry>
       </collision>
       <inertial>
         <pose>0.025 0 0 0 0 0</pose>
@@ -114,25 +127,43 @@
         </inertia>
       </inertial>
     </link>
-    
-    <joint name="joint_3" type="universal">
+
+    <joint name="joint_3_y" type="revolute">
+      <pose relative_to="segment_2">0.05 0 0 0 0 0</pose>
       <parent>segment_2</parent>
+      <child>dummy_3</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="dummy_3">
+      <pose relative_to="joint_3_y">0 0 0 0 0 0</pose>
+      <inertial><mass>0.001</mass><inertia><ixx>1e-7</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1e-7</iyy><iyz>0</iyz><izz>1e-7</izz></inertia></inertial>
+    </link>
+    <joint name="joint_3_z" type="revolute">
+      <pose relative_to="dummy_3">0 0 0 0 0 0</pose>
+      <parent>dummy_3</parent>
       <child>segment_3</child>
-      <pose>0 0 0 0 0 0</pose>
       <axis>
-        <xyz>0 1 0</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis>
-      <axis2>
         <xyz>0 0 1</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis2>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
     </joint>
-
-    <link name="segment_4">
-      <pose>0.133727 0.000000 -0.067875 0 0.417097 0.000000</pose>
+    <link name="segment_3">
+      <pose relative_to="joint_3_z">0 0 0 0 0 0</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -140,7 +171,7 @@
       </visual>
       <collision name="collision">
         <pose>0.025 0 0 0 1.5708 0</pose>
-        <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
+        <geometry><cylinder><radius>0.002</radius><length>0.045000000000000005</length></cylinder></geometry>
       </collision>
       <inertial>
         <pose>0.025 0 0 0 0 0</pose>
@@ -151,25 +182,43 @@
         </inertia>
       </inertial>
     </link>
-    
-    <joint name="joint_4" type="universal">
+
+    <joint name="joint_4_y" type="revolute">
+      <pose relative_to="segment_3">0.05 0 0 0 0 0</pose>
       <parent>segment_3</parent>
+      <child>dummy_4</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="dummy_4">
+      <pose relative_to="joint_4_y">0 0 0 0 0 0</pose>
+      <inertial><mass>0.001</mass><inertia><ixx>1e-7</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1e-7</iyy><iyz>0</iyz><izz>1e-7</izz></inertia></inertial>
+    </link>
+    <joint name="joint_4_z" type="revolute">
+      <pose relative_to="dummy_4">0 0 0 0 0 0</pose>
+      <parent>dummy_4</parent>
       <child>segment_4</child>
-      <pose>0 0 0 0 0 0</pose>
       <axis>
-        <xyz>0 1 0</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis>
-      <axis2>
         <xyz>0 0 1</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis2>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
     </joint>
-
-    <link name="segment_5">
-      <pose>0.179441 0.000000 -0.088131 0 0.389803 -0.000000</pose>
+    <link name="segment_4">
+      <pose relative_to="joint_4_z">0 0 0 0 0 0</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -177,7 +226,7 @@
       </visual>
       <collision name="collision">
         <pose>0.025 0 0 0 1.5708 0</pose>
-        <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
+        <geometry><cylinder><radius>0.002</radius><length>0.045000000000000005</length></cylinder></geometry>
       </collision>
       <inertial>
         <pose>0.025 0 0 0 0 0</pose>
@@ -188,25 +237,43 @@
         </inertia>
       </inertial>
     </link>
-    
-    <joint name="joint_5" type="universal">
+
+    <joint name="joint_5_y" type="revolute">
+      <pose relative_to="segment_4">0.05 0 0 0 0 0</pose>
       <parent>segment_4</parent>
+      <child>dummy_5</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="dummy_5">
+      <pose relative_to="joint_5_y">0 0 0 0 0 0</pose>
+      <inertial><mass>0.001</mass><inertia><ixx>1e-7</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1e-7</iyy><iyz>0</iyz><izz>1e-7</izz></inertia></inertial>
+    </link>
+    <joint name="joint_5_z" type="revolute">
+      <pose relative_to="dummy_5">0 0 0 0 0 0</pose>
+      <parent>dummy_5</parent>
       <child>segment_5</child>
-      <pose>0 0 0 0 0 0</pose>
       <axis>
-        <xyz>0 1 0</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis>
-      <axis2>
         <xyz>0 0 1</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis2>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
     </joint>
-
-    <link name="segment_6">
-      <pose>0.225690 0.000000 -0.107131 0 0.362036 -0.000000</pose>
+    <link name="segment_5">
+      <pose relative_to="joint_5_z">0 0 0 0 0 0</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -214,7 +281,7 @@
       </visual>
       <collision name="collision">
         <pose>0.025 0 0 0 1.5708 0</pose>
-        <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
+        <geometry><cylinder><radius>0.002</radius><length>0.045000000000000005</length></cylinder></geometry>
       </collision>
       <inertial>
         <pose>0.025 0 0 0 0 0</pose>
@@ -225,25 +292,43 @@
         </inertia>
       </inertial>
     </link>
-    
-    <joint name="joint_6" type="universal">
+
+    <joint name="joint_6_y" type="revolute">
+      <pose relative_to="segment_5">0.05 0 0 0 0 0</pose>
       <parent>segment_5</parent>
+      <child>dummy_6</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="dummy_6">
+      <pose relative_to="joint_6_y">0 0 0 0 0 0</pose>
+      <inertial><mass>0.001</mass><inertia><ixx>1e-7</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1e-7</iyy><iyz>0</iyz><izz>1e-7</izz></inertia></inertial>
+    </link>
+    <joint name="joint_6_z" type="revolute">
+      <pose relative_to="dummy_6">0 0 0 0 0 0</pose>
+      <parent>dummy_6</parent>
       <child>segment_6</child>
-      <pose>0 0 0 0 0 0</pose>
       <axis>
-        <xyz>0 1 0</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis>
-      <axis2>
         <xyz>0 0 1</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis2>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
     </joint>
-
-    <link name="segment_7">
-      <pose>0.272449 -0.000000 -0.124840 0 0.333813 0.000000</pose>
+    <link name="segment_6">
+      <pose relative_to="joint_6_z">0 0 0 0 0 0</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -251,7 +336,7 @@
       </visual>
       <collision name="collision">
         <pose>0.025 0 0 0 1.5708 0</pose>
-        <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
+        <geometry><cylinder><radius>0.002</radius><length>0.045000000000000005</length></cylinder></geometry>
       </collision>
       <inertial>
         <pose>0.025 0 0 0 0 0</pose>
@@ -262,25 +347,43 @@
         </inertia>
       </inertial>
     </link>
-    
-    <joint name="joint_7" type="universal">
+
+    <joint name="joint_7_y" type="revolute">
+      <pose relative_to="segment_6">0.05 0 0 0 0 0</pose>
       <parent>segment_6</parent>
+      <child>dummy_7</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="dummy_7">
+      <pose relative_to="joint_7_y">0 0 0 0 0 0</pose>
+      <inertial><mass>0.001</mass><inertia><ixx>1e-7</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1e-7</iyy><iyz>0</iyz><izz>1e-7</izz></inertia></inertial>
+    </link>
+    <joint name="joint_7_z" type="revolute">
+      <pose relative_to="dummy_7">0 0 0 0 0 0</pose>
+      <parent>dummy_7</parent>
       <child>segment_7</child>
-      <pose>0 0 0 0 0 0</pose>
       <axis>
-        <xyz>0 1 0</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis>
-      <axis2>
         <xyz>0 0 1</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis2>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
     </joint>
-
-    <link name="segment_8">
-      <pose>0.319689 0.000000 -0.141222 0 0.305203 0.000000</pose>
+    <link name="segment_7">
+      <pose relative_to="joint_7_z">0 0 0 0 0 0</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -288,7 +391,7 @@
       </visual>
       <collision name="collision">
         <pose>0.025 0 0 0 1.5708 0</pose>
-        <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
+        <geometry><cylinder><radius>0.002</radius><length>0.045000000000000005</length></cylinder></geometry>
       </collision>
       <inertial>
         <pose>0.025 0 0 0 0 0</pose>
@@ -299,25 +402,43 @@
         </inertia>
       </inertial>
     </link>
-    
-    <joint name="joint_8" type="universal">
+
+    <joint name="joint_8_y" type="revolute">
+      <pose relative_to="segment_7">0.05 0 0 0 0 0</pose>
       <parent>segment_7</parent>
+      <child>dummy_8</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="dummy_8">
+      <pose relative_to="joint_8_y">0 0 0 0 0 0</pose>
+      <inertial><mass>0.001</mass><inertia><ixx>1e-7</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1e-7</iyy><iyz>0</iyz><izz>1e-7</izz></inertia></inertial>
+    </link>
+    <joint name="joint_8_z" type="revolute">
+      <pose relative_to="dummy_8">0 0 0 0 0 0</pose>
+      <parent>dummy_8</parent>
       <child>segment_8</child>
-      <pose>0 0 0 0 0 0</pose>
       <axis>
-        <xyz>0 1 0</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis>
-      <axis2>
         <xyz>0 0 1</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis2>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
     </joint>
-
-    <link name="segment_9">
-      <pose>0.367378 0.000000 -0.156247 0 0.276282 -0.000000</pose>
+    <link name="segment_8">
+      <pose relative_to="joint_8_z">0 0 0 0 0 0</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -325,7 +446,7 @@
       </visual>
       <collision name="collision">
         <pose>0.025 0 0 0 1.5708 0</pose>
-        <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
+        <geometry><cylinder><radius>0.002</radius><length>0.045000000000000005</length></cylinder></geometry>
       </collision>
       <inertial>
         <pose>0.025 0 0 0 0 0</pose>
@@ -336,25 +457,43 @@
         </inertia>
       </inertial>
     </link>
-    
-    <joint name="joint_9" type="universal">
+
+    <joint name="joint_9_y" type="revolute">
+      <pose relative_to="segment_8">0.05 0 0 0 0 0</pose>
       <parent>segment_8</parent>
+      <child>dummy_9</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="dummy_9">
+      <pose relative_to="joint_9_y">0 0 0 0 0 0</pose>
+      <inertial><mass>0.001</mass><inertia><ixx>1e-7</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1e-7</iyy><iyz>0</iyz><izz>1e-7</izz></inertia></inertial>
+    </link>
+    <joint name="joint_9_z" type="revolute">
+      <pose relative_to="dummy_9">0 0 0 0 0 0</pose>
+      <parent>dummy_9</parent>
       <child>segment_9</child>
-      <pose>0 0 0 0 0 0</pose>
       <axis>
-        <xyz>0 1 0</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis>
-      <axis2>
         <xyz>0 0 1</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis2>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
     </joint>
-
-    <link name="segment_10">
-      <pose>0.415482 0.000000 -0.169886 0 0.247177 0.000000</pose>
+    <link name="segment_9">
+      <pose relative_to="joint_9_z">0 0 0 0 0 0</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -362,7 +501,7 @@
       </visual>
       <collision name="collision">
         <pose>0.025 0 0 0 1.5708 0</pose>
-        <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
+        <geometry><cylinder><radius>0.002</radius><length>0.045000000000000005</length></cylinder></geometry>
       </collision>
       <inertial>
         <pose>0.025 0 0 0 0 0</pose>
@@ -373,25 +512,43 @@
         </inertia>
       </inertial>
     </link>
-    
-    <joint name="joint_10" type="universal">
+
+    <joint name="joint_10_y" type="revolute">
+      <pose relative_to="segment_9">0.05 0 0 0 0 0</pose>
       <parent>segment_9</parent>
+      <child>dummy_10</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="dummy_10">
+      <pose relative_to="joint_10_y">0 0 0 0 0 0</pose>
+      <inertial><mass>0.001</mass><inertia><ixx>1e-7</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1e-7</iyy><iyz>0</iyz><izz>1e-7</izz></inertia></inertial>
+    </link>
+    <joint name="joint_10_z" type="revolute">
+      <pose relative_to="dummy_10">0 0 0 0 0 0</pose>
+      <parent>dummy_10</parent>
       <child>segment_10</child>
-      <pose>0 0 0 0 0 0</pose>
       <axis>
-        <xyz>0 1 0</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis>
-      <axis2>
         <xyz>0 0 1</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis2>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
     </joint>
-
-    <link name="segment_11">
-      <pose>0.463962 0.000000 -0.182119 0 0.217884 0.000000</pose>
+    <link name="segment_10">
+      <pose relative_to="joint_10_z">0 0 0 0 0 0</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -399,7 +556,7 @@
       </visual>
       <collision name="collision">
         <pose>0.025 0 0 0 1.5708 0</pose>
-        <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
+        <geometry><cylinder><radius>0.002</radius><length>0.045000000000000005</length></cylinder></geometry>
       </collision>
       <inertial>
         <pose>0.025 0 0 0 0 0</pose>
@@ -410,25 +567,43 @@
         </inertia>
       </inertial>
     </link>
-    
-    <joint name="joint_11" type="universal">
+
+    <joint name="joint_11_y" type="revolute">
+      <pose relative_to="segment_10">0.05 0 0 0 0 0</pose>
       <parent>segment_10</parent>
+      <child>dummy_11</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="dummy_11">
+      <pose relative_to="joint_11_y">0 0 0 0 0 0</pose>
+      <inertial><mass>0.001</mass><inertia><ixx>1e-7</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1e-7</iyy><iyz>0</iyz><izz>1e-7</izz></inertia></inertial>
+    </link>
+    <joint name="joint_11_z" type="revolute">
+      <pose relative_to="dummy_11">0 0 0 0 0 0</pose>
+      <parent>dummy_11</parent>
       <child>segment_11</child>
-      <pose>0 0 0 0 0 0</pose>
       <axis>
-        <xyz>0 1 0</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis>
-      <axis2>
         <xyz>0 0 1</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis2>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
     </joint>
-
-    <link name="segment_12">
-      <pose>0.512780 0.000000 -0.192927 0 0.188585 0.000000</pose>
+    <link name="segment_11">
+      <pose relative_to="joint_11_z">0 0 0 0 0 0</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -436,7 +611,7 @@
       </visual>
       <collision name="collision">
         <pose>0.025 0 0 0 1.5708 0</pose>
-        <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
+        <geometry><cylinder><radius>0.002</radius><length>0.045000000000000005</length></cylinder></geometry>
       </collision>
       <inertial>
         <pose>0.025 0 0 0 0 0</pose>
@@ -447,25 +622,43 @@
         </inertia>
       </inertial>
     </link>
-    
-    <joint name="joint_12" type="universal">
+
+    <joint name="joint_12_y" type="revolute">
+      <pose relative_to="segment_11">0.05 0 0 0 0 0</pose>
       <parent>segment_11</parent>
+      <child>dummy_12</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="dummy_12">
+      <pose relative_to="joint_12_y">0 0 0 0 0 0</pose>
+      <inertial><mass>0.001</mass><inertia><ixx>1e-7</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1e-7</iyy><iyz>0</iyz><izz>1e-7</izz></inertia></inertial>
+    </link>
+    <joint name="joint_12_z" type="revolute">
+      <pose relative_to="dummy_12">0 0 0 0 0 0</pose>
+      <parent>dummy_12</parent>
       <child>segment_12</child>
-      <pose>0 0 0 0 0 0</pose>
       <axis>
-        <xyz>0 1 0</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis>
-      <axis2>
         <xyz>0 0 1</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis2>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
     </joint>
-
-    <link name="segment_13">
-      <pose>0.561894 0.000000 -0.202301 0 0.159370 -0.000000</pose>
+    <link name="segment_12">
+      <pose relative_to="joint_12_z">0 0 0 0 0 0</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -473,7 +666,7 @@
       </visual>
       <collision name="collision">
         <pose>0.025 0 0 0 1.5708 0</pose>
-        <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
+        <geometry><cylinder><radius>0.002</radius><length>0.045000000000000005</length></cylinder></geometry>
       </collision>
       <inertial>
         <pose>0.025 0 0 0 0 0</pose>
@@ -484,25 +677,43 @@
         </inertia>
       </inertial>
     </link>
-    
-    <joint name="joint_13" type="universal">
+
+    <joint name="joint_13_y" type="revolute">
+      <pose relative_to="segment_12">0.05 0 0 0 0 0</pose>
       <parent>segment_12</parent>
+      <child>dummy_13</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="dummy_13">
+      <pose relative_to="joint_13_y">0 0 0 0 0 0</pose>
+      <inertial><mass>0.001</mass><inertia><ixx>1e-7</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1e-7</iyy><iyz>0</iyz><izz>1e-7</izz></inertia></inertial>
+    </link>
+    <joint name="joint_13_z" type="revolute">
+      <pose relative_to="dummy_13">0 0 0 0 0 0</pose>
+      <parent>dummy_13</parent>
       <child>segment_13</child>
-      <pose>0 0 0 0 0 0</pose>
       <axis>
-        <xyz>0 1 0</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis>
-      <axis2>
         <xyz>0 0 1</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis2>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
     </joint>
-
-    <link name="segment_14">
-      <pose>0.611260 0.000000 -0.210236 0 0.130243 0.000000</pose>
+    <link name="segment_13">
+      <pose relative_to="joint_13_z">0 0 0 0 0 0</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -510,7 +721,7 @@
       </visual>
       <collision name="collision">
         <pose>0.025 0 0 0 1.5708 0</pose>
-        <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
+        <geometry><cylinder><radius>0.002</radius><length>0.045000000000000005</length></cylinder></geometry>
       </collision>
       <inertial>
         <pose>0.025 0 0 0 0 0</pose>
@@ -521,25 +732,43 @@
         </inertia>
       </inertial>
     </link>
-    
-    <joint name="joint_14" type="universal">
+
+    <joint name="joint_14_y" type="revolute">
+      <pose relative_to="segment_13">0.05 0 0 0 0 0</pose>
       <parent>segment_13</parent>
+      <child>dummy_14</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="dummy_14">
+      <pose relative_to="joint_14_y">0 0 0 0 0 0</pose>
+      <inertial><mass>0.001</mass><inertia><ixx>1e-7</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1e-7</iyy><iyz>0</iyz><izz>1e-7</izz></inertia></inertial>
+    </link>
+    <joint name="joint_14_z" type="revolute">
+      <pose relative_to="dummy_14">0 0 0 0 0 0</pose>
+      <parent>dummy_14</parent>
       <child>segment_14</child>
-      <pose>0 0 0 0 0 0</pose>
       <axis>
-        <xyz>0 1 0</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis>
-      <axis2>
         <xyz>0 0 1</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis2>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
     </joint>
-
-    <link name="segment_15">
-      <pose>0.660837 0.000000 -0.216729 0 0.101425 0.000000</pose>
+    <link name="segment_14">
+      <pose relative_to="joint_14_z">0 0 0 0 0 0</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -547,7 +776,7 @@
       </visual>
       <collision name="collision">
         <pose>0.025 0 0 0 1.5708 0</pose>
-        <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
+        <geometry><cylinder><radius>0.002</radius><length>0.045000000000000005</length></cylinder></geometry>
       </collision>
       <inertial>
         <pose>0.025 0 0 0 0 0</pose>
@@ -558,25 +787,43 @@
         </inertia>
       </inertial>
     </link>
-    
-    <joint name="joint_15" type="universal">
+
+    <joint name="joint_15_y" type="revolute">
+      <pose relative_to="segment_14">0.05 0 0 0 0 0</pose>
       <parent>segment_14</parent>
+      <child>dummy_15</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="dummy_15">
+      <pose relative_to="joint_15_y">0 0 0 0 0 0</pose>
+      <inertial><mass>0.001</mass><inertia><ixx>1e-7</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1e-7</iyy><iyz>0</iyz><izz>1e-7</izz></inertia></inertial>
+    </link>
+    <joint name="joint_15_z" type="revolute">
+      <pose relative_to="dummy_15">0 0 0 0 0 0</pose>
+      <parent>dummy_15</parent>
       <child>segment_15</child>
-      <pose>0 0 0 0 0 0</pose>
       <axis>
-        <xyz>0 1 0</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis>
-      <axis2>
         <xyz>0 0 1</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis2>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
     </joint>
-
-    <link name="segment_16">
-      <pose>0.710580 0.000000 -0.221792 0 0.072829 0.000000</pose>
+    <link name="segment_15">
+      <pose relative_to="joint_15_z">0 0 0 0 0 0</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -584,7 +831,7 @@
       </visual>
       <collision name="collision">
         <pose>0.025 0 0 0 1.5708 0</pose>
-        <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
+        <geometry><cylinder><radius>0.002</radius><length>0.045000000000000005</length></cylinder></geometry>
       </collision>
       <inertial>
         <pose>0.025 0 0 0 0 0</pose>
@@ -595,25 +842,43 @@
         </inertia>
       </inertial>
     </link>
-    
-    <joint name="joint_16" type="universal">
+
+    <joint name="joint_16_y" type="revolute">
+      <pose relative_to="segment_15">0.05 0 0 0 0 0</pose>
       <parent>segment_15</parent>
+      <child>dummy_16</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="dummy_16">
+      <pose relative_to="joint_16_y">0 0 0 0 0 0</pose>
+      <inertial><mass>0.001</mass><inertia><ixx>1e-7</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1e-7</iyy><iyz>0</iyz><izz>1e-7</izz></inertia></inertial>
+    </link>
+    <joint name="joint_16_z" type="revolute">
+      <pose relative_to="dummy_16">0 0 0 0 0 0</pose>
+      <parent>dummy_16</parent>
       <child>segment_16</child>
-      <pose>0 0 0 0 0 0</pose>
       <axis>
-        <xyz>0 1 0</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis>
-      <axis2>
         <xyz>0 0 1</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis2>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
     </joint>
-
-    <link name="segment_17">
-      <pose>0.760447 0.000000 -0.225430 0 0.044711 -0.000000</pose>
+    <link name="segment_16">
+      <pose relative_to="joint_16_z">0 0 0 0 0 0</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -621,7 +886,7 @@
       </visual>
       <collision name="collision">
         <pose>0.025 0 0 0 1.5708 0</pose>
-        <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
+        <geometry><cylinder><radius>0.002</radius><length>0.045000000000000005</length></cylinder></geometry>
       </collision>
       <inertial>
         <pose>0.025 0 0 0 0 0</pose>
@@ -632,25 +897,43 @@
         </inertia>
       </inertial>
     </link>
-    
-    <joint name="joint_17" type="universal">
+
+    <joint name="joint_17_y" type="revolute">
+      <pose relative_to="segment_16">0.05 0 0 0 0 0</pose>
       <parent>segment_16</parent>
+      <child>dummy_17</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="dummy_17">
+      <pose relative_to="joint_17_y">0 0 0 0 0 0</pose>
+      <inertial><mass>0.001</mass><inertia><ixx>1e-7</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1e-7</iyy><iyz>0</iyz><izz>1e-7</izz></inertia></inertial>
+    </link>
+    <joint name="joint_17_z" type="revolute">
+      <pose relative_to="dummy_17">0 0 0 0 0 0</pose>
+      <parent>dummy_17</parent>
       <child>segment_17</child>
-      <pose>0 0 0 0 0 0</pose>
       <axis>
-        <xyz>0 1 0</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis>
-      <axis2>
         <xyz>0 0 1</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis2>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
     </joint>
-
-    <link name="segment_18">
-      <pose>0.810397 0.000000 -0.227665 0 0.017060 0.000000</pose>
+    <link name="segment_17">
+      <pose relative_to="joint_17_z">0 0 0 0 0 0</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -658,7 +941,7 @@
       </visual>
       <collision name="collision">
         <pose>0.025 0 0 0 1.5708 0</pose>
-        <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
+        <geometry><cylinder><radius>0.002</radius><length>0.045000000000000005</length></cylinder></geometry>
       </collision>
       <inertial>
         <pose>0.025 0 0 0 0 0</pose>
@@ -669,25 +952,43 @@
         </inertia>
       </inertial>
     </link>
-    
-    <joint name="joint_18" type="universal">
+
+    <joint name="joint_18_y" type="revolute">
+      <pose relative_to="segment_17">0.05 0 0 0 0 0</pose>
       <parent>segment_17</parent>
+      <child>dummy_18</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="dummy_18">
+      <pose relative_to="joint_18_y">0 0 0 0 0 0</pose>
+      <inertial><mass>0.001</mass><inertia><ixx>1e-7</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1e-7</iyy><iyz>0</iyz><izz>1e-7</izz></inertia></inertial>
+    </link>
+    <joint name="joint_18_z" type="revolute">
+      <pose relative_to="dummy_18">0 0 0 0 0 0</pose>
+      <parent>dummy_18</parent>
       <child>segment_18</child>
-      <pose>0 0 0 0 0 0</pose>
       <axis>
-        <xyz>0 1 0</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis>
-      <axis2>
         <xyz>0 0 1</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis2>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
     </joint>
-
-    <link name="segment_19">
-      <pose>0.860390 0.000000 -0.228518 0 -0.010095 0.000000</pose>
+    <link name="segment_18">
+      <pose relative_to="joint_18_z">0 0 0 0 0 0</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -695,7 +996,7 @@
       </visual>
       <collision name="collision">
         <pose>0.025 0 0 0 1.5708 0</pose>
-        <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
+        <geometry><cylinder><radius>0.002</radius><length>0.045000000000000005</length></cylinder></geometry>
       </collision>
       <inertial>
         <pose>0.025 0 0 0 0 0</pose>
@@ -706,25 +1007,43 @@
         </inertia>
       </inertial>
     </link>
-    
-    <joint name="joint_19" type="universal">
+
+    <joint name="joint_19_y" type="revolute">
+      <pose relative_to="segment_18">0.05 0 0 0 0 0</pose>
       <parent>segment_18</parent>
+      <child>dummy_19</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="dummy_19">
+      <pose relative_to="joint_19_y">0 0 0 0 0 0</pose>
+      <inertial><mass>0.001</mass><inertia><ixx>1e-7</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1e-7</iyy><iyz>0</iyz><izz>1e-7</izz></inertia></inertial>
+    </link>
+    <joint name="joint_19_z" type="revolute">
+      <pose relative_to="dummy_19">0 0 0 0 0 0</pose>
+      <parent>dummy_19</parent>
       <child>segment_19</child>
-      <pose>0 0 0 0 0 0</pose>
       <axis>
-        <xyz>0 1 0</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis>
-      <axis2>
         <xyz>0 0 1</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis2>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
     </joint>
-
-    <link name="segment_20">
-      <pose>0.910387 0.000000 -0.228013 0 -0.036570 0.000000</pose>
+    <link name="segment_19">
+      <pose relative_to="joint_19_z">0 0 0 0 0 0</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -732,7 +1051,7 @@
       </visual>
       <collision name="collision">
         <pose>0.025 0 0 0 1.5708 0</pose>
-        <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
+        <geometry><cylinder><radius>0.002</radius><length>0.045000000000000005</length></cylinder></geometry>
       </collision>
       <inertial>
         <pose>0.025 0 0 0 0 0</pose>
@@ -743,25 +1062,43 @@
         </inertia>
       </inertial>
     </link>
-    
-    <joint name="joint_20" type="universal">
+
+    <joint name="joint_20_y" type="revolute">
+      <pose relative_to="segment_19">0.05 0 0 0 0 0</pose>
       <parent>segment_19</parent>
+      <child>dummy_20</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="dummy_20">
+      <pose relative_to="joint_20_y">0 0 0 0 0 0</pose>
+      <inertial><mass>0.001</mass><inertia><ixx>1e-7</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1e-7</iyy><iyz>0</iyz><izz>1e-7</izz></inertia></inertial>
+    </link>
+    <joint name="joint_20_z" type="revolute">
+      <pose relative_to="dummy_20">0 0 0 0 0 0</pose>
+      <parent>dummy_20</parent>
       <child>segment_20</child>
-      <pose>0 0 0 0 0 0</pose>
       <axis>
-        <xyz>0 1 0</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis>
-      <axis2>
         <xyz>0 0 1</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis2>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
     </joint>
-
-    <link name="segment_21">
-      <pose>0.960354 0.000000 -0.226185 0 -0.062395 0.000000</pose>
+    <link name="segment_20">
+      <pose relative_to="joint_20_z">0 0 0 0 0 0</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -769,7 +1106,7 @@
       </visual>
       <collision name="collision">
         <pose>0.025 0 0 0 1.5708 0</pose>
-        <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
+        <geometry><cylinder><radius>0.002</radius><length>0.045000000000000005</length></cylinder></geometry>
       </collision>
       <inertial>
         <pose>0.025 0 0 0 0 0</pose>
@@ -780,25 +1117,43 @@
         </inertia>
       </inertial>
     </link>
-    
-    <joint name="joint_21" type="universal">
+
+    <joint name="joint_21_y" type="revolute">
+      <pose relative_to="segment_20">0.05 0 0 0 0 0</pose>
       <parent>segment_20</parent>
+      <child>dummy_21</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="dummy_21">
+      <pose relative_to="joint_21_y">0 0 0 0 0 0</pose>
+      <inertial><mass>0.001</mass><inertia><ixx>1e-7</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1e-7</iyy><iyz>0</iyz><izz>1e-7</izz></inertia></inertial>
+    </link>
+    <joint name="joint_21_z" type="revolute">
+      <pose relative_to="dummy_21">0 0 0 0 0 0</pose>
+      <parent>dummy_21</parent>
       <child>segment_21</child>
-      <pose>0 0 0 0 0 0</pose>
       <axis>
-        <xyz>0 1 0</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis>
-      <axis2>
         <xyz>0 0 1</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis2>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
     </joint>
-
-    <link name="segment_22">
-      <pose>1.010257 0.000000 -0.223067 0 -0.087563 0.000000</pose>
+    <link name="segment_21">
+      <pose relative_to="joint_21_z">0 0 0 0 0 0</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -806,7 +1161,7 @@
       </visual>
       <collision name="collision">
         <pose>0.025 0 0 0 1.5708 0</pose>
-        <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
+        <geometry><cylinder><radius>0.002</radius><length>0.045000000000000005</length></cylinder></geometry>
       </collision>
       <inertial>
         <pose>0.025 0 0 0 0 0</pose>
@@ -817,25 +1172,43 @@
         </inertia>
       </inertial>
     </link>
-    
-    <joint name="joint_22" type="universal">
+
+    <joint name="joint_22_y" type="revolute">
+      <pose relative_to="segment_21">0.05 0 0 0 0 0</pose>
       <parent>segment_21</parent>
+      <child>dummy_22</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="dummy_22">
+      <pose relative_to="joint_22_y">0 0 0 0 0 0</pose>
+      <inertial><mass>0.001</mass><inertia><ixx>1e-7</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1e-7</iyy><iyz>0</iyz><izz>1e-7</izz></inertia></inertial>
+    </link>
+    <joint name="joint_22_z" type="revolute">
+      <pose relative_to="dummy_22">0 0 0 0 0 0</pose>
+      <parent>dummy_22</parent>
       <child>segment_22</child>
-      <pose>0 0 0 0 0 0</pose>
       <axis>
-        <xyz>0 1 0</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis>
-      <axis2>
         <xyz>0 0 1</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis2>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
     </joint>
-
-    <link name="segment_23">
-      <pose>1.060065 0.000000 -0.218695 0 -0.111960 0.000000</pose>
+    <link name="segment_22">
+      <pose relative_to="joint_22_z">0 0 0 0 0 0</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -843,7 +1216,7 @@
       </visual>
       <collision name="collision">
         <pose>0.025 0 0 0 1.5708 0</pose>
-        <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
+        <geometry><cylinder><radius>0.002</radius><length>0.045000000000000005</length></cylinder></geometry>
       </collision>
       <inertial>
         <pose>0.025 0 0 0 0 0</pose>
@@ -854,25 +1227,43 @@
         </inertia>
       </inertial>
     </link>
-    
-    <joint name="joint_23" type="universal">
+
+    <joint name="joint_23_y" type="revolute">
+      <pose relative_to="segment_22">0.05 0 0 0 0 0</pose>
       <parent>segment_22</parent>
+      <child>dummy_23</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="dummy_23">
+      <pose relative_to="joint_23_y">0 0 0 0 0 0</pose>
+      <inertial><mass>0.001</mass><inertia><ixx>1e-7</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1e-7</iyy><iyz>0</iyz><izz>1e-7</izz></inertia></inertial>
+    </link>
+    <joint name="joint_23_z" type="revolute">
+      <pose relative_to="dummy_23">0 0 0 0 0 0</pose>
+      <parent>dummy_23</parent>
       <child>segment_23</child>
-      <pose>0 0 0 0 0 0</pose>
       <axis>
-        <xyz>0 1 0</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis>
-      <axis2>
         <xyz>0 0 1</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis2>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
     </joint>
-
-    <link name="segment_24">
-      <pose>1.109752 0.000000 -0.213109 0 -0.135595 0.000000</pose>
+    <link name="segment_23">
+      <pose relative_to="joint_23_z">0 0 0 0 0 0</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -880,7 +1271,7 @@
       </visual>
       <collision name="collision">
         <pose>0.025 0 0 0 1.5708 0</pose>
-        <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
+        <geometry><cylinder><radius>0.002</radius><length>0.045000000000000005</length></cylinder></geometry>
       </collision>
       <inertial>
         <pose>0.025 0 0 0 0 0</pose>
@@ -891,25 +1282,43 @@
         </inertia>
       </inertial>
     </link>
-    
-    <joint name="joint_24" type="universal">
+
+    <joint name="joint_24_y" type="revolute">
+      <pose relative_to="segment_23">0.05 0 0 0 0 0</pose>
       <parent>segment_23</parent>
+      <child>dummy_24</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="dummy_24">
+      <pose relative_to="joint_24_y">0 0 0 0 0 0</pose>
+      <inertial><mass>0.001</mass><inertia><ixx>1e-7</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1e-7</iyy><iyz>0</iyz><izz>1e-7</izz></inertia></inertial>
+    </link>
+    <joint name="joint_24_z" type="revolute">
+      <pose relative_to="dummy_24">0 0 0 0 0 0</pose>
+      <parent>dummy_24</parent>
       <child>segment_24</child>
-      <pose>0 0 0 0 0 0</pose>
       <axis>
-        <xyz>0 1 0</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis>
-      <axis2>
         <xyz>0 0 1</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis2>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
     </joint>
-
-    <link name="segment_25">
-      <pose>1.159293 0.000000 -0.206350 0 -0.158447 0.000000</pose>
+    <link name="segment_24">
+      <pose relative_to="joint_24_z">0 0 0 0 0 0</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -917,7 +1326,7 @@
       </visual>
       <collision name="collision">
         <pose>0.025 0 0 0 1.5708 0</pose>
-        <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
+        <geometry><cylinder><radius>0.002</radius><length>0.045000000000000005</length></cylinder></geometry>
       </collision>
       <inertial>
         <pose>0.025 0 0 0 0 0</pose>
@@ -928,25 +1337,43 @@
         </inertia>
       </inertial>
     </link>
-    
-    <joint name="joint_25" type="universal">
+
+    <joint name="joint_25_y" type="revolute">
+      <pose relative_to="segment_24">0.05 0 0 0 0 0</pose>
       <parent>segment_24</parent>
+      <child>dummy_25</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="dummy_25">
+      <pose relative_to="joint_25_y">0 0 0 0 0 0</pose>
+      <inertial><mass>0.001</mass><inertia><ixx>1e-7</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1e-7</iyy><iyz>0</iyz><izz>1e-7</izz></inertia></inertial>
+    </link>
+    <joint name="joint_25_z" type="revolute">
+      <pose relative_to="dummy_25">0 0 0 0 0 0</pose>
+      <parent>dummy_25</parent>
       <child>segment_25</child>
-      <pose>0 0 0 0 0 0</pose>
       <axis>
-        <xyz>0 1 0</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis>
-      <axis2>
         <xyz>0 0 1</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis2>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
     </joint>
-
-    <link name="segment_26">
-      <pose>1.208667 0.000000 -0.198460 0 -0.180503 0.000000</pose>
+    <link name="segment_25">
+      <pose relative_to="joint_25_z">0 0 0 0 0 0</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -954,7 +1381,7 @@
       </visual>
       <collision name="collision">
         <pose>0.025 0 0 0 1.5708 0</pose>
-        <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
+        <geometry><cylinder><radius>0.002</radius><length>0.045000000000000005</length></cylinder></geometry>
       </collision>
       <inertial>
         <pose>0.025 0 0 0 0 0</pose>
@@ -965,25 +1392,43 @@
         </inertia>
       </inertial>
     </link>
-    
-    <joint name="joint_26" type="universal">
+
+    <joint name="joint_26_y" type="revolute">
+      <pose relative_to="segment_25">0.05 0 0 0 0 0</pose>
       <parent>segment_25</parent>
+      <child>dummy_26</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="dummy_26">
+      <pose relative_to="joint_26_y">0 0 0 0 0 0</pose>
+      <inertial><mass>0.001</mass><inertia><ixx>1e-7</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1e-7</iyy><iyz>0</iyz><izz>1e-7</izz></inertia></inertial>
+    </link>
+    <joint name="joint_26_z" type="revolute">
+      <pose relative_to="dummy_26">0 0 0 0 0 0</pose>
+      <parent>dummy_26</parent>
       <child>segment_26</child>
-      <pose>0 0 0 0 0 0</pose>
       <axis>
-        <xyz>0 1 0</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis>
-      <axis2>
         <xyz>0 0 1</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis2>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
     </joint>
-
-    <link name="segment_27">
-      <pose>1.257854 0.000000 -0.189484 0 -0.201723 0.000000</pose>
+    <link name="segment_26">
+      <pose relative_to="joint_26_z">0 0 0 0 0 0</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -991,7 +1436,7 @@
       </visual>
       <collision name="collision">
         <pose>0.025 0 0 0 1.5708 0</pose>
-        <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
+        <geometry><cylinder><radius>0.002</radius><length>0.045000000000000005</length></cylinder></geometry>
       </collision>
       <inertial>
         <pose>0.025 0 0 0 0 0</pose>
@@ -1002,25 +1447,43 @@
         </inertia>
       </inertial>
     </link>
-    
-    <joint name="joint_27" type="universal">
+
+    <joint name="joint_27_y" type="revolute">
+      <pose relative_to="segment_26">0.05 0 0 0 0 0</pose>
       <parent>segment_26</parent>
+      <child>dummy_27</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="dummy_27">
+      <pose relative_to="joint_27_y">0 0 0 0 0 0</pose>
+      <inertial><mass>0.001</mass><inertia><ixx>1e-7</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1e-7</iyy><iyz>0</iyz><izz>1e-7</izz></inertia></inertial>
+    </link>
+    <joint name="joint_27_z" type="revolute">
+      <pose relative_to="dummy_27">0 0 0 0 0 0</pose>
+      <parent>dummy_27</parent>
       <child>segment_27</child>
-      <pose>0 0 0 0 0 0</pose>
       <axis>
-        <xyz>0 1 0</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis>
-      <axis2>
         <xyz>0 0 1</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis2>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
     </joint>
-
-    <link name="segment_28">
-      <pose>1.306840 0.000000 -0.179466 0 -0.222170 0.000000</pose>
+    <link name="segment_27">
+      <pose relative_to="joint_27_z">0 0 0 0 0 0</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -1028,7 +1491,7 @@
       </visual>
       <collision name="collision">
         <pose>0.025 0 0 0 1.5708 0</pose>
-        <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
+        <geometry><cylinder><radius>0.002</radius><length>0.045000000000000005</length></cylinder></geometry>
       </collision>
       <inertial>
         <pose>0.025 0 0 0 0 0</pose>
@@ -1039,25 +1502,43 @@
         </inertia>
       </inertial>
     </link>
-    
-    <joint name="joint_28" type="universal">
+
+    <joint name="joint_28_y" type="revolute">
+      <pose relative_to="segment_27">0.05 0 0 0 0 0</pose>
       <parent>segment_27</parent>
+      <child>dummy_28</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="dummy_28">
+      <pose relative_to="joint_28_y">0 0 0 0 0 0</pose>
+      <inertial><mass>0.001</mass><inertia><ixx>1e-7</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1e-7</iyy><iyz>0</iyz><izz>1e-7</izz></inertia></inertial>
+    </link>
+    <joint name="joint_28_z" type="revolute">
+      <pose relative_to="dummy_28">0 0 0 0 0 0</pose>
+      <parent>dummy_28</parent>
       <child>segment_28</child>
-      <pose>0 0 0 0 0 0</pose>
       <axis>
-        <xyz>0 1 0</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis>
-      <axis2>
         <xyz>0 0 1</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis2>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
     </joint>
-
-    <link name="segment_29">
-      <pose>1.355612 0.000000 -0.168449 0 -0.241784 0.000000</pose>
+    <link name="segment_28">
+      <pose relative_to="joint_28_z">0 0 0 0 0 0</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -1065,7 +1546,7 @@
       </visual>
       <collision name="collision">
         <pose>0.025 0 0 0 1.5708 0</pose>
-        <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
+        <geometry><cylinder><radius>0.002</radius><length>0.045000000000000005</length></cylinder></geometry>
       </collision>
       <inertial>
         <pose>0.025 0 0 0 0 0</pose>
@@ -1076,25 +1557,43 @@
         </inertia>
       </inertial>
     </link>
-    
-    <joint name="joint_29" type="universal">
+
+    <joint name="joint_29_y" type="revolute">
+      <pose relative_to="segment_28">0.05 0 0 0 0 0</pose>
       <parent>segment_28</parent>
+      <child>dummy_29</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="dummy_29">
+      <pose relative_to="joint_29_y">0 0 0 0 0 0</pose>
+      <inertial><mass>0.001</mass><inertia><ixx>1e-7</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1e-7</iyy><iyz>0</iyz><izz>1e-7</izz></inertia></inertial>
+    </link>
+    <joint name="joint_29_z" type="revolute">
+      <pose relative_to="dummy_29">0 0 0 0 0 0</pose>
+      <parent>dummy_29</parent>
       <child>segment_29</child>
-      <pose>0 0 0 0 0 0</pose>
       <axis>
-        <xyz>0 1 0</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis>
-      <axis2>
         <xyz>0 0 1</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis2>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
     </joint>
-
-    <link name="segment_30">
-      <pose>1.404157 0.000000 -0.156477 0 -0.260605 -0.000000</pose>
+    <link name="segment_29">
+      <pose relative_to="joint_29_z">0 0 0 0 0 0</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -1102,7 +1601,7 @@
       </visual>
       <collision name="collision">
         <pose>0.025 0 0 0 1.5708 0</pose>
-        <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
+        <geometry><cylinder><radius>0.002</radius><length>0.045000000000000005</length></cylinder></geometry>
       </collision>
       <inertial>
         <pose>0.025 0 0 0 0 0</pose>
@@ -1113,25 +1612,43 @@
         </inertia>
       </inertial>
     </link>
-    
-    <joint name="joint_30" type="universal">
+
+    <joint name="joint_30_y" type="revolute">
+      <pose relative_to="segment_29">0.05 0 0 0 0 0</pose>
       <parent>segment_29</parent>
+      <child>dummy_30</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="dummy_30">
+      <pose relative_to="joint_30_y">0 0 0 0 0 0</pose>
+      <inertial><mass>0.001</mass><inertia><ixx>1e-7</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1e-7</iyy><iyz>0</iyz><izz>1e-7</izz></inertia></inertial>
+    </link>
+    <joint name="joint_30_z" type="revolute">
+      <pose relative_to="dummy_30">0 0 0 0 0 0</pose>
+      <parent>dummy_30</parent>
       <child>segment_30</child>
-      <pose>0 0 0 0 0 0</pose>
       <axis>
-        <xyz>0 1 0</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis>
-      <axis2>
         <xyz>0 0 1</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis2>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
     </joint>
-
-    <link name="segment_31">
-      <pose>1.452469 0.000000 -0.143594 0 -0.260605 -0.000000</pose>
+    <link name="segment_30">
+      <pose relative_to="joint_30_z">0 0 0 0 0 0</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -1139,7 +1656,7 @@
       </visual>
       <collision name="collision">
         <pose>0.025 0 0 0 1.5708 0</pose>
-        <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
+        <geometry><cylinder><radius>0.002</radius><length>0.045000000000000005</length></cylinder></geometry>
       </collision>
       <inertial>
         <pose>0.025 0 0 0 0 0</pose>
@@ -1150,25 +1667,43 @@
         </inertia>
       </inertial>
     </link>
-    
-    <joint name="joint_31" type="universal">
+
+    <joint name="joint_31_y" type="revolute">
+      <pose relative_to="segment_30">0.05 0 0 0 0 0</pose>
       <parent>segment_30</parent>
+      <child>dummy_31</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="dummy_31">
+      <pose relative_to="joint_31_y">0 0 0 0 0 0</pose>
+      <inertial><mass>0.001</mass><inertia><ixx>1e-7</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1e-7</iyy><iyz>0</iyz><izz>1e-7</izz></inertia></inertial>
+    </link>
+    <joint name="joint_31_z" type="revolute">
+      <pose relative_to="dummy_31">0 0 0 0 0 0</pose>
+      <parent>dummy_31</parent>
       <child>segment_31</child>
-      <pose>0 0 0 0 0 0</pose>
       <axis>
-        <xyz>0 1 0</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis>
-      <axis2>
         <xyz>0 0 1</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis2>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
     </joint>
-
-    <link name="segment_32">
-      <pose>1.500781 -0.000000 -0.130711 0 -0.260605 -0.000000</pose>
+    <link name="segment_31">
+      <pose relative_to="joint_31_z">0 0 0 0 0 0</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -1176,7 +1711,7 @@
       </visual>
       <collision name="collision">
         <pose>0.025 0 0 0 1.5708 0</pose>
-        <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
+        <geometry><cylinder><radius>0.002</radius><length>0.045000000000000005</length></cylinder></geometry>
       </collision>
       <inertial>
         <pose>0.025 0 0 0 0 0</pose>
@@ -1187,25 +1722,43 @@
         </inertia>
       </inertial>
     </link>
-    
-    <joint name="joint_32" type="universal">
+
+    <joint name="joint_32_y" type="revolute">
+      <pose relative_to="segment_31">0.05 0 0 0 0 0</pose>
       <parent>segment_31</parent>
+      <child>dummy_32</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="dummy_32">
+      <pose relative_to="joint_32_y">0 0 0 0 0 0</pose>
+      <inertial><mass>0.001</mass><inertia><ixx>1e-7</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1e-7</iyy><iyz>0</iyz><izz>1e-7</izz></inertia></inertial>
+    </link>
+    <joint name="joint_32_z" type="revolute">
+      <pose relative_to="dummy_32">0 0 0 0 0 0</pose>
+      <parent>dummy_32</parent>
       <child>segment_32</child>
-      <pose>0 0 0 0 0 0</pose>
       <axis>
-        <xyz>0 1 0</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis>
-      <axis2>
         <xyz>0 0 1</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis2>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
     </joint>
-
-    <link name="segment_33">
-      <pose>1.549092 -0.000000 -0.117827 0 -0.260605 -0.000000</pose>
+    <link name="segment_32">
+      <pose relative_to="joint_32_z">0 0 0 0 0 0</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -1213,7 +1766,7 @@
       </visual>
       <collision name="collision">
         <pose>0.025 0 0 0 1.5708 0</pose>
-        <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
+        <geometry><cylinder><radius>0.002</radius><length>0.045000000000000005</length></cylinder></geometry>
       </collision>
       <inertial>
         <pose>0.025 0 0 0 0 0</pose>
@@ -1224,25 +1777,43 @@
         </inertia>
       </inertial>
     </link>
-    
-    <joint name="joint_33" type="universal">
+
+    <joint name="joint_33_y" type="revolute">
+      <pose relative_to="segment_32">0.05 0 0 0 0 0</pose>
       <parent>segment_32</parent>
+      <child>dummy_33</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="dummy_33">
+      <pose relative_to="joint_33_y">0 0 0 0 0 0</pose>
+      <inertial><mass>0.001</mass><inertia><ixx>1e-7</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1e-7</iyy><iyz>0</iyz><izz>1e-7</izz></inertia></inertial>
+    </link>
+    <joint name="joint_33_z" type="revolute">
+      <pose relative_to="dummy_33">0 0 0 0 0 0</pose>
+      <parent>dummy_33</parent>
       <child>segment_33</child>
-      <pose>0 0 0 0 0 0</pose>
       <axis>
-        <xyz>0 1 0</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis>
-      <axis2>
         <xyz>0 0 1</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis2>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
     </joint>
-
-    <link name="segment_34">
-      <pose>1.597404 -0.000000 -0.104944 0 -0.260605 -0.000000</pose>
+    <link name="segment_33">
+      <pose relative_to="joint_33_z">0 0 0 0 0 0</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -1250,7 +1821,7 @@
       </visual>
       <collision name="collision">
         <pose>0.025 0 0 0 1.5708 0</pose>
-        <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
+        <geometry><cylinder><radius>0.002</radius><length>0.045000000000000005</length></cylinder></geometry>
       </collision>
       <inertial>
         <pose>0.025 0 0 0 0 0</pose>
@@ -1261,25 +1832,43 @@
         </inertia>
       </inertial>
     </link>
-    
-    <joint name="joint_34" type="universal">
+
+    <joint name="joint_34_y" type="revolute">
+      <pose relative_to="segment_33">0.05 0 0 0 0 0</pose>
       <parent>segment_33</parent>
+      <child>dummy_34</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="dummy_34">
+      <pose relative_to="joint_34_y">0 0 0 0 0 0</pose>
+      <inertial><mass>0.001</mass><inertia><ixx>1e-7</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1e-7</iyy><iyz>0</iyz><izz>1e-7</izz></inertia></inertial>
+    </link>
+    <joint name="joint_34_z" type="revolute">
+      <pose relative_to="dummy_34">0 0 0 0 0 0</pose>
+      <parent>dummy_34</parent>
       <child>segment_34</child>
-      <pose>0 0 0 0 0 0</pose>
       <axis>
-        <xyz>0 1 0</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis>
-      <axis2>
         <xyz>0 0 1</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis2>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
     </joint>
-
-    <link name="segment_35">
-      <pose>1.645716 -0.000000 -0.092061 0 -0.260605 -0.000000</pose>
+    <link name="segment_34">
+      <pose relative_to="joint_34_z">0 0 0 0 0 0</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -1287,7 +1876,7 @@
       </visual>
       <collision name="collision">
         <pose>0.025 0 0 0 1.5708 0</pose>
-        <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
+        <geometry><cylinder><radius>0.002</radius><length>0.045000000000000005</length></cylinder></geometry>
       </collision>
       <inertial>
         <pose>0.025 0 0 0 0 0</pose>
@@ -1298,25 +1887,43 @@
         </inertia>
       </inertial>
     </link>
-    
-    <joint name="joint_35" type="universal">
+
+    <joint name="joint_35_y" type="revolute">
+      <pose relative_to="segment_34">0.05 0 0 0 0 0</pose>
       <parent>segment_34</parent>
+      <child>dummy_35</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="dummy_35">
+      <pose relative_to="joint_35_y">0 0 0 0 0 0</pose>
+      <inertial><mass>0.001</mass><inertia><ixx>1e-7</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1e-7</iyy><iyz>0</iyz><izz>1e-7</izz></inertia></inertial>
+    </link>
+    <joint name="joint_35_z" type="revolute">
+      <pose relative_to="dummy_35">0 0 0 0 0 0</pose>
+      <parent>dummy_35</parent>
       <child>segment_35</child>
-      <pose>0 0 0 0 0 0</pose>
       <axis>
-        <xyz>0 1 0</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis>
-      <axis2>
         <xyz>0 0 1</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis2>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
     </joint>
-
-    <link name="segment_36">
-      <pose>1.694027 -0.000000 -0.079177 0 -0.260605 -0.000000</pose>
+    <link name="segment_35">
+      <pose relative_to="joint_35_z">0 0 0 0 0 0</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -1324,7 +1931,7 @@
       </visual>
       <collision name="collision">
         <pose>0.025 0 0 0 1.5708 0</pose>
-        <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
+        <geometry><cylinder><radius>0.002</radius><length>0.045000000000000005</length></cylinder></geometry>
       </collision>
       <inertial>
         <pose>0.025 0 0 0 0 0</pose>
@@ -1335,25 +1942,43 @@
         </inertia>
       </inertial>
     </link>
-    
-    <joint name="joint_36" type="universal">
+
+    <joint name="joint_36_y" type="revolute">
+      <pose relative_to="segment_35">0.05 0 0 0 0 0</pose>
       <parent>segment_35</parent>
+      <child>dummy_36</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="dummy_36">
+      <pose relative_to="joint_36_y">0 0 0 0 0 0</pose>
+      <inertial><mass>0.001</mass><inertia><ixx>1e-7</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1e-7</iyy><iyz>0</iyz><izz>1e-7</izz></inertia></inertial>
+    </link>
+    <joint name="joint_36_z" type="revolute">
+      <pose relative_to="dummy_36">0 0 0 0 0 0</pose>
+      <parent>dummy_36</parent>
       <child>segment_36</child>
-      <pose>0 0 0 0 0 0</pose>
       <axis>
-        <xyz>0 1 0</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis>
-      <axis2>
         <xyz>0 0 1</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis2>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
     </joint>
-
-    <link name="segment_37">
-      <pose>1.742339 -0.000000 -0.066294 0 -0.260605 -0.000000</pose>
+    <link name="segment_36">
+      <pose relative_to="joint_36_z">0 0 0 0 0 0</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -1361,7 +1986,7 @@
       </visual>
       <collision name="collision">
         <pose>0.025 0 0 0 1.5708 0</pose>
-        <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
+        <geometry><cylinder><radius>0.002</radius><length>0.045000000000000005</length></cylinder></geometry>
       </collision>
       <inertial>
         <pose>0.025 0 0 0 0 0</pose>
@@ -1372,25 +1997,43 @@
         </inertia>
       </inertial>
     </link>
-    
-    <joint name="joint_37" type="universal">
+
+    <joint name="joint_37_y" type="revolute">
+      <pose relative_to="segment_36">0.05 0 0 0 0 0</pose>
       <parent>segment_36</parent>
+      <child>dummy_37</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="dummy_37">
+      <pose relative_to="joint_37_y">0 0 0 0 0 0</pose>
+      <inertial><mass>0.001</mass><inertia><ixx>1e-7</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1e-7</iyy><iyz>0</iyz><izz>1e-7</izz></inertia></inertial>
+    </link>
+    <joint name="joint_37_z" type="revolute">
+      <pose relative_to="dummy_37">0 0 0 0 0 0</pose>
+      <parent>dummy_37</parent>
       <child>segment_37</child>
-      <pose>0 0 0 0 0 0</pose>
       <axis>
-        <xyz>0 1 0</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis>
-      <axis2>
         <xyz>0 0 1</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis2>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
     </joint>
-
-    <link name="segment_38">
-      <pose>1.790651 -0.000000 -0.053411 0 -0.260605 -0.000000</pose>
+    <link name="segment_37">
+      <pose relative_to="joint_37_z">0 0 0 0 0 0</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -1398,7 +2041,7 @@
       </visual>
       <collision name="collision">
         <pose>0.025 0 0 0 1.5708 0</pose>
-        <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
+        <geometry><cylinder><radius>0.002</radius><length>0.045000000000000005</length></cylinder></geometry>
       </collision>
       <inertial>
         <pose>0.025 0 0 0 0 0</pose>
@@ -1409,25 +2052,43 @@
         </inertia>
       </inertial>
     </link>
-    
-    <joint name="joint_38" type="universal">
+
+    <joint name="joint_38_y" type="revolute">
+      <pose relative_to="segment_37">0.05 0 0 0 0 0</pose>
       <parent>segment_37</parent>
-      <child>segment_38</child>
-      <pose>0 0 0 0 0 0</pose>
+      <child>dummy_38</child>
       <axis>
         <xyz>0 1 0</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
       </axis>
-      <axis2>
-        <xyz>0 0 1</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis2>
     </joint>
-
-    <link name="segment_39">
-      <pose>1.838963 -0.000000 -0.040528 0 -0.260605 -0.000000</pose>
+    <link name="dummy_38">
+      <pose relative_to="joint_38_y">0 0 0 0 0 0</pose>
+      <inertial><mass>0.001</mass><inertia><ixx>1e-7</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1e-7</iyy><iyz>0</iyz><izz>1e-7</izz></inertia></inertial>
+    </link>
+    <joint name="joint_38_z" type="revolute">
+      <pose relative_to="dummy_38">0 0 0 0 0 0</pose>
+      <parent>dummy_38</parent>
+      <child>segment_38</child>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="segment_38">
+      <pose relative_to="joint_38_z">0 0 0 0 0 0</pose>
       <visual name="visual">
         <pose>0.025 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
@@ -1435,7 +2096,7 @@
       </visual>
       <collision name="collision">
         <pose>0.025 0 0 0 1.5708 0</pose>
-        <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
+        <geometry><cylinder><radius>0.002</radius><length>0.045000000000000005</length></cylinder></geometry>
       </collision>
       <inertial>
         <pose>0.025 0 0 0 0 0</pose>
@@ -1446,69 +2107,139 @@
         </inertia>
       </inertial>
     </link>
-    
-    <joint name="joint_39" type="universal">
+
+    <joint name="joint_39_y" type="revolute">
+      <pose relative_to="segment_38">0.05 0 0 0 0 0</pose>
       <parent>segment_38</parent>
-      <child>segment_39</child>
-      <pose>0 0 0 0 0 0</pose>
+      <child>dummy_39</child>
       <axis>
         <xyz>0 1 0</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
       </axis>
-      <axis2>
-        <xyz>0 0 1</xyz>
-        <limit><lower>-2.0</lower><upper>2.0</upper></limit>
-        <dynamics><damping>0.002</damping><friction>0.0</friction></dynamics>
-      </axis2>
     </joint>
-
-    <link name="final_segment">
-      <pose>1.887274 -0.000000 -0.027644 0 -0.260605 -0.000000</pose>
+    <link name="dummy_39">
+      <pose relative_to="joint_39_y">0 0 0 0 0 0</pose>
+      <inertial><mass>0.001</mass><inertia><ixx>1e-7</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1e-7</iyy><iyz>0</iyz><izz>1e-7</izz></inertia></inertial>
+    </link>
+    <joint name="joint_39_z" type="revolute">
+      <pose relative_to="dummy_39">0 0 0 0 0 0</pose>
+      <parent>dummy_39</parent>
+      <child>segment_39</child>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="segment_39">
+      <pose relative_to="joint_39_z">0 0 0 0 0 0</pose>
       <visual name="visual">
-        <pose>0.025 0 0 0 0 0</pose>
-        <geometry><sphere><radius>0.012</radius></sphere></geometry>
-        <material><ambient>0.8 0.1 0.1 1</ambient><diffuse>0.8 0.1 0.1 1</diffuse></material>
+        <pose>0.025 0 0 0 1.5708 0</pose>
+        <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
+        <material><ambient>0 0 0 1</ambient><diffuse>0 0 0 1</diffuse></material>
       </visual>
       <collision name="collision">
-        <pose>0.025 0 0 0 0 0</pose>
-        <geometry><sphere><radius>0.012</radius></sphere></geometry>
+        <pose>0.025 0 0 0 1.5708 0</pose>
+        <geometry><cylinder><radius>0.002</radius><length>0.045000000000000005</length></cylinder></geometry>
       </collision>
       <inertial>
         <pose>0.025 0 0 0 0 0</pose>
         <mass>0.0005</mass>
         <inertia>
-          <ixx>2.8800000000000003e-08</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>2.8800000000000003e-08</iyy><iyz>0</iyz><izz>2.8800000000000003e-08</izz>
+          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>1.0466666666666668e-07</iyy><iyz>0</iyz><izz>1.0466666666666668e-07</izz>
         </inertia>
       </inertial>
     </link>
-    
-    <joint name="joint_40" type="ball">
+
+    <joint name="joint_40_y" type="revolute">
+      <pose relative_to="segment_39">0.05 0 0 0 0 0</pose>
       <parent>segment_39</parent>
-      <child>final_segment</child>
-      <pose>0 0 0 0 0 0</pose>
+      <child>dummy_40</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
         <sensor name="sensor_tensao_drone" type="force_torque">
           <always_on>true</always_on>
           <update_rate>50</update_rate>
           <topic>/cabo/tensao_drone</topic>
         </sensor>
     </joint>
-
-    <link name="ponta_cabo">
-      <pose>1.935586 -0.000000 -0.014761 0 0 0</pose>
+    <link name="dummy_40">
+      <pose relative_to="joint_40_y">0 0 0 0 0 0</pose>
+      <inertial><mass>0.001</mass><inertia><ixx>1e-7</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1e-7</iyy><iyz>0</iyz><izz>1e-7</izz></inertia></inertial>
+    </link>
+    <joint name="joint_40_z" type="revolute">
+      <pose relative_to="dummy_40">0 0 0 0 0 0</pose>
+      <parent>dummy_40</parent>
+      <child>final_segment</child>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit><lower>-0.7</lower><upper>0.7</upper><effort>5</effort><velocity>10</velocity></limit>
+        <dynamics>
+          <damping>0.08</damping>
+          <friction>0.002</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0.02</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="final_segment">
+      <pose relative_to="joint_40_z">0 0 0 0 0 0</pose>
+      <visual name="visual">
+        <pose>0.025 0 0 0 1.5708 0</pose>
+        <geometry><cylinder><radius>0.002</radius><length>0.05</length></cylinder></geometry>
+        <material><ambient>0 0 0 1</ambient><diffuse>0 0 0 1</diffuse></material>
+      </visual>
+      <collision name="collision">
+        <pose>0.025 0 0 0 1.5708 0</pose>
+        <geometry><cylinder><radius>0.002</radius><length>0.045000000000000005</length></cylinder></geometry>
+      </collision>
       <inertial>
-        <mass>0.001</mass>
+        <pose>0.025 0 0 0 0 0</pose>
+        <mass>0.0005</mass>
         <inertia>
-          <ixx>1e-6</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>1e-6</iyy><iyz>0</iyz><izz>1e-6</izz>
+          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>1.0466666666666668e-07</iyy><iyz>0</iyz><izz>1.0466666666666668e-07</izz>
         </inertia>
       </inertial>
     </link>
-    <joint name="joint_ponta" type="fixed">
+
+    <link name="ponta_cabo">
+      <pose relative_to="final_segment">0.05 0 0 0 0 0</pose>
+      <inertial>
+        <mass>0.001</mass>
+        <inertia>
+          <ixx>1e-7</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>1e-7</iyy><iyz>0</iyz><izz>1e-7</izz>
+        </inertia>
+      </inertial>
+      <visual name="visual">
+        <geometry><sphere><radius>0.008</radius></sphere></geometry>
+        <material><ambient>0.9 0.05 0.05 1</ambient><diffuse>0.9 0.05 0.05 1</diffuse></material>
+      </visual>
+    </link>
+    <joint name="joint_ponta_cabo" type="fixed">
       <parent>final_segment</parent>
       <child>ponta_cabo</child>
-      <pose>0 0 0 0 0 0</pose>
     </joint>
   </model>
 </sdf>

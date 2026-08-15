@@ -1,0 +1,18 @@
+{
+  "descricao": "Configuracao padrao para os testes de sanidade do sensor de angulo do cabo.",
+  "cabo_comprimento": 2.0,
+  "poste_altura": 1.2,
+  "ancora": [0.0, 0.0, 0.05],
+  "sensor_yaw_graus": 90.0,
+  "casos": {
+    "e": {"x": 1.6, "y": 0.0},
+    "ne": {"x": 1.1313708499, "y": 1.1313708499},
+    "n": {"x": 0.0, "y": 1.6},
+    "nw": {"x": -1.1313708499, "y": 1.1313708499},
+    "w": {"x": -1.6, "y": 0.0},
+    "sw": {"x": -1.1313708499, "y": -1.1313708499},
+    "s": {"x": 0.0, "y": -1.6},
+    "se": {"x": 1.1313708499, "y": -1.1313708499},
+    "c1": {"x": 1.1, "y": 1.1}
+  }
+}

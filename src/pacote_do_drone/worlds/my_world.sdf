@@ -1,7 +1,6 @@
 <?xml version="1.0" ?>
 <sdf version="1.8">
   <world name="mundo_ic">
-
     <gravity>0 0 -9.81</gravity>
 
     <physics name="1ms" type="ignored">
@@ -9,10 +8,10 @@
       <real_time_factor>1.0</real_time_factor>
     </physics>
 
-    <plugin filename="gz-sim-physics-system"           name="gz::sim::systems::Physics"/>
-    <plugin filename="gz-sim-user-commands-system"     name="gz::sim::systems::UserCommands"/>
+    <plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands"/>
     <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster"/>
-    <plugin filename="gz-sim-forcetorque-system"       name="gz::sim::systems::ForceTorque"/>
+    <plugin filename="gz-sim-forcetorque-system" name="gz::sim::systems::ForceTorque"/>
 
     <light type="directional" name="sun">
       <cast_shadows>true</cast_shadows>
@@ -23,45 +22,82 @@
     <model name="ground_plane">
       <static>true</static>
       <link name="link">
-        <collision name="collision">
-          <geometry><plane><normal>0 0 1</normal><size>100 100</size></plane></geometry>
-        </collision>
-        <visual name="visual">
-          <geometry><plane><normal>0 0 1</normal><size>100 100</size></plane></geometry>
-          <material><ambient>0.8 0.8 0.8 1</ambient><diffuse>0.8 0.8 0.8 1</diffuse></material>
+        <collision name="collision"><geometry><plane><normal>0 0 1</normal><size>100 100</size></plane></geometry></collision>
+        <visual name="visual"><geometry><plane><normal>0 0 1</normal><size>100 100</size></plane></geometry><material><ambient>0.8 0.8 0.8 1</ambient><diffuse>0.8 0.8 0.8 1</diffuse></material></visual>
+      </link>
+    </model>
+
+    <model name="meu_carretel">
+      <static>true</static>
+      <link name="visual_link">
+        <visual name="base_visual">
+          <pose>0 0 0.01 0 0 0</pose>
+          <geometry><box><size>0.4 0.7 0.02</size></box></geometry>
+          <material><ambient>0.3 0.3 0.3 1</ambient><diffuse>0.3 0.3 0.3 1</diffuse></material>
+        </visual>
+        <visual name="haste_esq_visual">
+          <pose>0 0.23 0.15 0 0 0</pose>
+          <geometry><box><size>0.06 0.06 0.30</size></box></geometry>
+          <material><ambient>0.2 0.2 0.8 1</ambient><diffuse>0.2 0.2 0.8 1</diffuse></material>
+        </visual>
+        <visual name="haste_dir_visual">
+          <pose>0 -0.23 0.15 0 0 0</pose>
+          <geometry><box><size>0.06 0.06 0.30</size></box></geometry>
+          <material><ambient>0.2 0.2 0.8 1</ambient><diffuse>0.2 0.2 0.8 1</diffuse></material>
+        </visual>
+        <visual name="cilindro_visual">
+          <pose>0 0 0.26 1.570796 0 0</pose>
+          <geometry><cylinder><radius>0.07</radius><length>0.40</length></cylinder></geometry>
+          <material><ambient>0.5 0.3 0.3 1</ambient><diffuse>0.5 0.3 0.3 1</diffuse></material>
         </visual>
       </link>
     </model>
 
-    <include>
-      <uri>file:///home/joseubu/IC/src/pacote_do_drone/models/carretel/carretel.sdf</uri>
-      <name>meu_carretel</name>
-      <pose>0 0 0 0 0 0</pose> 
-    </include>
-
-    <include>
-      <uri>file:///home/joseubu/IC/src/pacote_do_drone/models/cabo.sdf</uri>
-      <name>cabo_dinamico</name>
-      <pose>0.0 0.18 0.33 0 0 0</pose>
-      <static>false</static>
-    </include>
-
-    <joint name="ancora_carretel_cabo" type="ball">
-      <parent>meu_carretel::cilindro_carretel</parent>
-      <child>cabo_dinamico::raiz_cabo</child>
+    <model name="sistema_cabo_drone">
       <pose>0 0 0 0 0 0</pose>
-    </joint>
 
-    <include>
-      <uri>file:///home/joseubu/IC/src/pacote_do_drone/models/meu_drone/meu_drone.sdf</uri>
-      <name>meu_drone</name>
-      <pose>1.9355859746553368 0.17999999999999972 0.3152388922402048 0 0 0.0</pose>
-    </include>
+      <link name="ancora_cabo">
+        <pose>0.0 0.18 0.33 0 0 0</pose>
+        <inertial>
+          <mass>10</mass>
+          <inertia>
+            <ixx>1</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>1</iyy><iyz>0</iyz><izz>1</izz>
+          </inertia>
+        </inertial>
+        <visual name="visual">
+          <geometry><sphere><radius>0.015</radius></sphere></geometry>
+          <material><ambient>0.9 0.05 0.05 1</ambient><diffuse>0.9 0.05 0.05 1</diffuse></material>
+        </visual>
+      </link>
 
-    <joint name="cabo_drone_joint" type="ball">
-      <parent>cabo_dinamico::ponta_cabo</parent>
-      <child>meu_drone::base_link</child>
-    </joint>
+      <joint name="fixa_ancora_cabo_mundo" type="fixed">
+        <parent>world</parent>
+        <child>ancora_cabo</child>
+      </joint>
 
+      <include>
+        <uri>file:///home/lima/codes/ic/drone-cabo/src/pacote_do_drone/models/cabo.sdf</uri>
+        <name>cabo_dinamico</name>
+        <pose>0.0 0.18 0.33 0 0 0.0</pose>
+        <static>false</static>
+      </include>
+
+      <include>
+        <uri>file:///home/lima/codes/ic/drone-cabo/src/pacote_do_drone/models/meu_drone/meu_drone.sdf</uri>
+        <name>meu_drone</name>
+        <pose>2.0 0.18 0.33 0 0 0.0</pose>
+      </include>
+
+      <joint name="ancora_carretel_cabo" type="fixed">
+        <parent>ancora_cabo</parent>
+        <child>cabo_dinamico::raiz_cabo</child>
+      </joint>
+
+      <joint name="cabo_drone_joint" type="fixed">
+        <parent>cabo_dinamico::ponta_cabo</parent>
+        <child>meu_drone::cabo_sensor_link</child>
+      </joint>
+    </model>
   </world>
 </sdf>

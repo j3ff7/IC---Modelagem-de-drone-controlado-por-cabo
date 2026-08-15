@@ -13,8 +13,7 @@ def generate_launch_description():
     # Caminho para o seu novo arquivo de mundo
     world_path = os.path.join(pkg_share, 'worlds', 'my_world.sdf')
 
-    # Usando o mesmo caminho absoluto que usamos no gerar_cabo.py
-    caminho_json = '/home/joseubu/IC/src/pacote_do_drone/tether_parameters.json'
+    caminho_json = os.path.join(pkg_share, 'tether_parameters.json')
     
     try:
         with open(caminho_json, 'r') as f:
@@ -42,15 +41,25 @@ def generate_launch_description():
         package='ros_gz_bridge',
         executable='parameter_bridge',
         arguments=[
-            '/tensao_cabo@geometry_msgs/msg/WrenchStamped[gz.msgs.Wrench',
-            '/angulos_cabo@sensor_msgs/msg/JointState[gz.msgs.Model',
-            '/meu_drone/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist'
+            '/cabo/tensao_drone@geometry_msgs/msg/WrenchStamped[gz.msgs.Wrench',
+            '/cabo/tensao_carretel@geometry_msgs/msg/WrenchStamped[gz.msgs.Wrench',
+            '/meu_drone/odom@nav_msgs/msg/Odometry[gz.msgs.Odometry',
+            '/meu_drone/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist',
+            '/world/mundo_ic/model/sistema_cabo_drone/model/meu_drone/joint_state@sensor_msgs/msg/JointState[gz.msgs.Model',
+            '/world/mundo_ic/pose/info@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V',
         ],
+        output='screen'
+    )
+
+    sensores = Node(
+        package='pacote_do_drone',
+        executable='sensores',
         output='screen'
     )
 
     return LaunchDescription([
         AppendEnvironmentVariable(name='GZ_SIM_RESOURCE_PATH', value=models_path),
         gazebo,
-        bridge
+        bridge,
+        sensores
     ])

@@ -28,6 +28,9 @@ setup(
         # Instala a pasta Gazebo (onde o Python salva o cabo agora)
         (os.path.join('share', package_name, 'models/Gazebo'), glob('models/Gazebo/*.*')),
         
+        # Instala a pasta do carretel
+        (os.path.join('share', package_name, 'models/carretel'), glob('models/carretel/*.*')),
+
         # Instala a pasta do drone e suas malhas (meshes)
         (os.path.join('share', package_name, 'models/meu_drone'), glob('models/meu_drone/*.*')),
         (os.path.join('share', package_name, 'models/meu_drone/meshes'), glob('models/meu_drone/meshes/*.*')),
@@ -41,7 +44,10 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'sensores = pacote_do_drone.sensores:main'
+            'sensores = pacote_do_drone.sensores:main',
+            'cabo_monitor = pacote_do_drone.cabo_monitor:main',
+            'movimento_circular = pacote_do_drone.movimento_circular:main',
+            'test_tensao = pacote_do_drone.test_tensao:main',
         ],
     },
 )
