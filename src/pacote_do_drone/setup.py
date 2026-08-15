@@ -22,6 +22,9 @@ setup(
         # Instala o seu arquivo de parâmetros JSON que está na RAIZ do pacote
         (os.path.join('share', package_name), ['tether_parameters.json']),
 
+        # Instala configuracoes de trajetoria e testes
+        (os.path.join('share', package_name, 'config'), glob('config/*.json')),
+
         # Instala arquivos na pasta models (incluindo o cabo.sdf)
         (os.path.join('share', package_name, 'models'), glob('models/*.*')),
         

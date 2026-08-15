@@ -78,6 +78,11 @@ def calcular_angulos_ancora_drone_graus(
     return calcular_angulos_vetor_graus(vetor_corpo)
 
 
+def calcular_angulos_vetor_mundo_graus(orientacao_drone, vetor_mundo):
+    vetor_corpo = rotacionar_vetor_inverso(orientacao_drone, vetor_mundo)
+    return calcular_angulos_vetor_graus(vetor_corpo)
+
+
 def calcular_angulos_tangente_cabo_graus(orientacao_drone, orientacao_segmento_final):
     eixo_cabo_mundo = rotacionar_vetor(orientacao_segmento_final, (-1.0, 0.0, 0.0))
     eixo_cabo_corpo = rotacionar_vetor_inverso(orientacao_drone, eixo_cabo_mundo)

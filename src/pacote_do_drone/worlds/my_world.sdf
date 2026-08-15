@@ -57,7 +57,7 @@
       <pose>0 0 0 0 0 0</pose>
 
       <link name="ancora_cabo">
-        <pose>0.0 0.18 0.33 0 0 0</pose>
+        <pose>0.0 0.0 0.33 0 0 0</pose>
         <inertial>
           <mass>10</mass>
           <inertia>
@@ -79,14 +79,14 @@
       <include>
         <uri>file:///home/lima/codes/ic/drone-cabo/src/pacote_do_drone/models/cabo.sdf</uri>
         <name>cabo_dinamico</name>
-        <pose>0.0 0.18 0.33 0 0 0.0</pose>
+        <pose>0.0 0.0 0.33 0 0 0.0</pose>
         <static>false</static>
       </include>
 
       <include>
         <uri>file:///home/lima/codes/ic/drone-cabo/src/pacote_do_drone/models/meu_drone/meu_drone.sdf</uri>
         <name>meu_drone</name>
-        <pose>2.0 0.18 0.33 0 0 0.0</pose>
+        <pose>2.0 0.0 0.33 0 0 0.0</pose>
       </include>
 
       <joint name="ancora_carretel_cabo" type="fixed">

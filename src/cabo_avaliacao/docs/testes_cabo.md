@@ -150,6 +150,51 @@ Rodar a simulacao principal:
 ros2 launch pacote_do_drone start_sim.launch.py
 ```
 
+Rodar a simulacao principal com controlador de sequencia de waypoints:
+
+```bash
+ros2 launch pacote_do_drone start_sim.launch.py \
+  controlador_trajetoria:=true \
+  waypoints_file:=config/trajetoria_hover_ancora.json \
+  tempo_hover:=10.0 \
+  repetir:=false \
+  tolerancia_posicao:=0.18 \
+  heading_fixo:=0.0
+```
+
+O arquivo padrao `src/pacote_do_drone/config/trajetoria_hover_ancora.json` define um unico waypoint em `(0.0, 0.0, 1.6)`, verticalmente acima da ancora do cabo, que fica em `x=0, y=0` no plano. Esse e o teste de sanidade inicial: o drone deve convergir para o ponto e permanecer nele.
+
+Depois que esse caso estiver estavel, use o arquivo `src/pacote_do_drone/config/trajetoria_drone_padrao.json`, que define dois pontos simetricos em torno da ancora:
+
+```bash
+ros2 launch pacote_do_drone start_sim.launch.py \
+  controlador_trajetoria:=true \
+  waypoints_file:=config/trajetoria_drone_padrao.json \
+  tempo_hover:=3.0 \
+  repetir:=true
+```
+
+Para passar os pontos diretamente pela linha de comando:
+
+```bash
+ros2 launch pacote_do_drone start_sim.launch.py \
+  controlador_trajetoria:=true \
+  waypoints:='[[0.8, 0.0, 1.6], [-0.8, 0.0, 1.6]]' \
+  waypoints_file:='' \
+  tempo_hover:=5.0 \
+  repetir:=true
+```
+
+Cada waypoint pode ser uma lista `[x, y, z]` ou um objeto `{"x": 0.8, "y": 0.0, "z": 1.6}`. Se `z` for omitido, o controlador usa `altura_trajetoria`. Quando `waypoints` e `waypoints_file` forem informados ao mesmo tempo, a lista passada em `waypoints` tem prioridade.
+
+O controlador so avanca para o proximo ponto depois que o drone fica dentro das tolerancias de posicao, altura e velocidade durante o tempo de hovering. Ele usa controle PD em posicao, com termo integral opcional para ensaios posteriores. Se o drone se comportar como se o comando de velocidade estivesse no frame do corpo, rode com:
+
+No caso de sanidade com um waypoint, o controle de heading fica desativado por padrao (`controlar_heading:=false`) para evitar acoplamento entre yaw e posicao enquanto a resposta basica ainda esta sendo avaliada. O amortecimento usa velocidade estimada por diferenca de posicao (`usar_velocidade_por_diferenca:=true`), pois o `twist` da odometria pode ser ambiguo quanto ao frame. O controlador tambem usa histerese de chegada (`histerese_chegada:=1.6`) para nao zerar o tempo de hovering por pequenos overshoots causados pela dinamica do cabo.
+
+```bash
+ros2 launch pacote_do_drone start_sim.launch.py controlador_trajetoria:=true cmd_vel_frame:=body
+```
+
 O mesmo calculo de azimuth/elevation e usado pelo drone e pelo avaliador dos postes. No drone, os topicos sao:
 
 ```bash

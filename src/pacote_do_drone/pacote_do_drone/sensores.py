@@ -1,5 +1,6 @@
 import json
 import os
+import re
 
 from ament_index_python.packages import get_package_share_directory
 import rclpy
@@ -13,19 +14,24 @@ from tf2_msgs.msg import TFMessage
 from pacote_do_drone.cabo_angulos import (
     calcular_angulos_ancora_drone_graus,
     calcular_angulos_tangente_cabo_graus,
+    calcular_angulos_vetor_mundo_graus,
     compor_quaternions,
     elevation_saturado,
     extrair_angulos_graus,
+    rotacionar_vetor,
 )
 
 JOINT_STATE_TOPIC = '/world/mundo_ic/model/sistema_cabo_drone/model/meu_drone/joint_state'
 POSE_TOPIC = '/world/mundo_ic/pose/info'
 FINAL_SEGMENT_FRAME_TOKENS = ('final_segment',)
+TIP_FRAME_TOKENS = ('ponta_cabo',)
 CABO_MODEL_FRAME = 'cabo_dinamico'
+SEGMENT_RE = re.compile(r'(^|::)segment_(\d+)$')
 
 class LeitorCabo(Node):
     def __init__(self):
         super().__init__('leitor_cabo_node')
+        self.declare_parameter('janela_tangente_links', 6)
 
         self.subscription_tensao = self.create_subscription(
             WrenchStamped,
@@ -53,14 +59,21 @@ class LeitorCabo(Node):
 
         self.azimuth_pub = self.create_publisher(Float64, '/cabo/azimuth_graus', 10)
         self.elevation_pub = self.create_publisher(Float64, '/cabo/elevation_graus', 10)
+        self.azimuth_ancora_pub = self.create_publisher(Float64, '/cabo/azimuth_ancora_graus', 10)
+        self.elevation_ancora_pub = self.create_publisher(Float64, '/cabo/elevation_ancora_graus', 10)
         self.azimuth_joint_pub = self.create_publisher(Float64, '/cabo/azimuth_joint_graus', 10)
         self.elevation_joint_pub = self.create_publisher(Float64, '/cabo/elevation_joint_graus', 10)
         self.last_log_time = self.get_clock().now()
         self.orientacao_modelo_cabo = None
         self.orientacao_segmento_final = None
+        self.posicao_modelo_cabo = None
+        self.posicao_segmento_final = None
+        self.posicao_ponta_cabo = None
+        self.posicoes_segmentos = {}
         self.usando_tangente_local = False
         self.posicao_ancora = self._ler_posicao_ancora()
         self.offset_sensor_corpo = (0.0, 0.0, -0.05)
+        self.janela_tangente_links = max(1, int(self.get_parameter('janela_tangente_links').value))
 
     def _ler_posicao_ancora(self):
         try:
@@ -90,19 +103,69 @@ class LeitorCabo(Node):
     def pose_callback(self, msg):
         for transform in msg.transforms:
             frame = transform.child_frame_id
+            t = transform.transform.translation
             q = transform.transform.rotation
+            posicao = (t.x, t.y, t.z)
             orientacao = (q.x, q.y, q.z, q.w)
             if frame == CABO_MODEL_FRAME:
                 self.orientacao_modelo_cabo = orientacao
+                self.posicao_modelo_cabo = posicao
+                continue
+
+            match = SEGMENT_RE.search(frame)
+            if match:
+                self.posicoes_segmentos[int(match.group(2))] = posicao
             elif all(token in frame for token in FINAL_SEGMENT_FRAME_TOKENS):
                 self.orientacao_segmento_final = orientacao
+                self.posicao_segmento_final = posicao
+            elif all(token in frame for token in TIP_FRAME_TOKENS):
+                self.posicao_ponta_cabo = posicao
+
+    def _ponto_cabo_mundo(self, posicao):
+        if posicao is None:
+            return None
+        if self.posicao_modelo_cabo is None or self.orientacao_modelo_cabo is None:
+            return posicao
+        rotacionado = rotacionar_vetor(self.orientacao_modelo_cabo, posicao)
+        return tuple(self.posicao_modelo_cabo[i] + rotacionado[i] for i in range(3))
+
+    def _ponto_tangente_cabo(self):
+        if self.posicoes_segmentos:
+            maior_indice = max(self.posicoes_segmentos)
+            indice = max(1, maior_indice - self.janela_tangente_links)
+            while indice > 0:
+                posicao = self.posicoes_segmentos.get(indice)
+                if posicao is not None:
+                    return self._ponto_cabo_mundo(posicao), f'segment_{indice}'
+                indice -= 1
+
+        return self._ponto_cabo_mundo(self.posicao_segmento_final), 'final_segment'
 
     def odom_callback(self, msg):
         p = msg.pose.pose.position
         q = msg.pose.pose.orientation
         orientacao_drone = (q.x, q.y, q.z, q.w)
+        posicao_drone = (p.x, p.y, p.z)
 
-        if self.orientacao_segmento_final is not None:
+        azimuth_ancora_deg, elevation_ancora_deg = calcular_angulos_ancora_drone_graus(
+            posicao_drone,
+            orientacao_drone,
+            self.posicao_ancora,
+            self.offset_sensor_corpo,
+        )
+
+        posicao_segmento, frame_tangente = self._ponto_tangente_cabo()
+        posicao_ponta = self._ponto_cabo_mundo(self.posicao_ponta_cabo)
+
+        if posicao_segmento is not None and posicao_ponta is not None:
+            vetor_mundo = tuple(posicao_segmento[i] - posicao_ponta[i] for i in range(3))
+            azimuth_deg, elevation_deg = calcular_angulos_vetor_mundo_graus(
+                orientacao_drone,
+                vetor_mundo,
+            )
+            origem = f'geometria:{frame_tangente}'
+            self.usando_tangente_local = True
+        elif self.orientacao_segmento_final is not None:
             orientacao_segmento = self.orientacao_segmento_final
             if self.orientacao_modelo_cabo is not None:
                 orientacao_segmento = compor_quaternions(self.orientacao_modelo_cabo, orientacao_segmento)
@@ -113,16 +176,13 @@ class LeitorCabo(Node):
             origem = 'tangente'
             self.usando_tangente_local = True
         else:
-            azimuth_deg, elevation_deg = calcular_angulos_ancora_drone_graus(
-                (p.x, p.y, p.z),
-                orientacao_drone,
-                self.posicao_ancora,
-                self.offset_sensor_corpo,
-            )
+            azimuth_deg, elevation_deg = azimuth_ancora_deg, elevation_ancora_deg
             origem = 'ancora'
 
         self.azimuth_pub.publish(Float64(data=azimuth_deg))
         self.elevation_pub.publish(Float64(data=elevation_deg))
+        self.azimuth_ancora_pub.publish(Float64(data=azimuth_ancora_deg))
+        self.elevation_ancora_pub.publish(Float64(data=elevation_ancora_deg))
 
         now = self.get_clock().now()
         if (now - self.last_log_time).nanoseconds >= 500_000_000:
@@ -130,7 +190,8 @@ class LeitorCabo(Node):
             sufixo = ' | perto de vertical' if elevation_saturado(elevation_deg) else ''
             self.get_logger().info(
                 f'azimuth {origem}: {azimuth_deg:7.2f} graus | '
-                f'elevation {origem}: {elevation_deg:7.2f} graus{sufixo}'
+                f'elevation {origem}: {elevation_deg:7.2f} graus | '
+                f'az/el ancora: {azimuth_ancora_deg:7.2f}/{elevation_ancora_deg:7.2f}{sufixo}'
             )
 
     def joint_callback(self, msg):

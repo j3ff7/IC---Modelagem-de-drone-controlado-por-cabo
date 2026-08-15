@@ -26,9 +26,9 @@ drone_y = params['drone_y']
 drone_z = params['drone_z']
 
 comprimento_total = num_links * length
-ancora_x = 0.0
-ancora_y = 0.18
-ancora_z = 0.33
+ancora_x = float(params.get('anchor_x', 0.0))
+ancora_y = float(params.get('anchor_y', 0.0))
+ancora_z = float(params.get('anchor_z', 0.33))
 
 yaw_base = math.atan2(drone_y - ancora_y, drone_x - ancora_x)
 spawn_distance = comprimento_total

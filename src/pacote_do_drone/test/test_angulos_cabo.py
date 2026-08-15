@@ -6,6 +6,7 @@ from pacote_do_drone.cabo_angulos import (
     calcular_angulos_ancora_drone_graus,
     calcular_angulos_tangente_cabo_graus,
     calcular_angulos_vetor_graus,
+    calcular_angulos_vetor_mundo_graus,
     elevation_saturado,
     extrair_angulos_graus,
 )
@@ -70,6 +71,15 @@ class TestAngulosCabo(unittest.TestCase):
 
         self.assertAlmostEqual(azimuth_deg, 0.0)
         self.assertAlmostEqual(elevation_deg, 80.0, places=6)
+
+    def test_vetor_mundo_vertical_com_drone_nivelado(self):
+        azimuth_deg, elevation_deg = calcular_angulos_vetor_mundo_graus(
+            orientacao_drone=(0.0, 0.0, 0.0, 1.0),
+            vetor_mundo=(0.0, 0.0, -1.0),
+        )
+
+        self.assertAlmostEqual(azimuth_deg, 0.0)
+        self.assertAlmostEqual(elevation_deg, 90.0)
 
 
 if __name__ == '__main__':
