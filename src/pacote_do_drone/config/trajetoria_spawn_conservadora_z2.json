@@ -1,0 +1,11 @@
+{
+  "descricao": "Diagnostico com spawn original: pequena subida no proprio x do spawn, hover curto e depois deslocamento para o waypoint final.",
+  "tempo_hover": 3.0,
+  "repetir": false,
+  "controlar_heading": false,
+  "heading_fixo": 0.0,
+  "waypoints": [
+    {"x": 2.0, "y": 0.0, "z": 0.6},
+    {"x": 0.0, "y": 0.0, "z": 2.0}
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "descricao": "Teste vertical B: transicao sobre a ancora de z=1.0 para z=2.0.",
+  "tempo_hover": 1.0,
+  "repetir": false,
+  "controlar_heading": true,
+  "heading_fixo": 1.57079632679,
+  "waypoints": [
+    {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 1.0
+    },
+    {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 2.0
+    }
+  ]
+}

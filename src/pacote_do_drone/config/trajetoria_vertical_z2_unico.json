@@ -1,0 +1,14 @@
+{
+  "descricao": "Teste vertical A: waypoint unico sobre a ancora em z=2.0.",
+  "tempo_hover": 1.0,
+  "repetir": false,
+  "controlar_heading": true,
+  "heading_fixo": 1.57079632679,
+  "waypoints": [
+    {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 2.0
+    }
+  ]
+}

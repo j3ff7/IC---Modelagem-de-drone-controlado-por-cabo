@@ -14,6 +14,7 @@ from tf2_msgs.msg import TFMessage
 from pacote_do_drone.cabo_angulos import (
     calcular_angulos_ancora_drone_graus,
     calcular_angulos_tangente_cabo_graus,
+    calcular_angulos_vetor_graus_z_positivo,
     calcular_angulos_vetor_mundo_graus,
     compor_quaternions,
     elevation_saturado,
@@ -61,6 +62,12 @@ class LeitorCabo(Node):
         self.elevation_pub = self.create_publisher(Float64, '/cabo/elevation_graus', 10)
         self.azimuth_ancora_pub = self.create_publisher(Float64, '/cabo/azimuth_ancora_graus', 10)
         self.elevation_ancora_pub = self.create_publisher(Float64, '/cabo/elevation_ancora_graus', 10)
+        self.azimuth_drone_pub = self.create_publisher(Float64, '/cabo/drone/azimuth_graus', 10)
+        self.elevation_drone_pub = self.create_publisher(Float64, '/cabo/drone/elevation_graus', 10)
+        self.azimuth_reta_ancora_pub = self.create_publisher(Float64, '/cabo/drone/reta_ancora/azimuth_graus', 10)
+        self.elevation_reta_ancora_pub = self.create_publisher(Float64, '/cabo/drone/reta_ancora/elevation_graus', 10)
+        self.azimuth_tangente_ancora_pub = self.create_publisher(Float64, '/cabo/ancora/azimuth_graus', 10)
+        self.elevation_tangente_ancora_pub = self.create_publisher(Float64, '/cabo/ancora/elevation_graus', 10)
         self.azimuth_joint_pub = self.create_publisher(Float64, '/cabo/azimuth_joint_graus', 10)
         self.elevation_joint_pub = self.create_publisher(Float64, '/cabo/elevation_joint_graus', 10)
         self.last_log_time = self.get_clock().now()
@@ -88,7 +95,7 @@ class LeitorCabo(Node):
 
         return (
             float(params.get('anchor_x', 0.0)),
-            float(params.get('anchor_y', 0.18)),
+            float(params.get('anchor_y', 0.0)),
             float(params.get('anchor_z', 0.33)),
         )
 
@@ -141,6 +148,19 @@ class LeitorCabo(Node):
 
         return self._ponto_cabo_mundo(self.posicao_segmento_final), 'final_segment'
 
+    def _ponto_tangente_ancora(self):
+        if not self.posicoes_segmentos:
+            return None, 'indisponivel'
+
+        indice = min(self.janela_tangente_links, max(self.posicoes_segmentos))
+        while indice <= max(self.posicoes_segmentos):
+            posicao = self.posicoes_segmentos.get(indice)
+            if posicao is not None:
+                return self._ponto_cabo_mundo(posicao), f'segment_{indice}'
+            indice += 1
+
+        return None, 'indisponivel'
+
     def odom_callback(self, msg):
         p = msg.pose.pose.position
         q = msg.pose.pose.orientation
@@ -153,6 +173,14 @@ class LeitorCabo(Node):
             self.posicao_ancora,
             self.offset_sensor_corpo,
         )
+        azimuth_tangente_ancora_deg = None
+        elevation_tangente_ancora_deg = None
+        posicao_segmento_ancora, frame_tangente_ancora = self._ponto_tangente_ancora()
+        if posicao_segmento_ancora is not None:
+            vetor_ancora_mundo = tuple(posicao_segmento_ancora[i] - self.posicao_ancora[i] for i in range(3))
+            azimuth_tangente_ancora_deg, elevation_tangente_ancora_deg = calcular_angulos_vetor_graus_z_positivo(
+                vetor_ancora_mundo,
+            )
 
         posicao_segmento, frame_tangente = self._ponto_tangente_cabo()
         posicao_ponta = self._ponto_cabo_mundo(self.posicao_ponta_cabo)
@@ -181,17 +209,30 @@ class LeitorCabo(Node):
 
         self.azimuth_pub.publish(Float64(data=azimuth_deg))
         self.elevation_pub.publish(Float64(data=elevation_deg))
+        self.azimuth_drone_pub.publish(Float64(data=azimuth_deg))
+        self.elevation_drone_pub.publish(Float64(data=elevation_deg))
         self.azimuth_ancora_pub.publish(Float64(data=azimuth_ancora_deg))
         self.elevation_ancora_pub.publish(Float64(data=elevation_ancora_deg))
+        self.azimuth_reta_ancora_pub.publish(Float64(data=azimuth_ancora_deg))
+        self.elevation_reta_ancora_pub.publish(Float64(data=elevation_ancora_deg))
+        if azimuth_tangente_ancora_deg is not None and elevation_tangente_ancora_deg is not None:
+            self.azimuth_tangente_ancora_pub.publish(Float64(data=azimuth_tangente_ancora_deg))
+            self.elevation_tangente_ancora_pub.publish(Float64(data=elevation_tangente_ancora_deg))
 
         now = self.get_clock().now()
         if (now - self.last_log_time).nanoseconds >= 500_000_000:
             self.last_log_time = now
             sufixo = ' | perto de vertical' if elevation_saturado(elevation_deg) else ''
+            texto_ancora = 'indisponivel'
+            if azimuth_tangente_ancora_deg is not None and elevation_tangente_ancora_deg is not None:
+                texto_ancora = (
+                    f'az={azimuth_tangente_ancora_deg:6.1f} deg '
+                    f'el={elevation_tangente_ancora_deg:5.1f} deg ({frame_tangente_ancora})'
+                )
             self.get_logger().info(
-                f'azimuth {origem}: {azimuth_deg:7.2f} graus | '
-                f'elevation {origem}: {elevation_deg:7.2f} graus | '
-                f'az/el ancora: {azimuth_ancora_deg:7.2f}/{elevation_ancora_deg:7.2f}{sufixo}'
+                f'Drone tangente: az={azimuth_deg:6.1f} deg el={elevation_deg:5.1f} deg ({frame_tangente}) | '
+                f'Drone reta->ancora: az={azimuth_ancora_deg:6.1f} deg el={elevation_ancora_deg:5.1f} deg | '
+                f'Ancora tangente: {texto_ancora}{sufixo}'
             )
 
     def joint_callback(self, msg):

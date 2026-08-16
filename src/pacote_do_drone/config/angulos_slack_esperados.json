@@ -1,0 +1,68 @@
+{
+  "convencao": "Casos slack com heading_fixo = pi/2 rad: x local aponta para norte e y local aponta para oeste.",
+  "comprimento_cabo_m": 2.0,
+  "sensor_offset_base_link": [
+    0.0,
+    0.0,
+    -0.05
+  ],
+  "anchor": [
+    0.0,
+    0.0,
+    0.33
+  ],
+  "base_link_z": 2.0,
+  "sensor_z": 1.95,
+  "raio_xy": 1.0,
+  "distancia_sensor_ancora_m": 1.9037857022,
+  "casos": {
+    "centro": {
+      "arquivo": "trajetoria_slack_hover_centro.json",
+      "observacao": "Azimuth e indefinido quando o cabo esta vertical; elevation esperado = 90 deg para a geometria ancora-sensor.",
+      "azimuth_graus": 0.0,
+      "elevation_graus": 90.0
+    },
+    "e": {
+      "arquivo": "trajetoria_slack_e.json",
+      "azimuth_graus": 90.0,
+      "elevation_graus": 58.31363231
+    },
+    "ne": {
+      "arquivo": "trajetoria_slack_ne.json",
+      "azimuth_graus": 135.0,
+      "elevation_graus": 58.31363231
+    },
+    "n": {
+      "arquivo": "trajetoria_slack_n.json",
+      "azimuth_graus": 180.0,
+      "elevation_graus": 58.31363231
+    },
+    "nw": {
+      "arquivo": "trajetoria_slack_nw.json",
+      "azimuth_graus": -135.0,
+      "elevation_graus": 58.31363231
+    },
+    "w": {
+      "arquivo": "trajetoria_slack_w.json",
+      "azimuth_graus": -90.0,
+      "elevation_graus": 58.31363231
+    },
+    "sw": {
+      "arquivo": "trajetoria_slack_sw.json",
+      "azimuth_graus": -45.0,
+      "elevation_graus": 58.31363231
+    },
+    "s": {
+      "arquivo": "trajetoria_slack_s.json",
+      "azimuth_graus": 0.0,
+      "elevation_graus": 58.31363231
+    },
+    "se": {
+      "arquivo": "trajetoria_slack_se.json",
+      "azimuth_graus": 45.0,
+      "elevation_graus": 58.31363231
+    }
+  },
+  "observacao_waypoints": "Cada caso direcional usa waypoint intermediario sobre a ancora em z=0.5 m antes do waypoint final.",
+  "folga_geometrica_m": 0.0962142978
+}

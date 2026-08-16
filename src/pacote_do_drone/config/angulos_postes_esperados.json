@@ -1,0 +1,18 @@
+{
+  "convencao": "Drone com heading_fixo = pi/2 rad: x local aponta para norte e y local aponta para oeste.",
+  "sensor_offset_base_link": [0.0, 0.0, -0.05],
+  "anchor": [0.0, 0.0, 0.33],
+  "sensor_z": 1.53,
+  "base_link_z": 1.58,
+  "casos": {
+    "e": {"azimuth_graus": 90.0, "elevation_graus": 36.86989765},
+    "ne": {"azimuth_graus": 135.0, "elevation_graus": 36.86989765},
+    "n": {"azimuth_graus": 180.0, "elevation_graus": 36.86989765},
+    "nw": {"azimuth_graus": -135.0, "elevation_graus": 36.86989765},
+    "w": {"azimuth_graus": -90.0, "elevation_graus": 36.86989765},
+    "sw": {"azimuth_graus": -45.0, "elevation_graus": 36.86989765},
+    "s": {"azimuth_graus": 0.0, "elevation_graus": 36.86989765},
+    "se": {"azimuth_graus": 45.0, "elevation_graus": 36.86989765},
+    "c1": {"azimuth_graus": 135.0, "elevation_graus": 37.64597536}
+  }
+}

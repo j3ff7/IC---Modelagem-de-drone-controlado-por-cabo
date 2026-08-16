@@ -7,6 +7,7 @@ from geometry_msgs.msg import Twist, WrenchStamped
 from nav_msgs.msg import Odometry
 import rclpy
 from rclpy.node import Node
+from sensor_msgs.msg import JointState
 
 
 def _normalizar_angulo(rad):
@@ -17,6 +18,18 @@ def _yaw_from_quat(q):
     siny_cosp = 2.0 * (q.w * q.z + q.x * q.y)
     cosy_cosp = 1.0 - 2.0 * (q.y * q.y + q.z * q.z)
     return math.atan2(siny_cosp, cosy_cosp)
+
+
+def _rpy_from_quat(q):
+    sinr_cosp = 2.0 * (q.w * q.x + q.y * q.z)
+    cosr_cosp = 1.0 - 2.0 * (q.x * q.x + q.y * q.y)
+    roll = math.atan2(sinr_cosp, cosr_cosp)
+
+    sinp = 2.0 * (q.w * q.y - q.z * q.x)
+    pitch = math.copysign(math.pi / 2.0, sinp) if abs(sinp) >= 1.0 else math.asin(sinp)
+
+    yaw = _yaw_from_quat(q)
+    return roll, pitch, yaw
 
 
 def _limitar(valor, limite):
@@ -57,6 +70,7 @@ class ControladorTrajetoriaDrone(Node):
         self.declare_parameter('odom_twist_frame', 'body')
         self.declare_parameter('usar_velocidade_por_diferenca', True)
         self.declare_parameter('filtro_velocidade', 0.35)
+        self.declare_parameter('log_periodo', 1.0)
 
         self.centro_x = float(self.get_parameter('centro_x').value)
         self.centro_y = float(self.get_parameter('centro_y').value)
@@ -87,6 +101,7 @@ class ControladorTrajetoriaDrone(Node):
         self.odom_twist_frame = str(self.get_parameter('odom_twist_frame').value).lower()
         self.usar_velocidade_por_diferenca = bool(self.get_parameter('usar_velocidade_por_diferenca').value)
         self.filtro_velocidade = max(0.0, min(1.0, float(self.get_parameter('filtro_velocidade').value)))
+        self.log_periodo_ns = int(max(0.05, float(self.get_parameter('log_periodo').value)) * 1e9)
         self.waypoints = self._carregar_waypoints()
 
         self.x = None
@@ -95,6 +110,8 @@ class ControladorTrajetoriaDrone(Node):
         self.vx = 0.0
         self.vy = 0.0
         self.vz = 0.0
+        self.roll = 0.0
+        self.pitch = 0.0
         self.ultimo_x = None
         self.ultimo_y = None
         self.ultimo_z = None
@@ -108,12 +125,25 @@ class ControladorTrajetoriaDrone(Node):
         self.ultimo_waypoint_atingido = False
         self.tensao_drone = 0.0
         self.tensao_carretel = 0.0
+        self.conexao_forca = (0.0, 0.0, 0.0)
+        self.conexao_momento = (0.0, 0.0, 0.0)
+        self.conexao_forca_modulo = 0.0
+        self.conexao_momento_modulo = 0.0
+        self.rotores = {}
         self.last_log_time = self.get_clock().now()
+        self.tempo_inicio_ns = None
 
         self.publisher_ = self.create_publisher(Twist, '/meu_drone/cmd_vel', 10)
         self.create_subscription(Odometry, '/meu_drone/odom', self.odom_callback, 10)
         self.create_subscription(WrenchStamped, '/cabo/tensao_drone', self.tensao_drone_callback, 10)
         self.create_subscription(WrenchStamped, '/cabo/tensao_carretel', self.tensao_carretel_callback, 10)
+        self.create_subscription(WrenchStamped, '/cabo/conexao_drone', self.conexao_drone_callback, 10)
+        self.create_subscription(
+            JointState,
+            '/world/mundo_ic/model/sistema_cabo_drone/model/meu_drone/joint_state',
+            self.joint_state_callback,
+            10,
+        )
         self.timer_period = 0.05
         self.timer = self.create_timer(self.timer_period, self.timer_callback)
 
@@ -215,7 +245,7 @@ class ControladorTrajetoriaDrone(Node):
         novo_y = p.y
         novo_z = p.z
         now_ns = self.get_clock().now().nanoseconds
-        novo_yaw = _yaw_from_quat(msg.pose.pose.orientation)
+        novo_roll, novo_pitch, novo_yaw = _rpy_from_quat(msg.pose.pose.orientation)
 
         if self.usar_velocidade_por_diferenca and self.ultimo_odom_ns is not None:
             dt = (now_ns - self.ultimo_odom_ns) * 1e-9
@@ -247,6 +277,8 @@ class ControladorTrajetoriaDrone(Node):
         self.x = novo_x
         self.y = novo_y
         self.z = novo_z
+        self.roll = novo_roll
+        self.pitch = novo_pitch
         self.yaw = novo_yaw
 
     def tensao_drone_callback(self, msg):
@@ -256,6 +288,19 @@ class ControladorTrajetoriaDrone(Node):
     def tensao_carretel_callback(self, msg):
         f = msg.wrench.force
         self.tensao_carretel = math.sqrt(f.x * f.x + f.y * f.y + f.z * f.z)
+
+    def conexao_drone_callback(self, msg):
+        f = msg.wrench.force
+        m = msg.wrench.torque
+        self.conexao_forca = (f.x, f.y, f.z)
+        self.conexao_momento = (m.x, m.y, m.z)
+        self.conexao_forca_modulo = math.sqrt(f.x * f.x + f.y * f.y + f.z * f.z)
+        self.conexao_momento_modulo = math.sqrt(m.x * m.x + m.y * m.y + m.z * m.z)
+
+    def joint_state_callback(self, msg):
+        for name, velocity in zip(msg.name, msg.velocity):
+            if name.startswith('rotor_') and name.endswith('_joint'):
+                self.rotores[name] = velocity
 
     def _velocidade_no_frame_de_comando(self, vx_mundo, vy_mundo):
         if self.cmd_vel_frame == 'body':
@@ -295,6 +340,8 @@ class ControladorTrajetoriaDrone(Node):
     def timer_callback(self):
         if self.x is None:
             return
+        if self.tempo_inicio_ns is None:
+            self.tempo_inicio_ns = self.get_clock().now().nanoseconds
 
         alvo_x, alvo_y, alvo_z = self.waypoints[self.indice_waypoint]
 
@@ -318,17 +365,19 @@ class ControladorTrajetoriaDrone(Node):
         vx_mundo = _limitar(vx_mundo, self.limite_vel_xy)
         vy_mundo = _limitar(vy_mundo, self.limite_vel_xy)
 
-        vz = _limitar(
+        vz_bruto = (
             self.ganho_altura * erro_z
             + self.ganho_integral_z * self.integral_z
-            - self.ganho_velocidade_z * self.vz,
-            self.limite_vel_z,
+            - self.ganho_velocidade_z * self.vz
         )
+        vz = _limitar(vz_bruto, self.limite_vel_z)
         erro_yaw = _normalizar_angulo(self.heading_fixo - self.yaw)
         yaw_rate = 0.0
         if self.controlar_heading:
             yaw_rate = _limitar(self.ganho_yaw * erro_yaw, self.limite_yaw_rate)
         vx_cmd, vy_cmd = self._velocidade_no_frame_de_comando(vx_mundo, vy_mundo)
+        saturou_xy = abs(vx_mundo) >= self.limite_vel_xy or abs(vy_mundo) >= self.limite_vel_xy
+        saturou_z = abs(vz) >= self.limite_vel_z
 
         msg = Twist()
         msg.linear.x = vx_cmd
@@ -357,23 +406,51 @@ class ControladorTrajetoriaDrone(Node):
                 self.ultimo_waypoint_atingido = True
                 self.tempo_no_alvo = self.tempo_hover
                 return
+            indice_anterior = self.indice_waypoint
             self.indice_waypoint = 0 if ultimo else self.indice_waypoint + 1
+            proximo_x, proximo_y, proximo_z = self.waypoints[self.indice_waypoint]
+            self.get_logger().info(
+                f'TRANSICAO WP {indice_anterior}->{self.indice_waypoint} | '
+                f'pos=({self.x:.2f},{self.y:.2f},{self.z:.2f}) '
+                f'ref_ant=({alvo_x:.2f},{alvo_y:.2f},{alvo_z:.2f}) '
+                f'ref_nova=({proximo_x:.2f},{proximo_y:.2f},{proximo_z:.2f}) '
+                f'err_ant=({erro_x:.2f},{erro_y:.2f},{erro_z:.2f}) '
+                f'vel=({self.vx:.2f},{self.vy:.2f},{self.vz:.2f}) '
+                f'cmd=({msg.linear.x:.2f},{msg.linear.y:.2f},{msg.linear.z:.2f},{msg.angular.z:.2f})'
+            )
             self.tempo_no_alvo = 0.0
             self._resetar_integradores()
             self.get_logger().info(f'Avancando para waypoint {self.indice_waypoint}/{len(self.waypoints) - 1}')
 
         now = self.get_clock().now()
-        if (now - self.last_log_time).nanoseconds >= 1_000_000_000:
+        if (now - self.last_log_time).nanoseconds >= self.log_periodo_ns:
             self.last_log_time = now
+            tempo_s = (now.nanoseconds - self.tempo_inicio_ns) * 1e-9
+            estado = 'hover' if self.tempo_no_alvo > 0.0 else 'transitando'
+            if self.ultimo_waypoint_atingido:
+                estado = 'concluido'
+            rotores = '-'
+            if self.rotores:
+                valores = [self.rotores.get(f'rotor_{i}_joint') for i in range(4)]
+                if all(valor is not None for valor in valores):
+                    rotores = '[' + ','.join(f'{valor:.0f}' for valor in valores) + '] rad/s'
             self.get_logger().info(
-                f'pos=({self.x:.2f}, {self.y:.2f}, {self.z:.2f}) '
-                f'alvo[{self.indice_waypoint}]=({alvo_x:.2f}, {alvo_y:.2f}, {alvo_z:.2f}) '
-                f'erro=({erro_x:.2f}, {erro_y:.2f}, {erro_z:.2f}) '
-                f'vel=({self.vx:.2f}, {self.vy:.2f}, {self.vz:.2f}) '
-                f'hover={self.tempo_no_alvo:.1f}/{self.tempo_hover:.1f} s '
-                f'yaw={math.degrees(self.yaw):.1f}/{math.degrees(self.heading_fixo):.1f} deg '
-                f'cmd=({msg.linear.x:.2f}, {msg.linear.y:.2f}, {msg.linear.z:.2f}, {msg.angular.z:.2f}) '
-                f'tensoes D/C={self.tensao_drone:.2f}/{self.tensao_carretel:.2f} N'
+                f't={tempo_s:.2f}s | WP {self.indice_waypoint} | estado={estado} | '
+                f'pos=({self.x:.2f},{self.y:.2f},{self.z:.2f}) '
+                f'ref=({alvo_x:.2f},{alvo_y:.2f},{alvo_z:.2f}) '
+                f'err=({erro_x:.2f},{erro_y:.2f},{erro_z:.2f}) '
+                f'vel=({self.vx:.2f},{self.vy:.2f},{self.vz:.2f}) '
+                f'hover={self.tempo_no_alvo:.1f}/{self.tempo_hover:.1f}s '
+                f'rpy=({math.degrees(self.roll):.1f}, {math.degrees(self.pitch):.1f}, '
+                f'{math.degrees(self.yaw):.1f}/{math.degrees(self.heading_fixo):.1f})deg '
+                f'cmd=({msg.linear.x:.2f},{msg.linear.y:.2f},{msg.linear.z:.2f},{msg.angular.z:.2f}) '
+                f'cmd_z_raw/lim={vz_bruto:.2f}/{self.limite_vel_z:.2f} '
+                f'sat_xy/z={int(saturou_xy)}/{int(saturou_z)} '
+                f'tensoes D/C={self.tensao_drone:.2f}/{self.tensao_carretel:.2f} N '
+                f'conexao |F|/|M|={self.conexao_forca_modulo:.2f}/{self.conexao_momento_modulo:.3f} '
+                f'F=({self.conexao_forca[0]:.2f},{self.conexao_forca[1]:.2f},{self.conexao_forca[2]:.2f}) '
+                f'M=({self.conexao_momento[0]:.3f},{self.conexao_momento[1]:.3f},{self.conexao_momento[2]:.3f}) '
+                f'rot={rotores}'
             )
 
 

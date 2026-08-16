@@ -65,6 +65,19 @@ def calcular_angulos_vetor_graus(vetor):
     return azimuth_deg, elevation_deg
 
 
+def calcular_angulos_vetor_graus_z_positivo(vetor):
+    """Calcula azimuth/elevation com elevacao positiva para cima."""
+    vx, vy, vz = vetor
+    horizontal = math.hypot(vx, vy)
+
+    if horizontal < 1e-9 and abs(vz) < 1e-9:
+        return 0.0, 0.0
+
+    azimuth_deg = 0.0 if horizontal < 1e-9 else normalizar_azimuth(math.degrees(math.atan2(vy, vx)))
+    elevation_deg = math.degrees(math.atan2(vz, horizontal))
+    return azimuth_deg, elevation_deg
+
+
 def calcular_angulos_ancora_drone_graus(
     posicao_drone,
     orientacao_drone,

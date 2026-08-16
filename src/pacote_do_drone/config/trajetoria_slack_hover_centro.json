@@ -1,0 +1,10 @@
+{
+  "descricao": "Caso inicial de sanidade: cabo com folga, sensor quase verticalmente acima da ancora e sem controle de heading.",
+  "tempo_hover": 10.0,
+  "repetir": false,
+  "controlar_heading": false,
+  "heading_fixo": 0.0,
+  "waypoints": [
+    {"x": 0.0, "y": 0.0, "z": 1.0}
+  ]
+}

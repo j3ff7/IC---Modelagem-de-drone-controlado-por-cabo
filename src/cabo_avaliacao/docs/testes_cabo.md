@@ -195,6 +195,75 @@ No caso de sanidade com um waypoint, o controle de heading fica desativado por p
 ros2 launch pacote_do_drone start_sim.launch.py controlador_trajetoria:=true cmd_vel_frame:=body
 ```
 
+## Validacao com drone nas posicoes dos postes
+
+Para reproduzir com o drone os casos estaticos dos postes, use um arquivo de waypoint por vez. Nesses arquivos, o drone usa `heading_fixo = pi/2 rad`, entao o eixo local `x` do drone aponta para o norte do mundo e o eixo local `y` aponta para oeste, igual ao sensor dos postes.
+
+O ponto de conexao do cabo fica 5 cm abaixo do `base_link`. Por isso, os arquivos comandam `base_link_z = 1.58`, fazendo o sensor/conexao ficar em `z = 1.53`, isto e, 1.20 m acima da ancora do carretel em `z = 0.33`.
+
+Exemplo para o caso norte:
+
+```bash
+ros2 launch pacote_do_drone start_sim.launch.py \
+  controlador_trajetoria:=true \
+  waypoints_file:=config/trajetoria_poste_n.json
+```
+
+Troque o sufixo do arquivo para testar cada caso:
+
+```text
+config/trajetoria_poste_e.json
+config/trajetoria_poste_ne.json
+config/trajetoria_poste_n.json
+config/trajetoria_poste_nw.json
+config/trajetoria_poste_w.json
+config/trajetoria_poste_sw.json
+config/trajetoria_poste_s.json
+config/trajetoria_poste_se.json
+config/trajetoria_poste_c1.json
+```
+
+Angulos esperados para comparacao:
+
+```text
+caso   azimuth [deg]   elevation [deg]
+e          90.00            36.87
+ne        135.00            36.87
+n         180.00            36.87
+nw       -135.00            36.87
+w         -90.00            36.87
+sw        -45.00            36.87
+s           0.00            36.87
+se         45.00            36.87
+c1        135.00            37.65
+```
+
+A mesma tabela esta em:
+
+```bash
+src/pacote_do_drone/config/angulos_postes_esperados.json
+```
+
+Topicos principais:
+
+```bash
+ros2 topic echo /cabo/azimuth_graus
+ros2 topic echo /cabo/elevation_graus
+```
+
+Topicos diagnosticos:
+
+```bash
+ros2 topic echo /cabo/azimuth_ancora_graus
+ros2 topic echo /cabo/elevation_ancora_graus
+ros2 topic echo /cabo/azimuth_joint_graus
+ros2 topic echo /cabo/elevation_joint_graus
+```
+
+Use primeiro os diagnosticos da ancora para conferir a geometria nominal. Em seguida compare os topicos principais, que usam a tangente local do cabo perto do sensor quando os links do cabo estao disponiveis.
+
+Observacao sobre a representacao fisica do joystick: o Gazebo/DART nao aceita, com joints SDF comuns, uma malha cinemática fechada do tipo `base_link do drone -> joystick 2 GDL -> ponta do cabo -> cabo -> ancora -> mundo -> drone`. Ao tentar representar o sensor exatamente como uma cadeia presa ao drone e ao cabo, o simulador recusa o modelo porque o link terminal passa a ter dois joints pais. Por isso, a validacao inicial deve usar os topicos geometricos calculados no frame do drone (`/cabo/azimuth_graus` e `/cabo/elevation_graus`). Os topicos `*_joint_graus` permanecem como diagnostico da articulacao simplificada, mas nao devem ser a referencia principal de validacao numerica ate trocarmos a conexao por uma constraint/plugin adequado.
+
 O mesmo calculo de azimuth/elevation e usado pelo drone e pelo avaliador dos postes. No drone, os topicos sao:
 
 ```bash

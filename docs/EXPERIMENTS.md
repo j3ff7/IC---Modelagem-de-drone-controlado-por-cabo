@@ -1,0 +1,573 @@
+# Experiments
+
+Este arquivo registra experimentos técnicos para evitar repetição de investigações já realizadas.
+
+## Experimento: Validação Unitária Dos Ângulos Do Cabo
+
+Data:
+2026-08-15 ou anterior, conforme histórico do branch.
+
+Objetivo:
+Validar matematicamente as funções de azimuth/elevation.
+
+Hipótese:
+Com a convenção `x` frente, `y` esquerda, `z` cima, os casos geométricos simples devem ter valores previsíveis.
+
+Configuração:
+Testes em `src/pacote_do_drone/test/test_angulos_cabo.py`.
+
+Parâmetros relevantes:
+
+```text
+azimuth   = atan2(y, x)
+elevation = atan2(-z, sqrt(x^2 + y^2))
+```
+
+Alterações realizadas:
+Testes cobrem extração de juntas, saturação perto de 90 graus, cabo horizontal/vertical, drone inclinado e vetor mundo transformado para frame do drone.
+
+Resultado:
+Testes estão presentes no repositório. Execução deve ser feita com `colcon test`.
+
+Conclusão:
+A base matemática da convenção angular está coberta por testes unitários.
+
+Próxima ação:
+Executar testes após mudanças em `cabo_angulos.py` ou `sensores.py`.
+
+## Experimento: Mundos Estáticos Com Postes
+
+Data:
+Commit `d007c79 Add cable angle validation environments`.
+
+Objetivo:
+Validar os ângulos do cabo sem a dinâmica do drone.
+
+Hipótese:
+Mundos com postes em posições conhecidas permitem validar sinais, frames e convenção de azimuth/elevation.
+
+Configuração:
+
+- Pacote `cabo_avaliacao`.
+- Configuração padrão em `src/cabo_avaliacao/config/postes_padrao.json`.
+- Launch `ros2 launch cabo_avaliacao avaliar_cabo.launch.py caso:=s modo_cabo:=reto`.
+
+Parâmetros relevantes:
+
+```text
+poste_altura = 1.2 m
+cabo_comprimento = 2.0 m
+ancora = (0.0, 0.0, 0.05) m
+sensor_yaw_graus = 90 deg
+```
+
+Alterações realizadas:
+Implementados modos `reto`, `articulado` e `catenaria`.
+
+Resultado:
+O modo `reto` valida sinais; o modo `catenaria` permite avaliar geometria com folga; o modo `articulado` carrega o cabo do drone de forma estática, mas não produz catenária dinâmica.
+
+Conclusão:
+Usar `cabo_avaliacao` antes de validar no drone quando houver mudança em frames ou sinais.
+
+Próxima ação:
+Manter tabelas esperadas sincronizadas com a convenção.
+
+## Experimento: `cmd_vel_frame` Do Controlador
+
+Data:
+Contexto do chat anterior, antes desta documentação.
+
+Objetivo:
+Determinar se `/meu_drone/cmd_vel` deve ser interpretado no frame global ou no frame do corpo.
+
+Hipótese:
+O plugin `MulticopterVelocityControl` interpreta velocidades lineares no frame do corpo.
+
+Configuração:
+Comparações de comportamento do controlador com e sem transformação para frame `body`.
+
+Parâmetros relevantes:
+
+```text
+cmd_vel_frame:=body
+usar_velocidade_por_diferenca:=true
+```
+
+Alterações realizadas:
+O controlador passou a converter a velocidade desejada do mundo para o frame do corpo quando `cmd_vel_frame == body`. O launch atual usa `body` por padrão.
+
+Resultado:
+O comportamento melhorou em relação às alternativas testadas.
+
+Conclusão:
+Preservar `cmd_vel_frame:=body` nos ensaios atuais.
+
+Próxima ação:
+Só reavaliar se houver mudança de plugin/modelo de drone.
+
+## Experimento: Controlador Sem Cabo E Com Cabo Próximo Ao Waypoint
+
+Data:
+Contexto do chat anterior.
+
+Objetivo:
+Separar falhas do controlador de falhas causadas pelo tether.
+
+Hipótese:
+Se o controlador funcionar sem cabo e com cabo em condição moderada, a instabilidade do spawn original provavelmente vem da interação inicial com o tether.
+
+Configuração:
+Testes com `trajetoria_hover_z2_unico.json` e variações de `usar_cabo` e spawn.
+
+Resultado:
+
+```text
+Sem cabo + spawn original:
+  hover estável
+  roll/pitch máx. ~4.8 deg
+
+Sem cabo + spawn próximo:
+  hover estável
+
+Com cabo + spawn próximo:
+  hover estável
+  tensão máxima ~0.35 N
+
+Com cabo + spawn original:
+  instável
+  pitch próximo de ±90 deg
+  tensão máxima ~6 N
+```
+
+Conclusão:
+O controlador básico não é a primeira suspeita; a condição inicial drone-tether deve ser investigada.
+
+Próxima ação:
+Criar condição inicial slack fisicamente compatível.
+
+## Experimento: Aumento Temporário Do Comprimento Do Cabo
+
+Data:
+2026-08-15, contexto recente.
+
+Objetivo:
+Verificar se aumentar o comprimento do tether elimina a instabilidade do spawn original.
+
+Hipótese:
+Com `L=2.5 m` ou `L=3.0 m`, a folga geométrica reduziria picos de tensão.
+
+Configuração:
+
+```text
+ancora = (0.0, 0.0, 0.33) m
+spawn  = (2.0, 0.0, 0.33) m
+massa total do cabo ~= 0.30 kg
+```
+
+Parâmetros relevantes:
+
+```text
+L=2.0 m: num_links=40, massa_segmento=0.007375 kg
+L=2.5 m: num_links=50, massa_segmento=0.00588 kg
+L=3.0 m: num_links=60, massa_segmento=0.004883 kg
+```
+
+Alterações realizadas:
+Comprimentos foram aplicados temporariamente no JSON e o cabo foi regenerado para testes; a configuração permanente voltou para `L=2.0 m`.
+
+Resultado:
+
+```text
+L=2.0 m:
+  slack = 0.0 m
+  z_min = 0.330 m
+  simulação roda
+  tensão máxima drone/âncora ~6.21/6.80 N
+  pitch máximo ~86.6 deg
+
+L=2.5 m:
+  slack = 0.5 m
+  z_min senoidal planar = -0.335 m
+  tentativas de inicialização curvada causaram abort do DART
+
+L=3.0 m:
+  slack = 1.0 m
+  z_min senoidal planar = -0.648 m
+  tentativas de inicialização curvada causaram abort do DART
+```
+
+Conclusão:
+Aumentar comprimento sem mudar a geometria inicial/spawn não resolve diretamente. Com extremidades a `z=0.33 m`, a folga adicional não cabe para baixo sem atravessar o solo.
+
+Próxima ação:
+Testar slack com extremidades mais altas ou spawn mais próximo da âncora.
+
+## Experimento: Inicialização 3D Ou Curvada Do Cabo
+
+Data:
+2026-08-15, contexto recente.
+
+Objetivo:
+Criar uma geometria inicial com folga que conecte a âncora ao drone sem compressão geométrica no primeiro passo.
+
+Hipótese:
+Uma curva senoidal ou meandra 3D poderia representar o cabo relaxado e evitar impulso inicial.
+
+Configuração:
+Modificações temporárias em `models/gerar_cabo.py`, incluindo tentativas com poses absolutas dos links e rotações relativas estruturais nas juntas.
+
+Resultado:
+
+- Poses/rotações estruturais para formas curvadas causaram abort do DART ao construir juntas.
+- Para `L=2.0 m`, a geometria permanece reta e roda porque os ângulos iniciais são zero.
+
+Conclusão:
+O encadeamento SDF atual não aceita facilmente curvatura inicial embutida dessa forma. É necessário redesenhar a inicialização do cabo ou usar outro modelo/solver.
+
+Próxima ação:
+Não insistir na mesma abordagem sem reprojetar a representação. Priorizar cenário fisicamente compatível com a geometria reta atual ou elevar as extremidades.
+
+## Experimento: Inicialização Slack Horizontal Do Cabo
+
+Data:
+2026-08-16.
+
+Objetivo:
+Criar uma condição inicial com folga sem atravessar o solo, mantendo âncora e sensor do drone em `z = 0.33 m`.
+
+Hipótese:
+Como a folga vertical atravessa o chão, a folga pode ser acomodada no plano horizontal com uma curva simples:
+
+```text
+x(s) = 2 s
+y(s) = A sin(pi s)
+z(s) = 0.33 m
+```
+
+A amplitude `A` deve ser resolvida numericamente para que o comprimento poliangular da cadeia seja igual ao comprimento configurado do cabo.
+
+Configuração:
+
+```text
+âncora = (0.0, 0.0, 0.33) m
+spawn  = (2.0, 0.0, 0.33) m
+massa total dinâmica do cabo ~= 0.30 kg
+cmd_vel_frame:=body
+controlador e ganhos inalterados
+trajetoria_assentamento_spawn.json
+```
+
+Alterações realizadas:
+
+- `src/pacote_do_drone/models/gerar_cabo.py` agora aceita `initial_shape: "sine_slack"` como senóide horizontal.
+- A amplitude lateral é resolvida por bisseção.
+- Os pontos de diagnóstico `0`, `N/4`, `N/2`, `3N/4` e `N` são impressos no terminal.
+- A curvatura inicial é aplicada com `<initial_position>` nas juntas revolutas e `spring_reference` igual ao ângulo inicial. Isto evita aplicar a curvatura como rotação estrutural dos links, que causava abort do DART.
+
+Resultado de geração:
+
+```text
+L=2.0 m:
+  N = 40
+  massa segmento = 0.007375 kg
+  amplitude = 0.0000 m
+  folga = 0.0000 m
+  z_min = 0.3300 m
+
+L=2.5 m:
+  N = 50
+  massa segmento = 0.005880 kg
+  amplitude = 0.6921 m
+  folga = 0.5000 m
+  z_min = 0.3300 m
+
+L=3.0 m:
+  N = 60
+  massa segmento = 0.004883 kg
+  amplitude = 1.0482 m
+  folga = 1.0000 m
+  z_min = 0.3300 m
+```
+
+Resultado dinâmico no assentamento do spawn:
+
+```text
+L=2.0 m:
+  tensão inicial drone/âncora = 0.20 / 0.40 N
+  tensão máxima drone/âncora = 6.32 / 6.92 N
+  pitch máximo = 86.6 deg
+  deslocamento máximo = 0.31 m
+
+L=2.5 m:
+  tensão inicial drone/âncora = 0.18 / 0.33 N
+  tensão máxima drone/âncora = 2.62 / 2.86 N
+  pitch máximo = 30.2 deg
+  deslocamento máximo = 0.09 m
+
+L=3.0 m:
+  tensão inicial drone/âncora = 0.16 / 0.29 N
+  tensão máxima drone/âncora = 8.30 / 36.32 N
+  pitch máximo = 15.2 deg
+  deslocamento máximo = 0.07 m
+```
+
+Conclusão:
+`L=2.5 m` é a melhor configuração entre as três para o assentamento inicial: remove o crash do DART e reduz o pico de tensão em relação a `L=2.0 m`. `L=3.0 m` cria uma curva lateral grande demais e produz pico muito alto na âncora, provavelmente por dinâmica/impacto da cadeia próxima ao carretel.
+
+Teste de subida com `L=2.5 m`:
+
+```text
+trajetoria_subida_curta_spawn.json, z final 0.60 m:
+  tensão máxima drone/âncora = 3.59 / 4.76 N
+  pitch máximo = 36.5 deg
+  erro final = 0.29 m
+  saturação z = 23 amostras
+  não atingiu o waypoint dentro da janela de teste
+
+trajetoria_subida_z1_spawn.json, z final 1.00 m:
+  tensão máxima drone/âncora = 2.68 / 15.79 N
+  pitch máximo = 34.0 deg
+  erro final = 0.71 m
+  saturação z = 22 amostras
+  não atingiu o waypoint dentro da janela de teste
+```
+
+Próxima ação:
+Antes de trajetórias verticais, investigar por que a cadeia horizontal relaxada ainda induz pitch sustentado de aproximadamente 30 graus. Possíveis causas: torque da junta fixa entre `ponta_cabo` e `cabo_sensor_link`, referência de mola/damping nos yaw joints, contato/impulso dos primeiros segmentos perto da âncora ou incompatibilidade entre cabo inicialmente lateral e junta fixa ao sensor.
+
+## Experimento: Diagnóstico Da Conexão Cabo-Drone
+
+Data:
+2026-08-16.
+
+Objetivo:
+Identificar qual elemento do tether ainda transmite força ou momento artificial ao drone no caso baseline com `L=2.5 m`.
+
+Baseline:
+
+```text
+comprimento do cabo = 2.5 m
+massa total = 0.30 kg
+50 segmentos
+comprimento por segmento = 0.05 m
+massa por segmento = 0.00588 kg
+initial_shape = sine_slack horizontal
+amplitude lateral = 0.6921 m
+cmd_vel_frame = body
+controlador e ganhos inalterados
+trajetoria_assentamento_spawn.json
+```
+
+Alterações realizadas:
+
+- `tether_parameters.json` ganhou parâmetros diagnósticos:
+  - `connection_type`: `fixed` ou `ball`;
+  - `joint_spring_stiffness`;
+  - `joint_damping`;
+  - `joint_friction`;
+  - `segment_collision`.
+- `start_sim.launch.py` passa a ler `connection_type` e gerar a junta `cabo_drone_joint` como `fixed` ou `ball`.
+- A junta de conexão publica `/cabo/conexao_drone`.
+- O controlador registra `|F|`, `|M|`, `F=(Fx,Fy,Fz)` e `M=(Mx,My,Mz)` da conexão.
+- O gerador imprime `tau_spring_inicial_max=0.0000 Nm`, pois `initial_position == spring_reference` nas juntas internas.
+
+Resultados no assentamento do spawn:
+
+```text
+caso                 conexão  spring  damping  colisão  Tmax D/C [N]   |F|max [N]  |M|max [Nm]  pitch max [deg]
+baseline_fixed       fixed    0.02    0.08     sim      3.72 / 4.88    0.99       0.044       31.2
+conexao_ball         ball     0.02    0.08     sim      2.01 / 3.32    1.03       0.000        0.2
+spring_zero          fixed    0.00    0.08     sim      2.78 / 2.97    0.96       0.042       31.4
+damping_half         fixed    0.02    0.04     sim      2.04 / 2.32    1.33       0.050       30.3
+damping_double       fixed    0.02    0.16     sim      5.72 / 8.29    5.74       0.039       30.9
+no_segment_collision fixed    0.02    0.08     não      8.86 / 6.55    8.85       1.963       89.1
+```
+
+Interpretação:
+
+- A junta `ball` praticamente elimina o momento na conexão e derruba o pitch máximo de aproximadamente `31 deg` para `0.2 deg`.
+- Zerar a mola interna não reduz o pitch, logo a energia elástica inicial das juntas internas não é a causa principal.
+- `initial_position` e `spring_reference` estão alinhados no gerador, logo `tau_spring(t=0)` é zero por construção.
+- Dobrar o damping aumenta bastante as tensões e a força na conexão, então damping excessivo pode transmitir força artificial.
+- Remover colisões dos segmentos piorou drasticamente o resultado neste modelo, com pitch próximo de `90 deg` e momento de quase `2 Nm`; portanto esse caminho está descartado como melhoria imediata.
+
+Conclusão:
+A causa dominante do pitch sustentado no assentamento é a transmissão de momento pela junta fixa `ponta_cabo -> cabo_sensor_link`, não a tensão axial isolada nem a mola interna inicial do cabo.
+
+Teste de subida curta com conexão `ball`:
+
+```text
+trajetoria_subida_curta_spawn.json, z final 0.60 m:
+  tensão máxima drone/âncora = 5.92 / 14.32 N
+  |F|max conexão = 2.16 N
+  |M|max conexão = 0.000 Nm
+  roll/pitch máximo = 0.0 / 0.7 deg
+  erro final = 0.24 m
+  saturação z = 22 amostras
+  resultado: não atingiu o waypoint dentro da janela testada
+```
+
+Conclusão da subida:
+A conexão livre resolve a inclinação artificial, mas a subida vertical ainda é limitada por saturação em `z` e por forças/tensões do tether. Esse problema deve ser tratado separadamente, depois de consolidar uma conexão final que não transmita momento indevido ao drone.
+
+Próxima ação:
+Projetar uma conexão final fisicamente coerente para o sensor do cabo: ela deve transmitir força no ponto de conexão, permitir orientação passiva do tether e medir azimuth/elevation sem impor orientação rígida ao drone. A junta `ball` é um bom diagnóstico, mas ainda não representa sozinha o sensor final de 2 DOF.
+
+## Experimento: Baseline Ball, Ângulos Locais E Subida Vertical
+
+Data:
+2026-08-16.
+
+Objetivo:
+Adotar `connection_type = ball` como baseline física provisória, verificar se a medição de ângulos continua viável e investigar a falha de subida vertical sem o momento artificial da conexão fixa.
+
+Configuração baseline:
+
+```text
+L = 2.5 m
+massa total do cabo = 0.30 kg
+num_links = 50
+length = 0.05 m
+mass = 0.00588 kg
+initial_shape = sine_slack horizontal
+connection_type = ball
+cmd_vel_frame = body
+ganhos do controlador inalterados
+```
+
+### Validação Angular Com Ball
+
+Método:
+O sensor principal usa a direção local do tether obtida pela diferença entre a `ponta_cabo` e um segmento próximo ao drone, expressa no frame do drone. Foram comparadas duas janelas:
+
+```text
+Método A: janela_tangente_links = 1
+Método B: janela_tangente_links = 3
+```
+
+Casos testados:
+`E`, `N`, `W`, `S` e `NE`, todos com extremidade em raio horizontal de `2.0 m` e `z = 0.33 m`.
+
+Resultados:
+
+```text
+janela = 1:
+  azimuth medido: ~179.8 deg em todos os casos
+  elevation medida: -10.7 a -12.0 deg
+
+janela = 3:
+  azimuth medido: ~179.8 deg em todos os casos
+  elevation medida: -3.3 a -6.1 deg
+```
+
+Interpretação:
+Com `connection_type = ball`, o cabo se reorienta passivamente após o início da simulação. Por isso, a tangente dinâmica medida não coincide com a tangente da curva senoidal inicial congelada. A comparação correta para o sensor é contra a geometria dinâmica dos segmentos, não contra a forma inicial. A janela de 3 links suaviza a estimativa local e reduz a inclinação aparente em relação ao uso de apenas 1 link.
+
+Decisão operacional:
+Usar `janela_tangente_links = 3` como estimativa local provisória do cabo no drone. A reta até a âncora continua disponível como diagnóstico, mas não deve ser usada como sensor local em cabo slack.
+
+### Subida Vertical Sem Tether Vs Com Tether Ball
+
+Trajetória:
+
+```text
+spawn = (2.0, 0.0, 0.33)
+waypoint inicial = (2.0, 0.0, 0.33)
+waypoint final = (2.0, 0.0, 0.60)
+tempo_hover = 5.0 s
+```
+
+Sweep de `limite_vel_z`:
+
+```text
+caso                 limite_z  chegou  z_final/ref  vz_max  raw_z_max  cmd_z_max  sat_z   Tmax D/C [N]   Fz_raw max [N]  pitch max
+sem tether           0.25      sim     0.60/0.60    0.24    0.17       0.17       0/22    0.00/0.00      0.00            0.0
+sem tether           0.50      sim     0.60/0.60    0.17    0.13       0.13       0/22    0.00/0.00      0.00            0.0
+sem tether           0.75      sim     0.60/0.60    0.17    0.14       0.14       0/22    0.00/0.00      0.00            0.0
+tether ball          0.25      não     0.34/0.60    0.04    0.35       0.25       31/41   1.78/3.47      0.49            0.4
+tether ball          0.50      não     0.37/0.60    0.03    0.35       0.35       0/40    7.83/14.73     0.49            0.3
+tether ball          0.75      não     0.44/0.60    0.04    0.35       0.35       0/40    1.75/3.55      0.49            1.1
+```
+
+Localização da saturação:
+
+- Para `limite_vel_z = 0.25`, a saturação ocorre no clamp do controlador: `raw_z_max = 0.35`, `cmd_z_max = 0.25`.
+- Para `limite_vel_z = 0.50` e `0.75`, o clamp do controlador não satura (`cmd_z_max = raw_z_max = 0.35`), mas o drone ainda quase não sobe.
+- Portanto, a falha com tether não é explicada apenas por `limite_vel_z`; há limitação posterior ao `cmd_vel` publicado ou carga/dinâmica do tether.
+
+Força vertical do tether:
+O maior `Fz` bruto medido na conexão foi aproximadamente `0.49 N` nos casos com settling. Esse valor é pequeno comparado ao peso do drone:
+
+```text
+peso do drone ~= 1.55 * 9.81 = 15.2 N
+Fz_tether / peso ~= 3.2 %
+```
+
+Teste imediato vs settling:
+
+```text
+subida imediata, tether ball, limite_z=0.25:
+  z_final/ref = 0.33/0.60
+  vz_max = 0.03 m/s
+  raw_z_max/cmd_z_max = 0.33/0.25
+  sat_z = 25/25
+  Tmax D/C = 1.66/4.04 N
+  Fz_raw max = 1.08 N
+  pitch max = 0.3 deg
+
+settling + subida, tether ball, limite_z=0.25:
+  z_final/ref = 0.34/0.60
+  vz_max = 0.04 m/s
+  raw_z_max/cmd_z_max = 0.35/0.25
+  sat_z = 31/41
+  Tmax D/C = 1.78/3.47 N
+  Fz_raw max = 0.49 N
+  pitch max = 0.4 deg
+```
+
+Conclusão do settling:
+O settling reduz a componente vertical máxima medida na conexão, mas não resolve a incapacidade de subir.
+
+Margem nominal de empuxo:
+Pelos parâmetros do SDF:
+
+```text
+forceConstant = 1.5e-03
+maxRotVelocity = 1000 rad/s
+4 rotores
+Tmax nominal = 4 * 1.5e-03 * 1000^2 = 6000 N
+peso do drone ~= 15.2 N
+T/W nominal ~= 394.6
+```
+
+Essa margem nominal é enorme e provavelmente não representa a limitação real do plugin durante o controle por velocidade. Nos logs, velocidades de rotor reportadas ficaram por volta de `11–12 rad/s`, muito abaixo de `maxRotVelocity`, então não há evidência de saturação dos rotores nesses ensaios.
+
+Conclusão:
+A conexão `ball` remove o torque artificial e preserva a possibilidade de medir a direção local do cabo por geometria dos segmentos. A subida vertical, porém, continua limitada mesmo sem saturação do clamp do controlador e com componente vertical de tether pequena. A próxima suspeita é a dinâmica interna do `MulticopterVelocityControl`, a interpretação do comando vertical quando há carga externa no modelo acoplado, ou a forma como o sistema multibody cabo-drone afeta o link/controlador usado pelo plugin.
+
+Próxima ação:
+Investigar a resposta do plugin para `cmd_vel.linear.z` com carga externa pequena: testar comandos verticais constantes sem controlador de posição, verificar o link usado como `comLinkName`, e comparar odometria/velocidade real do `base_link` com o comando publicado.
+
+## Experimento: Trajetórias Slack Com Waypoint Intermediário
+
+Data:
+Contexto do chat anterior.
+
+Objetivo:
+Evitar tensionamento durante deslocamento inicial usando waypoint intermediário antes do ponto final.
+
+Hipótese:
+Uma subida ou passagem conservadora reduziria aceleração abrupta do tether.
+
+Configuração:
+Arquivos `trajetoria_slack_*.json` e `trajetoria_spawn_conservadora_z2.json`.
+
+Resultado:
+Resultados numéricos completos não estão confirmados no repositório. O README registra que `trajetoria_slack_n.json` não atingiu o waypoint intermediário em janela de 125 s em um ensaio anterior.
+
+Conclusão:
+A estratégia depende da consistência entre spawn, primeiro waypoint e geometria inicial do cabo.
+
+Próxima ação:
+Confirmar o conteúdo atual dos arquivos `trajetoria_slack_*.json`, pois há inconsistência documentada para o caso `n`.

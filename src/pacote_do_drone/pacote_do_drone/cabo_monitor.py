@@ -26,12 +26,20 @@ class CaboMonitor(Node):
         self.create_subscription(Float64, '/cabo/elevation_graus', self._elevation_callback, 10)
         self.create_subscription(Float64, '/cabo/azimuth_ancora_graus', self._azimuth_ancora_callback, 10)
         self.create_subscription(Float64, '/cabo/elevation_ancora_graus', self._elevation_ancora_callback, 10)
+        self.create_subscription(Float64, '/cabo/ancora/azimuth_graus', self._azimuth_tangente_ancora_callback, 10)
+        self.create_subscription(Float64, '/cabo/ancora/elevation_graus', self._elevation_tangente_ancora_callback, 10)
+        self.create_subscription(Float64, '/cabo/azimuth_joint_graus', self._azimuth_joint_callback, 10)
+        self.create_subscription(Float64, '/cabo/elevation_joint_graus', self._elevation_joint_callback, 10)
         self.period_ns = int(1e9 / max(rate_hz, 0.1))
         self.last_print = self.get_clock().now()
         self.azimuth_deg = None
         self.elevation_deg = None
         self.azimuth_ancora_deg = None
         self.elevation_ancora_deg = None
+        self.azimuth_tangente_ancora_deg = None
+        self.elevation_tangente_ancora_deg = None
+        self.azimuth_joint_deg = None
+        self.elevation_joint_deg = None
         self.csv_file = None
         self.csv_writer = None
 
@@ -44,11 +52,15 @@ class CaboMonitor(Node):
                 'elevation_deg',
                 'azimuth_ancora_deg',
                 'elevation_ancora_deg',
+                'azimuth_tangente_ancora_deg',
+                'elevation_tangente_ancora_deg',
+                'azimuth_joint_deg',
+                'elevation_joint_deg',
                 'elevation_saturado',
             ])
             self.get_logger().info(f'Gravando CSV em {csv_path}')
 
-        self.get_logger().info('Lendo /cabo/azimuth_graus e /cabo/elevation_graus')
+        self.get_logger().info('Lendo angulos do cabo: drone, reta sensor-ancora e ancora.')
 
     def destroy_node(self):
         if self.csv_file:
@@ -71,6 +83,22 @@ class CaboMonitor(Node):
         self.elevation_ancora_deg = msg.data
         self._print_if_ready()
 
+    def _azimuth_tangente_ancora_callback(self, msg):
+        self.azimuth_tangente_ancora_deg = msg.data
+        self._print_if_ready()
+
+    def _elevation_tangente_ancora_callback(self, msg):
+        self.elevation_tangente_ancora_deg = msg.data
+        self._print_if_ready()
+
+    def _azimuth_joint_callback(self, msg):
+        self.azimuth_joint_deg = msg.data
+        self._print_if_ready()
+
+    def _elevation_joint_callback(self, msg):
+        self.elevation_joint_deg = msg.data
+        self._print_if_ready()
+
     def _print_if_ready(self):
         if self.azimuth_deg is None or self.elevation_deg is None:
             return
@@ -85,6 +113,10 @@ class CaboMonitor(Node):
                 f'{self.elevation_deg:.6f}',
                 '' if self.azimuth_ancora_deg is None else f'{self.azimuth_ancora_deg:.6f}',
                 '' if self.elevation_ancora_deg is None else f'{self.elevation_ancora_deg:.6f}',
+                '' if self.azimuth_tangente_ancora_deg is None else f'{self.azimuth_tangente_ancora_deg:.6f}',
+                '' if self.elevation_tangente_ancora_deg is None else f'{self.elevation_tangente_ancora_deg:.6f}',
+                '' if self.azimuth_joint_deg is None else f'{self.azimuth_joint_deg:.6f}',
+                '' if self.elevation_joint_deg is None else f'{self.elevation_joint_deg:.6f}',
                 int(saturado),
             ])
 
@@ -95,11 +127,21 @@ class CaboMonitor(Node):
 
         aviso = ' SAT' if saturado else ''
         linha = (
-            f'az {self.azimuth_deg:8.2f} [{_barra(self.azimuth_deg, 180.0)}]  '
-            f'el {self.elevation_deg:8.2f} [{_barra(self.elevation_deg, ELEVATION_LIMIT_DEG)}]{aviso}'
+            f'Drone tangente: az={self.azimuth_deg:6.1f} deg '
+            f'el={self.elevation_deg:5.1f} deg{aviso}'
         )
         if self.azimuth_ancora_deg is not None and self.elevation_ancora_deg is not None:
-            linha += f'  | ancora az/el {self.azimuth_ancora_deg:8.2f}/{self.elevation_ancora_deg:8.2f}'
+            linha += (
+                f' | Drone reta->ancora: az={self.azimuth_ancora_deg:6.1f} deg '
+                f'el={self.elevation_ancora_deg:5.1f} deg'
+            )
+        if self.azimuth_tangente_ancora_deg is not None and self.elevation_tangente_ancora_deg is not None:
+            linha += (
+                f' | Ancora tangente: az={self.azimuth_tangente_ancora_deg:6.1f} deg '
+                f'el={self.elevation_tangente_ancora_deg:5.1f} deg'
+            )
+        if self.azimuth_joint_deg is not None and self.elevation_joint_deg is not None:
+            linha += f' | Junta: az={self.azimuth_joint_deg:6.1f} deg el={self.elevation_joint_deg:5.1f} deg'
         print(linha, flush=True)
 
 

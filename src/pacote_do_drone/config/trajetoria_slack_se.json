@@ -1,0 +1,19 @@
+{
+  "descricao": "Teste de angulo com cabo folgado: sensor em SE a 1.0 m radial da ancora, com waypoint intermediario sobre a ancora.",
+  "tempo_hover": 1.0,
+  "repetir": false,
+  "controlar_heading": true,
+  "heading_fixo": 1.57079632679,
+  "waypoints": [
+    {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.5
+    },
+    {
+      "x": 0.7071067812,
+      "y": -0.7071067812,
+      "z": 2.0
+    }
+  ]
+}

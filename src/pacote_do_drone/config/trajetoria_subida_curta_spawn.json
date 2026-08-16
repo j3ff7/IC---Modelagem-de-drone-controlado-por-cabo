@@ -1,0 +1,8 @@
+{
+  "waypoints": [
+    {"x": 2.0, "y": 0.0, "z": 0.33, "hover": 5.0},
+    {"x": 2.0, "y": 0.0, "z": 0.60, "hover": 5.0}
+  ],
+  "repetir": false,
+  "controlar_heading": false
+}

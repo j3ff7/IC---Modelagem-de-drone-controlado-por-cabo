@@ -1,0 +1,10 @@
+{
+  "descricao": "Diagnostico minimo de hover: waypoint unico sobre a ancora em z=2.0, sem controle de heading.",
+  "tempo_hover": 5.0,
+  "repetir": false,
+  "controlar_heading": false,
+  "heading_fixo": 0.0,
+  "waypoints": [
+    {"x": 0.0, "y": 0.0, "z": 2.0}
+  ]
+}

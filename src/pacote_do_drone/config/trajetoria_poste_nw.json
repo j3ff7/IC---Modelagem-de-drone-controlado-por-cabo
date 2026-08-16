@@ -1,0 +1,9 @@
+{
+  "tempo_hover": 10.0,
+  "repetir": false,
+  "controlar_heading": true,
+  "heading_fixo": 1.57079632679,
+  "waypoints": [
+    {"x": -1.1313708499, "y": 1.1313708499, "z": 1.58}
+  ]
+}
