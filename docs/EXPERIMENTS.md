@@ -799,6 +799,7 @@ Alterações realizadas:
 
 - Auditoria de tempo no pacote ativo `src/pacote_do_drone`.
 - `sensores.py` e `cabo_monitor.py` passaram a usar `/clock` para cadência de log/CSV quando disponível.
+- `sensores.py` passou a aceitar `janela_tangente_metros`; com o padrão atual `0.15 m`, a janela equivale a 3 links no cabo baseline de `length=0.05 m`.
 - `movimento_circular.py` ganhou `tempo_estabilizacao`, separado de `tempo_hover`.
 - Logs compactos do controlador agora incluem `RTF`.
 - Criado o nó `hover_metrics`, que mede:
@@ -899,7 +900,7 @@ hover 10 s simulado em (2.0,0.0,1.0)
 hover 30 s simulado em (2.0,0.0,1.0)
 casos N/S/E/W em raio 1.0 m, z=2.0 m
 sweep 20/30/40/50 links
-comparacao janela_tangente_links=1 vs 3
+comparacao janela_tangente_metros=0.05 vs 0.15
 ```
 
 Motivo:
@@ -907,3 +908,80 @@ Com 50 links, o RTF observado ficou tipicamente em `0.04-0.07`; testes de 30 s s
 
 Próxima ação:
 Rodar as baterias longas com `hover_metrics` e timeouts reais dimensionados por RTF, ou primeiro executar o sweep de discretização para encontrar uma configuração com RTF melhor sem degradar ângulos/tensão.
+
+## Experimento: Janela Física E Teste Curto De Convergência
+
+Data:
+2026-08-17.
+
+Objetivo:
+Usar uma janela física para estimar a tangente local do cabo e comparar a subida vertical para `z=1.0 m` com e sem tether, mantendo a baseline física e os ganhos atuais.
+
+Alterações:
+
+- `sensores.py` agora recebe `janela_tangente_metros`.
+- Padrão atual: `0.15 m`.
+- Com a baseline `length=0.05 m/link`, isso equivale a `3` links.
+- `janela_tangente_links` permanece como fallback quando `janela_tangente_metros <= 0`.
+
+Caso sem cabo:
+
+```text
+usar_cabo=false
+spawn=(2.0,0.0,0.33)
+waypoints=(2.0,0.0,0.33) -> (2.0,0.0,1.0)
+RTF~1.00
+
+resultado:
+  transicao WP0->WP1: t_sim~3.85 s
+  entrada em hover no WP1: t_sim~8.0 s
+  sequencia concluida: t_sim~9.4 s
+  erro final na janela de metricas: ~0.03 m RMS
+  roll/pitch max: ~0.02/0.00 deg
+```
+
+Métricas sem cabo:
+
+```text
+RTF_med=1.00
+pos_mean=(2.000,0.004,0.975) m
+pos_std=(0.000,0.001,0.017) m
+err_mean/rms/max=0.025/0.030/0.066 m
+T_mean/max=0.00/0.00 N
+```
+
+Caso com cabo baseline:
+
+```text
+usar_cabo=true
+connection_type=ball
+L=2.5 m
+m_cabo~0.30 kg
+janela_tangente_metros=0.15
+RTF~0.05
+
+resultado:
+  transicao WP0->WP1: t_sim~3.3 s
+  t_sim~4.0 s: z~0.51 m, erro~0.50 m
+  t_sim~5.0 s: z~0.73 m, erro~0.27 m
+  t_sim~6.0 s: z~0.83 m, erro~0.18 m
+  cmd_z_raw abaixo de limite_vel_z depois da transicao
+  roll/pitch pequenos, sem indicio de tombamento
+```
+
+Métricas com cabo, janela curta `t_sim=4.0-5.0 s`:
+
+```text
+RTF_med=0.05
+pos_mean=(2.060,0.004,0.643) m
+pos_std=(0.006,0.000,0.064) m
+err_mean/rms/max=0.362/0.367/0.496 m
+roll_max=0.02 deg
+pitch_max=1.26 deg
+T_mean/max=0.42/0.47 N
+az_mean/std/min/max=179.88/0.01/179.85/179.90 deg
+el_mean/std/min/max=21.20/4.95/11.71/29.63 deg
+```
+
+Interpretação:
+A comparação confirma que o controlador e o comando `cmd_vel_frame=body` funcionam no caso sem cabo. Com cabo, a resposta permanece estável, sem saturação vertical dominante e com atitude pequena, mas a convergência vertical fica mais lenta e o custo computacional ainda é alto. O próximo diagnóstico deve priorizar redução de RTF/discretização antes de alterar ganhos.

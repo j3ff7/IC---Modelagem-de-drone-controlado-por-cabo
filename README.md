@@ -195,7 +195,7 @@ ros2 launch pacote_do_drone start_sim.launch.py \
   vz_cmd:=0.25 \
   velocity_test_duracao:=8.0 \
   log_periodo:=0.5 \
-  janela_tangente_links:=3
+  janela_tangente_metros:=0.15
 ```
 
 Variantes importantes:
@@ -228,7 +228,7 @@ ros2 launch pacote_do_drone start_sim.launch.py \
   headless:=true
 ```
 
-O nó imprime `RTF`, erro, tensão e um resumo final com média/desvio de posição, roll/pitch, tensão, azimuth e elevation.
+O nó imprime `RTF`, erro, tensão e um resumo final com média/desvio de posição, roll/pitch, tensão, azimuth e elevation. O sensor usa por padrão uma janela física de `0.15 m` perto da ponta do cabo (`janela_tangente_metros`) para estimar a tangente local; se esse valor for `0`, ele volta ao fallback `janela_tangente_links`.
 
 ### Diagnostico da geometria inicial do cabo
 

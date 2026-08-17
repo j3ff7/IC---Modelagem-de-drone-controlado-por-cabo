@@ -34,6 +34,7 @@ class LeitorCabo(Node):
     def __init__(self):
         super().__init__('leitor_cabo_node')
         self.declare_parameter('janela_tangente_links', 6)
+        self.declare_parameter('janela_tangente_metros', 0.15)
         self.sim_time_ns = None
 
         self.create_subscription(Clock, '/clock', self.clock_callback, 10)
@@ -81,9 +82,19 @@ class LeitorCabo(Node):
         self.posicao_ponta_cabo = None
         self.posicoes_segmentos = {}
         self.usando_tangente_local = False
-        self.posicao_ancora = self._ler_posicao_ancora()
+        self.tether_params = self._ler_tether_params()
+        self.posicao_ancora = self._posicao_ancora_params()
         self.offset_sensor_corpo = (0.0, 0.0, -0.05)
-        self.janela_tangente_links = max(1, int(self.get_parameter('janela_tangente_links').value))
+        self.janela_tangente_metros = max(0.0, float(self.get_parameter('janela_tangente_metros').value))
+        self.janela_tangente_links = self._calcular_janela_tangente_links()
+        self.get_logger().info(
+            f'Janela tangente: {self.janela_tangente_links} links'
+            + (
+                f' (~{self.janela_tangente_metros:.2f} m)'
+                if self.janela_tangente_metros > 0.0
+                else ''
+            )
+        )
 
     def _agora_ns(self):
         if self.sim_time_ns is not None:
@@ -93,22 +104,37 @@ class LeitorCabo(Node):
     def clock_callback(self, msg):
         self.sim_time_ns = msg.clock.sec * 1_000_000_000 + msg.clock.nanosec
 
-    def _ler_posicao_ancora(self):
+    def _ler_tether_params(self):
         try:
             caminho_json = os.path.join(
                 get_package_share_directory('pacote_do_drone'),
                 'tether_parameters.json',
             )
             with open(caminho_json, 'r') as f:
-                params = json.load(f)
+                return json.load(f)
         except (FileNotFoundError, KeyError):
-            params = {}
+            return {}
 
+    def _posicao_ancora_params(self):
         return (
-            float(params.get('anchor_x', 0.0)),
-            float(params.get('anchor_y', 0.0)),
-            float(params.get('anchor_z', 0.33)),
+            float(self.tether_params.get('anchor_x', 0.0)),
+            float(self.tether_params.get('anchor_y', 0.0)),
+            float(self.tether_params.get('anchor_z', 0.33)),
         )
+
+    def _calcular_janela_tangente_links(self):
+        fallback_links = max(1, int(self.get_parameter('janela_tangente_links').value))
+        if self.janela_tangente_metros <= 0.0:
+            return fallback_links
+
+        comprimento_segmento = float(self.tether_params.get('length', 0.0))
+        if comprimento_segmento <= 0.0:
+            self.get_logger().warning(
+                'Nao foi possivel ler length do tether; usando janela_tangente_links.'
+            )
+            return fallback_links
+
+        return max(1, int(round(self.janela_tangente_metros / comprimento_segmento)))
 
     def tensao_callback(self, msg):
         fx = msg.wrench.force.x

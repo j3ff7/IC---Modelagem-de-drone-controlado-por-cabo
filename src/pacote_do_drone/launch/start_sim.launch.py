@@ -371,6 +371,7 @@ def generate_launch_description():
         executable='sensores',
         parameters=[{
             'janela_tangente_links': ParameterValue(LaunchConfiguration('janela_tangente_links'), value_type=int),
+            'janela_tangente_metros': ParameterValue(LaunchConfiguration('janela_tangente_metros'), value_type=float),
         }],
         output='screen'
     )
@@ -681,7 +682,12 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'janela_tangente_links',
             default_value='6',
-            description='Numero de links usados para estimar a tangente local do cabo no sensor.',
+            description='Fallback em links para estimar a tangente local quando janela_tangente_metros <= 0.',
+        ),
+        DeclareLaunchArgument(
+            'janela_tangente_metros',
+            default_value='0.15',
+            description='Comprimento fisico da janela usada para estimar a tangente local do cabo no sensor.',
         ),
         DeclareLaunchArgument(
             'hover_metrics',

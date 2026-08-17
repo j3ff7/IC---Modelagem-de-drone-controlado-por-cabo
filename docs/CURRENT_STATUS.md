@@ -80,6 +80,7 @@ L=3.0 m: z_min = -0.648 m
 - O controlador de posição também usa `/clock` para derivadas, integradores, estabilização, hovering e logs.
 - `tempo_estabilizacao` foi separado de `tempo_hover`.
 - `hover_metrics` coleta estatísticas de posição, tensão, atitude e azimuth/elevation em janelas de tempo simulado.
+- `sensores.py` usa `janela_tangente_metros=0.15` por padrão para estimar a tangente local em comprimento físico, equivalente a 3 links no cabo baseline.
 
 ## Constraints / Do Not Change
 
@@ -89,6 +90,7 @@ L=3.0 m: z_min = -0.648 m
 - Não alterar a convenção angular sem atualizar testes, tabelas esperadas e documentação.
 - Não editar manualmente `models/cabo.sdf` como fonte primária; ele é gerado por `models/gerar_cabo.py`.
 - Interpretar testes com cabo em tempo simulado (`t_sim`), não em tempo de parede, porque o RTF pode cair para cerca de `0.04-0.10` com o cabo de 50 links.
+- No teste curto `z=1.0 m`, o caso sem cabo concluiu hover com erro RMS de cerca de `0.03 m`; com o cabo baseline, a subida ficou estável mas lenta, com `RTF~0.05`, `pitch_max~1.3 deg`, `T_max~0.47 N` na janela `t_sim=4-5 s` e erro RMS de cerca de `0.37 m` nessa janela inicial.
 
 ## Recent Results
 
@@ -357,7 +359,7 @@ Com cabo + spawn original: instável, pitch próximo de ±90 deg, tensão máxim
 ## Next Steps
 
 1. Manter `connection_type=ball` como baseline provisória; usar `fixed` apenas para diagnóstico.
-2. Consolidar o cálculo de azimuth/elevation usando direção local dos últimos segmentos, inicialmente `janela_tangente_links=3`.
+2. Consolidar o cálculo de azimuth/elevation usando direção local por janela física, inicialmente `janela_tangente_metros=0.15` (`3` links no cabo baseline de `0.05 m/link`).
 3. Investigar por que o drone com tether não responde ao `cmd_vel.linear.z` como no caso sem tether, mesmo quando o clamp do controlador não satura.
 4. Testar comandos verticais constantes sem controlador de posição e verificar a resposta do `MulticopterVelocityControl` no modelo multibody cabo-drone.
 
@@ -366,7 +368,7 @@ Com cabo + spawn original: instável, pitch próximo de ±90 deg, tensão máxim
 Último commit remoto conhecido no branch atual:
 
 ```text
-c73e8a6 (shared, origin/shared) Adiciona diagnostico aberto de resposta vertical
+3e369fc (shared, origin/shared) Consolida tempo simulado e metricas de hover
 ```
 
 Observação: após a correção por `/clock`, o próximo commit deverá atualizar esta referência.
