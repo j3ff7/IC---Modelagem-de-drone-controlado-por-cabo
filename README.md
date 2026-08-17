@@ -90,21 +90,23 @@ Cabo, em `src/pacote_do_drone/tether_parameters.json` e gerado por `src/pacote_d
 
 ```text
 num_links              50
+comprimento_total_m    2.500 m
 length por segmento    0.050 m
 comprimento nominal    2.500 m
+densidade_linear       0.010 kg/m
 raio                   0.002 m
-massa por segmento     0.005880 kg
-massa dos 50 segmentos 0.294 kg
+massa por segmento     0.000500 kg
+massa dos 50 segmentos 0.025 kg
 50 links dummy         50 x 0.0001 kg = 0.005 kg
 raiz_cabo              0.0005 kg
 ponta_cabo             0.0005 kg
-massa total SDF cabo   0.300 kg
+massa dinamica total   0.031 kg
 ancora                 10.000 kg, fixa ao mundo
 connection_type        ball (baseline fisica provisoria)
-razao cabo/drone       0.194
+razao cabo/drone       0.020
 ```
 
-O valor `mass` do JSON e a massa de cada segmento cilindrico do cabo. A massa dinamica total do cabo inclui tambem `dummy_*`, `raiz_cabo` e `ponta_cabo`.
+Quando `densidade_linear_kg_m` estiver presente, ela tem precedencia sobre o parametro legado `mass`: o gerador calcula `mass = densidade_linear_kg_m * comprimento_total_m / num_links`. A massa dinamica total do cabo inclui tambem `dummy_*`, `raiz_cabo` e `ponta_cabo`.
 
 A conexão `ball` transmite força no ponto de conexão e permite orientação passiva do tether, evitando o momento artificial observado com a conexão `fixed`. A opção `fixed` permanece disponível apenas para diagnóstico em `tether_parameters.json`.
 

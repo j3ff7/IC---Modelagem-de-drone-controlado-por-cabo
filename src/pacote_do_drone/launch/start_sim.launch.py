@@ -25,6 +25,12 @@ def _int_launch(context, nome, default):
     return default if valor == '' else int(valor)
 
 
+def _comprimento_total_cabo(params):
+    if 'comprimento_total_m' in params:
+        return float(params['comprimento_total_m'])
+    return int(params.get('num_links', 0)) * float(params.get('length', 0.0))
+
+
 def _payload_xml(massa):
     return f'''
       <link name="payload_teste">
@@ -106,7 +112,7 @@ def _criar_mundo_diagnostico(context, pkg_share, params):
 
     num_links = int(params.get('num_links', 40))
     length = float(params.get('length', 0.05))
-    comprimento_total = num_links * length
+    comprimento_total = _comprimento_total_cabo(params)
     ancora_x = float(params.get('anchor_x', 0.0))
     ancora_y = float(params.get('anchor_y', 0.0))
     ancora_z = float(params.get('anchor_z', 0.33))
@@ -335,7 +341,7 @@ def generate_launch_description():
         with open(caminho_json, 'r') as f:
             params = json.load(f)
         # Multiplica quantidade de elos pelo tamanho de cada um
-        tamanho_total_cabo = params["num_links"] * params["length"]
+        tamanho_total_cabo = _comprimento_total_cabo(params)
         # Usa 85% do tamanho do cabo para dar uma "barriga" (catenária) natural e evitar tensão infinita
         altura_x = str(tamanho_total_cabo * 0.85)
         print(f"Calculado altura_x automático: {altura_x}m")
@@ -439,6 +445,8 @@ def generate_launch_description():
             'duracao_s': ParameterValue(LaunchConfiguration('metricas_duracao_s'), value_type=float),
             'janela_final_s': ParameterValue(LaunchConfiguration('metricas_janela_final_s'), value_type=float),
             'log_periodo_s': ParameterValue(LaunchConfiguration('metricas_log_periodo_s'), value_type=float),
+            'limite_vel_xy': ParameterValue(LaunchConfiguration('limite_vel_xy'), value_type=float),
+            'limite_vel_z': ParameterValue(LaunchConfiguration('limite_vel_z'), value_type=float),
         }],
         output='screen',
     )

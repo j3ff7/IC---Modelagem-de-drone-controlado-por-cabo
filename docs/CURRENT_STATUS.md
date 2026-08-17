@@ -81,6 +81,7 @@ L=3.0 m: z_min = -0.648 m
 - `tempo_estabilizacao` foi separado de `tempo_hover`.
 - `hover_metrics` coleta estatísticas de posição, tensão, atitude e azimuth/elevation em janelas de tempo simulado.
 - `sensores.py` usa `janela_tangente_metros=0.15` por padrão para estimar a tangente local em comprimento físico, equivalente a 3 links no cabo baseline.
+- A massa dos segmentos do tether agora é derivada de `densidade_linear_kg_m=0.01 kg/m` e `comprimento_total_m=2.5 m`, resultando em `0.025 kg` nos segmentos e `0.031 kg` incluindo links auxiliares.
 
 ## Constraints / Do Not Change
 
@@ -90,7 +91,8 @@ L=3.0 m: z_min = -0.648 m
 - Não alterar a convenção angular sem atualizar testes, tabelas esperadas e documentação.
 - Não editar manualmente `models/cabo.sdf` como fonte primária; ele é gerado por `models/gerar_cabo.py`.
 - Interpretar testes com cabo em tempo simulado (`t_sim`), não em tempo de parede, porque o RTF pode cair para cerca de `0.04-0.10` com o cabo de 50 links.
-- No teste curto `z=1.0 m`, o caso sem cabo concluiu hover com erro RMS de cerca de `0.03 m`; com o cabo baseline, a subida ficou estável mas lenta, com `RTF~0.05`, `pitch_max~1.3 deg`, `T_max~0.47 N` na janela `t_sim=4-5 s` e erro RMS de cerca de `0.37 m` nessa janela inicial.
+- Com a baseline física de `25 g`, o teste vertical `z=1.0 m` concluiu hover com `pitch_max~0.06 deg`, `T_mean/max~0.10/0.10 N`, `RTF~0.10` e sem saturação.
+- O teste N com `25 g` foi `NO-GO` por convergência lateral: forças baixas, sem saturação persistente e roll/pitch moderados, mas erro 3D RMS de cerca de `0.25 m` na janela final.
 
 ## Recent Results
 
@@ -360,15 +362,15 @@ Com cabo + spawn original: instável, pitch próximo de ±90 deg, tensão máxim
 
 1. Manter `connection_type=ball` como baseline provisória; usar `fixed` apenas para diagnóstico.
 2. Consolidar o cálculo de azimuth/elevation usando direção local por janela física, inicialmente `janela_tangente_metros=0.15` (`3` links no cabo baseline de `0.05 m/link`).
-3. Investigar por que o drone com tether não responde ao `cmd_vel.linear.z` como no caso sem tether, mesmo quando o clamp do controlador não satura.
-4. Testar comandos verticais constantes sem controlador de posição e verificar a resposta do `MulticopterVelocityControl` no modelo multibody cabo-drone.
+3. Ajustar de forma conservadora a convergência lateral do controlador ou a estratégia de aproximação antes dos testes N/S/E/W completos.
+4. Manter o modelo do drone inalterado; não há evidência objetiva de insuficiência física com tether de `25 g`.
 
 ## Last Known Good State
 
 Último commit remoto conhecido no branch atual:
 
 ```text
-3e369fc (shared, origin/shared) Consolida tempo simulado e metricas de hover
+f945daa (shared, origin/shared) Adiciona janela fisica para sensor do cabo
 ```
 
 Observação: após a correção por `/clock`, o próximo commit deverá atualizar esta referência.

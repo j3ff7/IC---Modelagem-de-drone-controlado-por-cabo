@@ -1,8 +1,9 @@
 {
-  "tempo_hover": 10.0,
+  "tempo_hover": 5.0,
   "repetir": false,
   "controlar_heading": false,
   "waypoints": [
+    {"x": 2.0, "y": 0.0, "z": 1.00},
     {"x": 0.0, "y": -1.0, "z": 2.00}
   ]
 }

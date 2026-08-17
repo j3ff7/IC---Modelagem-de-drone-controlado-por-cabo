@@ -178,6 +178,36 @@ Isso torna os testes de sensor mais robustos, pois as estatísticas de azimuth/e
 Consequências:
 Os arquivos de trajetória continuam definindo `tempo_hover`; `tempo_estabilizacao` é parâmetro de launch/controlador. A lógica e os ganhos do controlador foram preservados.
 
+## 2026-08-17 Massa Do Tether Derivada Da Densidade Linear Física
+
+Contexto:
+A baseline anterior de `0.30 kg` para `L=2.5 m` representava um cabo aproximadamente 12 vezes mais pesado que a densidade linear física informada, `0.01 kg/m`.
+
+Decisão:
+A massa do tether é derivada de sua densidade linear física, `0.01 kg/m`, e do comprimento configurado. Para `L=2.5 m`, a massa nominal dos segmentos é `0.025 kg`.
+
+Implementação:
+`tether_parameters.json` define `densidade_linear_kg_m` e `comprimento_total_m`. Quando `densidade_linear_kg_m` está presente, `models/gerar_cabo.py` calcula a massa por segmento automaticamente:
+
+```text
+mass = densidade_linear_kg_m * comprimento_total_m / num_links
+```
+
+Para `50` segmentos:
+
+```text
+mass = 0.0005 kg por segmento
+massa segmentos = 0.025 kg
+massa auxiliares = 0.006 kg
+massa dinâmica total = 0.031 kg
+```
+
+Justificativa:
+O teste vertical com `25 g` concluiu hover, reduziu a tensão medida no drone de aproximadamente `0.42/0.47 N` para `0.10/0.10 N` média/máxima, eliminou a degradação de pitch e aproximou a resposta do caso sem tether.
+
+Consequências:
+O parâmetro legado `mass` permanece no JSON como valor compatível/diagnóstico, mas a densidade linear tem precedência. A baseline de `0.30 kg` permanece documentada apenas como histórico comparativo.
+
 ## 2026-08-16 Conexão Tether-Drone Deve Permitir Orientação Passiva
 
 Contexto:

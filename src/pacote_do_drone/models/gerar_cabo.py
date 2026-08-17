@@ -17,10 +17,25 @@ os.makedirs(pasta_worlds, exist_ok=True)
 with open(caminho_json, 'r') as f:
     params = json.load(f)
 
-num_links = params['num_links']
-length = params['length']
+num_links = int(params['num_links'])
+comprimento_total_param = params.get('comprimento_total_m')
+if comprimento_total_param is not None:
+    comprimento_total = float(comprimento_total_param)
+    length = comprimento_total / num_links
+else:
+    length = float(params['length'])
+    comprimento_total = num_links * length
 radius = params['radius']
-mass = params['mass']
+densidade_linear = params.get('densidade_linear_kg_m')
+if densidade_linear is not None:
+    densidade_linear = float(densidade_linear)
+    massa_total_segmentos = densidade_linear * comprimento_total
+    mass = massa_total_segmentos / num_links
+    massa_origem = 'densidade_linear_kg_m'
+else:
+    mass = float(params['mass'])
+    massa_total_segmentos = num_links * mass
+    massa_origem = 'mass legado por segmento'
 dummy_mass = float(params.get('dummy_mass', 0.0001))
 root_mass = float(params.get('root_mass', 0.0005))
 tip_mass = float(params.get('tip_mass', 0.0005))
@@ -33,7 +48,6 @@ joint_friction = float(params.get('joint_friction', 0.002))
 joint_spring_stiffness = float(params.get('joint_spring_stiffness', 0.02))
 segment_collision = bool(params.get('segment_collision', True))
 
-comprimento_total = num_links * length
 ancora_x = float(params.get('anchor_x', 0.0))
 ancora_y = float(params.get('anchor_y', 0.0))
 ancora_z = float(params.get('anchor_z', 0.33))
@@ -164,10 +178,18 @@ max_delta_joint_z = max((abs(delta) for delta in [
 print(f'Alvo original (JSON): ({drone_x:.4f}, {drone_y:.4f}, {drone_z:.4f})')
 print(f'Spawn inicial do drone: ({drone_spawn_x:.4f}, {drone_spawn_y:.4f}, {drone_spawn_z:.4f})')
 print(f'Cabo: {num_links} elos x {length:.4f} m = {comprimento_total:.4f} m')
+if densidade_linear is not None:
+    print(
+        f'Massa por densidade linear: rho={densidade_linear:.4f} kg/m, '
+        f'm_segmento={mass:.6f} kg, m_segmentos={massa_total_segmentos:.4f} kg'
+    )
+else:
+    print(f'Massa por parametro legado: m_segmento={mass:.6f} kg')
 print(
-    f'Massas do cabo: segmentos={num_links * mass:.4f} kg, '
+    f'Massas do cabo: segmentos={massa_total_segmentos:.4f} kg, '
     f'auxiliares={num_links * dummy_mass + root_mass + tip_mass:.4f} kg, '
-    f'total={num_links * mass + num_links * dummy_mass + root_mass + tip_mass:.4f} kg'
+    f'total={massa_total_segmentos + num_links * dummy_mass + root_mass + tip_mass:.4f} kg, '
+    f'fonte={massa_origem}'
 )
 print(
     f'Inicializacao do cabo: {descricao_inicial}; '
@@ -193,9 +215,6 @@ if z_min_mundo < radius:
         f'z_min={z_min_mundo:.4f} m, raio={radius:.4f} m.'
     )
 
-ixx_segment = 0.5 * mass * radius ** 2
-iyy_segment = (1.0 / 12.0) * mass * (3 * radius ** 2 + length ** 2)
-izz_segment = iyy_segment
 joint_limit_rad = max(0.7, max_delta_joint_y, max_delta_joint_z) + 0.3
 collision_xml_template = '''
       <collision name="collision">
@@ -229,6 +248,9 @@ for i in range(1, num_links + 1):
     yaw_segmento = yaws_segmentos[i - 1]
     theta_anterior = 0.0 if i == 1 else pitches_segmentos[i - 2]
     yaw_anterior = 0.0 if i == 1 else yaws_segmentos[i - 2]
+    ixx_segment = 0.5 * mass * radius ** 2
+    iyy_segment = (1.0 / 12.0) * mass * (3 * radius ** 2 + seg_length ** 2)
+    izz_segment = iyy_segment
     pitch_delta = theta_segmento - theta_anterior
     yaw_delta = math.atan2(
         math.sin(yaw_segmento - yaw_anterior),

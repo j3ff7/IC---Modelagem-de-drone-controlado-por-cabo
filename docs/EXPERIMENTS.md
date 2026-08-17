@@ -985,3 +985,115 @@ el_mean/std/min/max=21.20/4.95/11.71/29.63 deg
 
 Interpretação:
 A comparação confirma que o controlador e o comando `cmd_vel_frame=body` funcionam no caso sem cabo. Com cabo, a resposta permanece estável, sem saturação vertical dominante e com atitude pequena, mas a convergência vertical fica mais lenta e o custo computacional ainda é alto. O próximo diagnóstico deve priorizar redução de RTF/discretização antes de alterar ganhos.
+
+## Experimento: Baseline Física Do Tether 25 g
+
+Data:
+2026-08-17.
+
+Objetivo:
+Substituir a massa artificial de `0.30 kg` por uma massa derivada da densidade linear física do cabo, mantendo controlador, drone, conexão `ball`, `L=2.5 m`, 50 segmentos, molas/damping e geometria inicial.
+
+Configuração:
+
+```text
+densidade_linear_kg_m = 0.01 kg/m
+comprimento_total_m = 2.5 m
+num_links = 50
+mass por segmento = 0.0005 kg
+massa segmentos = 0.025 kg
+dummy_* = 50 x 0.0001 kg = 0.005 kg
+raiz_cabo = 0.0005 kg
+ponta_cabo = 0.0005 kg
+massa dinâmica total = 0.031 kg
+```
+
+As inércias dos segmentos são recalculadas automaticamente em `models/gerar_cabo.py` a partir de `mass`, `radius` e do comprimento real de cada segmento gerado.
+
+Validação do SDF:
+
+```text
+segmentos=50
+mass_each_minmax=0.000500/0.000500 kg
+total_segmentos=0.025000 kg
+auxiliares_total=0.006000 kg
+total_dinamico=0.031000 kg
+```
+
+### Teste Vertical z=1.0 m
+
+Comando:
+
+```text
+waypoints=(2.0,0.0,0.33) -> (2.0,0.0,1.0)
+cmd_vel_frame=body
+janela_tangente_metros=0.15
+tempo_estabilizacao=1.0 s
+```
+
+Resultado:
+
+```text
+t_erro_z<0.20/0.10/0.05 = 5.12 / 6.12 / nao atingido ate 7.0 s
+em t_sim~8.0 s: erro~0.04 m, estado=hover
+sequencia concluida em t_sim~9.0 s
+RTF_med~0.10
+roll_max=0.01 deg
+pitch_max=0.06 deg
+T_mean/max=0.10/0.10 N
+F_mean=(-0.08, -0.00, 0.05) N
+cmd_abs_max=(0.01, 0.00, 0.14) m/s
+sat_xyz=(0.0, 0.0, 0.0) %
+```
+
+Comparação direta:
+
+```text
+Caso        | convergência/resultado                    | erro final/janela | pitch_max | T_mean | T_max
+Sem tether  | hover concluído; RTF~1.00                 | RMS~0.03 m        | ~0.00 deg | 0.00 N | 0.00 N
+25 g        | hover concluído; RTF~0.10                 | ~0.02-0.04 m      | 0.06 deg  | 0.10 N | 0.10 N
+300 g       | estável mas lento; não concluiu na janela | RMS~0.37 m        | 1.26 deg  | 0.42 N | 0.47 N
+```
+
+Interpretação:
+A massa anterior de `0.30 kg` era uma causa importante da degradação vertical. Com `25 g`, a resposta se aproxima do caso sem tether: forças muito menores, atitude praticamente nula, sem saturação e hover concluído. A tensão média/máxima de `~0.10 N` é plausível em relação ao peso dos segmentos do cabo físico (`0.025 kg * 9.81 ~= 0.245 N`), lembrando que a força medida é no lado do drone e depende da geometria/dinâmica.
+
+### Teste N
+
+Geometria:
+
+```text
+ancora = (0.0, 0.0, 0.33) m
+waypoint intermediario = (2.0, 0.0, 1.0) m
+waypoint final N = (0.0, 1.0, 2.0) m
+distancia horizontal final = 1.000 m
+distancia 3D ancora-drone = 1.947 m
+comprimento tether = 2.500 m
+slack geometrico = 0.553 m
+```
+
+Resultado até `t_sim=25 s`:
+
+```text
+WP intermediario atingido e estabilizado.
+Transicao para N em t_sim~9.0 s.
+O drone aproximou do ponto N, mas não entrou em hover.
+Erro 3D final na janela: mean/rms/max=0.236/0.252/0.333 m
+pos_mean=(0.020, 1.036, 1.952) m
+pos_std=(0.057, 0.238, 0.002) m
+roll_max=4.16 deg
+pitch_max=1.68 deg
+T_mean/max=0.21/0.24 N
+F_mean=(-0.21, 0.00, 0.06) N
+cmd_abs_max=(0.17, 0.49, 0.05) m/s
+sat_xyz=(0.0, 0.0, 0.0) %
+az_mean/std=-50.10/7.98 deg
+el_mean/std=26.13/5.95 deg
+RTF_med~0.10
+```
+
+Classificação:
+`NO-GO por controlador/convergência lateral`, não por autoridade física do drone. As forças são baixas, roll/pitch permanecem moderados e não há saturação persistente; o problema observado é oscilação lateral em torno do waypoint final N. Não há evidência, nesta configuração de `25 g`, de insuficiência física do drone.
+
+Próxima ação:
+Antes de executar N/S/E/W completos, ajustar o controlador lateral de forma conservadora ou modificar a estratégia de aproximação do waypoint N. Não alterar o modelo do drone nesta etapa.
