@@ -115,7 +115,7 @@ Contexto:
 Foi solicitado usar um cabo de massa total aproximadamente `0.30 kg`.
 
 Decisão:
-Configuração atual usa `40` segmentos de `0.007375 kg`, `40` dummies de `0.0001 kg`, raiz `0.0005 kg` e ponta `0.0005 kg`, totalizando `0.300 kg`.
+Configuração atual usa `50` segmentos de `0.00588 kg`, `50` dummies de `0.0001 kg`, raiz `0.0005 kg` e ponta `0.0005 kg`, totalizando `0.300 kg`.
 
 Justificativa:
 Solicitação experimental e consistência com `tether_parameters.json`.
@@ -125,6 +125,36 @@ Massa anterior não registrada com segurança neste documento.
 
 Consequências:
 Mudanças em `num_links` ou `length` devem redistribuir massa por segmento se a massa total de `0.30 kg` for preservada.
+
+## 2026-08-17 Usar Tempo Simulado Em Testes E Controle
+
+Contexto:
+Com o cabo de 50 links presente, o Gazebo roda com fator de tempo real muito menor que 1. Os testes anteriores de `velocity_test` e parte da instrumentação do controlador usavam tempo de parede. Isso fazia o comando vertical ser encerrado depois de poucos segundos reais, antes de o simulador avançar tempo físico suficiente, criando a falsa impressão de que `cmd_vel.z` não produzia subida.
+
+Decisão:
+Usar `/clock` como base de tempo para:
+
+```text
+velocity_test.py:
+  duracao do comando
+  periodo de log
+  derivadas vz/az
+
+movimento_circular.py:
+  derivadas de velocidade por diferença
+  integradores
+  tempo de hovering
+  periodo de log
+```
+
+Justificativa:
+Repetindo o teste aberto com tempo simulado, o drone com tether `ball`, massa `0.30 kg` e `L=2.5 m` sobe de forma coerente: com `vz_cmd=0.25 m/s`, o `base_link` foi de aproximadamente `z=0.33 m` para `z=0.60 m` em cerca de `2 s` simulados, com pitch pequeno e momento nulo na conexão.
+
+Alternativas consideradas:
+Continuar usando tempo de parede e aumentar timeouts reais. Isso preservaria o erro conceitual e manteria derivadas/hover dependentes do desempenho da simulação.
+
+Consequências:
+Ensaios com cabo devem ser interpretados em tempo simulado (`t_sim`). O tempo de parede (`t_wall`) continua útil apenas para estimar custo computacional/RTF.
 
 ## 2026-08-16 Conexão Tether-Drone Deve Permitir Orientação Passiva
 

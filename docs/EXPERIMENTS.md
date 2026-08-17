@@ -690,3 +690,99 @@ O problema atual nao deve ser tratado ajustando ganhos do controlador de posicao
 
 Próxima ação:
 Investigar a topologia de conexao entre `meu_drone::base_link`, `cabo_sensor_link` e o cabo. Um teste diagnostico recomendado e conectar o tether diretamente ao `base_link`, ou transformar o sensor em link filho do `base_link`, para verificar se o `MulticopterVelocityControl` e o `comLinkName=base_link` sao afetados pela cadeia externa ligada ao link do sensor. Tambem vale testar uma carga externa simples aplicada ao drone, sem multibody do cabo, para separar carga fisica de restricao articulada.
+
+## Experimento: Reavaliacao Com Tempo Simulado
+
+Data:
+2026-08-17.
+
+Objetivo:
+Verificar se a falha de subida observada no experimento anterior era fisica ou causada por usar tempo de parede enquanto o Gazebo rodava lentamente com o cabo.
+
+Hipótese:
+Com o cabo de 50 links, o fator de tempo real cai bastante. Se `velocity_test` encerra o comando apos `8 s` de parede, mas a simulacao avancou muito menos que `8 s` fisicos, o drone parece nao subir embora esteja respondendo corretamente em tempo simulado.
+
+Alterações realizadas:
+
+- Bridge de `/clock` em `start_sim.launch.py`.
+- `velocity_test.py` passou a usar tempo simulado para:
+  - duracao do comando;
+  - periodo de log;
+  - derivadas `vz` e `az`.
+- `movimento_circular.py` passou a usar tempo simulado para:
+  - derivadas de velocidade por diferenca;
+  - integradores;
+  - tempo de hovering;
+  - periodo de log.
+
+Teste aberto com tether desacoplado visualmente:
+
+```text
+tether presente, sem joint com drone, vz_cmd=0.25:
+  t_sim=0.50 s, t_wall=5.55 s, z=0.357 m, vz=0.187 m/s
+  t_sim=1.00 s, t_wall=13.45 s, z=0.470 m, vz=0.238 m/s
+  t_sim=1.50 s, t_wall=25.10 s, z=0.594 m, vz=0.249 m/s
+```
+
+Interpretação:
+A presença do cabo sem conexão nao impede a subida. Ela reduz drasticamente o RTF.
+
+Teste aberto com tether conectado por `ball`, raiz livre:
+
+```text
+vz_cmd=0.25:
+  t_sim=0.50 s, t_wall=8.90 s, z=0.337 m, vz=0.126 m/s
+  t_sim=1.00 s, t_wall=19.90 s, z=0.418 m, vz=0.184 m/s
+  t_sim=1.50 s, t_wall=31.75 s, z=0.510 m, vz=0.186 m/s
+  t_sim=2.00 s, t_wall=42.85 s, z=0.599 m, vz=0.176 m/s
+  pitch < 1.5 deg
+  |M| conexao = 0.000 Nm
+```
+
+Teste aberto com tether conectado por `ball`, raiz ancorada:
+
+```text
+vz_cmd=0.25:
+  t_sim=0.50 s, t_wall=5.25 s, z=0.341 m, vz=0.139 m/s
+  t_sim=1.00 s, t_wall=15.75 s, z=0.426 m, vz=0.184 m/s
+  t_sim=1.50 s, t_wall=27.40 s, z=0.519 m, vz=0.184 m/s
+  t_sim=2.00 s, t_wall=38.20 s, z=0.609 m, vz=0.177 m/s
+  t_sim=2.51 s, t_wall=46.85 s, z=0.634 m, vz=-0.024 m/s
+  pitch < 1.0 deg
+  |M| conexao = 0.000 Nm
+```
+
+Teste com controlador de posicao:
+
+```text
+trajetoria_subida_curta_spawn.json
+spawn=(2.0, 0.0, 0.33)
+ref final=(2.0, 0.0, 0.60)
+tempo_hover=2.0 s
+tolerancia_altura=0.15 m
+
+resultado:
+  transicao WP0->WP1 em t_sim ~2.2 s
+  z=0.47 m em t_sim=4.0 s
+  z=0.51 m em t_sim=5.0 s
+  sequencia concluida dentro da tolerancia configurada
+```
+
+Com tolerancia vertical mais apertada apenas para diagnostico:
+
+```text
+tolerancia_altura=0.05 m
+tempo_hover=1.0 s
+
+resultado parcial antes do timeout real:
+  z=0.54 m em t_sim=6.01 s
+  ref=0.60 m
+  erro_z=0.06 m
+  subida continua e comandos coerentes
+```
+
+Conclusão:
+A hipótese estrutural forte sobre `MulticopterVelocityControl` e topologia `base_link/cabo_sensor_link` nao foi confirmada como causa da falha vertical. A causa dominante dos resultados anteriores foi a base de tempo incorreta dos testes e do controlador em uma simulacao com RTF baixo. Em tempo simulado, `cmd_vel.z > 0` produz subida coerente do `base_link` com tether `ball`, massa `0.30 kg` e `L=2.5 m`.
+
+Próxima ação:
+Manter `/clock` bridged e usar `t_sim` nos testes. Para melhorar usabilidade, reduzir custo computacional do cabo ou aumentar timeouts reais dos ensaios automatizados. So retomar investigacao estrutural se uma falha persistir quando medida em tempo simulado.

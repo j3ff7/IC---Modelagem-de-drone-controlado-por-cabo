@@ -4,6 +4,7 @@ from geometry_msgs.msg import Twist, WrenchStamped
 from nav_msgs.msg import Odometry
 import rclpy
 from rclpy.node import Node
+from rosgraph_msgs.msg import Clock
 from sensor_msgs.msg import JointState
 
 
@@ -63,6 +64,7 @@ class VelocityTest(Node):
         self.cabo_joint_limit_rad = max(1e-6, float(self.get_parameter('cabo_joint_limit_rad').value))
 
         self.publisher = self.create_publisher(Twist, '/meu_drone/cmd_vel', 10)
+        self.create_subscription(Clock, '/clock', self.clock_callback, 10)
         self.create_subscription(Odometry, '/meu_drone/odom', self.odom_callback, 10)
         self.create_subscription(WrenchStamped, '/cabo/conexao_drone', self.conexao_callback, 10)
         self.create_subscription(
@@ -73,7 +75,19 @@ class VelocityTest(Node):
         )
         self.create_subscription(
             JointState,
+            '/world/mundo_ic/model/meu_drone/joint_state',
+            self.joint_state_callback,
+            10,
+        )
+        self.create_subscription(
+            JointState,
             '/world/mundo_ic/model/sistema_cabo_drone/model/cabo_dinamico/joint_state',
+            self.cabo_joint_state_callback,
+            10,
+        )
+        self.create_subscription(
+            JointState,
+            '/world/mundo_ic/model/cabo_dinamico/joint_state',
             self.cabo_joint_state_callback,
             10,
         )
@@ -92,6 +106,8 @@ class VelocityTest(Node):
         self.last_z = None
         self.last_vz = None
         self.last_odom_ns = None
+        self.sim_time_ns = None
+        self.using_sim_time = False
         self.conexao_f_raw = (0.0, 0.0, 0.0)
         self.conexao_m_raw = (0.0, 0.0, 0.0)
         self.conexao_f_mod = 0.0
@@ -100,6 +116,7 @@ class VelocityTest(Node):
         self.cabo_joint_min_margin = None
         self.cabo_joint_near_limit = None
         self.inicio_ns = None
+        self.inicio_wall_ns = None
         self.last_log_ns = None
         self.timer = self.create_timer(0.05, self.timer_callback)
 
@@ -109,7 +126,8 @@ class VelocityTest(Node):
         )
 
     def odom_callback(self, msg):
-        now_ns = self.get_clock().now().nanoseconds
+        stamp_ns = msg.header.stamp.sec * 1_000_000_000 + msg.header.stamp.nanosec
+        now_ns = self.sim_time_ns if self.sim_time_ns is not None else stamp_ns
         p = msg.pose.pose.position
         q_msg = msg.pose.pose.orientation
         self.orientation = (q_msg.x, q_msg.y, q_msg.z, q_msg.w)
@@ -129,6 +147,9 @@ class VelocityTest(Node):
 
         self.last_z = self.z
         self.last_odom_ns = now_ns
+
+    def clock_callback(self, msg):
+        self.sim_time_ns = msg.clock.sec * 1_000_000_000 + msg.clock.nanosec
 
     def conexao_callback(self, msg):
         f = msg.wrench.force
@@ -155,12 +176,20 @@ class VelocityTest(Node):
 
     def timer_callback(self):
         now = self.get_clock().now()
-        now_ns = now.nanoseconds
+        wall_ns = now.nanoseconds
+        if self.sim_time_ns is not None and not self.using_sim_time:
+            self.using_sim_time = True
+            self.inicio_ns = None
+            self.last_log_ns = None
+
+        now_ns = self.sim_time_ns if self.sim_time_ns is not None else wall_ns
         if self.inicio_ns is None:
             self.inicio_ns = now_ns
+            self.inicio_wall_ns = wall_ns
             self.last_log_ns = now_ns
 
         t = (now_ns - self.inicio_ns) * 1e-9
+        t_wall = (wall_ns - self.inicio_wall_ns) * 1e-9
         msg = Twist()
         if t <= self.duracao:
             msg.linear.x = self.vx_cmd
@@ -184,7 +213,7 @@ class VelocityTest(Node):
             cabo_juntas = f'min_margin={100.0 * self.cabo_joint_min_margin:.1f}% near_limit={self.cabo_joint_near_limit}'
 
         self.get_logger().info(
-            f't={t:.2f}s z={self.z:.3f} vz={self.vz:.3f} az={self.az:.3f} '
+            f't_sim={t:.2f}s t_wall={t_wall:.2f}s z={self.z:.3f} vz={self.vz:.3f} az={self.az:.3f} '
             f'cmd_z_pub={msg.linear.z:.3f} '
             f'rpy=({math.degrees(self.roll):.1f},{math.degrees(self.pitch):.1f},'
             f'{math.degrees(self.yaw):.1f})deg '

@@ -181,7 +181,7 @@ A causa mais provavel da falha de hovering nos testes anteriores e a combinacao 
 
 ### Teste aberto de velocidade vertical
 
-Para separar o controlador de posicao da resposta do plugin do multicopter, use o no `velocity_test`. Ele publica um `Twist` constante em `/meu_drone/cmd_vel`, mede odometria, RPY, rotores, forca/momento na conexao cabo-drone e margem das juntas internas do cabo.
+Para separar o controlador de posicao da resposta do plugin do multicopter, use o no `velocity_test`. Ele publica um `Twist` constante em `/meu_drone/cmd_vel`, mede odometria, RPY, rotores, forca/momento na conexao cabo-drone e margem das juntas internas do cabo. A duração e os logs usam tempo simulado via `/clock`; `t_wall` aparece apenas para indicar o custo real/RTF.
 
 ```bash
 ros2 launch pacote_do_drone start_sim.launch.py \
@@ -207,9 +207,9 @@ usar_cabo:=false
 usar_cabo:=true prender_ancora:=false
 ```
 
-Resultado atual do caso acima com tether `ball`, `L=2.5 m` e massa total `0.30 kg`: o comando chega ao Gazebo (`cmd_z_pub=0.25`), o drone fica praticamente em `z ~= 0.32-0.36 m`, `pitch < 0.5 deg`, `|M|=0`, e as juntas do cabo mantem margem minima maior que `60%` no ensaio curto. Portanto, a falha de subida nao e causada por saturacao das juntas do cabo nesse caso.
+Resultado atual do caso acima com tether `ball`, `L=2.5 m` e massa total `0.30 kg`: o comando chega ao Gazebo (`cmd_z_pub=0.25`) e o drone sobe de `z ~= 0.33 m` para `z ~= 0.60 m` em cerca de `2 s` simulados, com `pitch` pequeno e `|M|=0`.
 
-Sem tether, o mesmo teste de `cmd_vel.z` produz subida coerente. Com tether livre ou ancorado, a resposta vertical fica muito reduzida. A suspeita atual e a interacao entre o `MulticopterVelocityControl`, o modelo multibody do cabo e a topologia de conexao, nao os ganhos do controlador de posicao.
+Sem tether, o mesmo teste roda próximo do tempo real. Com o tether de 50 links, o RTF cai bastante; por isso avalie sempre `t_sim`, não o tempo de parede.
 
 ### Diagnostico da geometria inicial do cabo
 

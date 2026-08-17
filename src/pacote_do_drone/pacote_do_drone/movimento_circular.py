@@ -7,6 +7,7 @@ from geometry_msgs.msg import Twist, WrenchStamped
 from nav_msgs.msg import Odometry
 import rclpy
 from rclpy.node import Node
+from rosgraph_msgs.msg import Clock
 from sensor_msgs.msg import JointState
 
 
@@ -130,10 +131,13 @@ class ControladorTrajetoriaDrone(Node):
         self.conexao_forca_modulo = 0.0
         self.conexao_momento_modulo = 0.0
         self.rotores = {}
-        self.last_log_time = self.get_clock().now()
+        self.sim_time_ns = None
+        self.last_log_ns = None
         self.tempo_inicio_ns = None
+        self.ultimo_timer_ns = None
 
         self.publisher_ = self.create_publisher(Twist, '/meu_drone/cmd_vel', 10)
+        self.create_subscription(Clock, '/clock', self.clock_callback, 10)
         self.create_subscription(Odometry, '/meu_drone/odom', self.odom_callback, 10)
         self.create_subscription(WrenchStamped, '/cabo/tensao_drone', self.tensao_drone_callback, 10)
         self.create_subscription(WrenchStamped, '/cabo/tensao_carretel', self.tensao_carretel_callback, 10)
@@ -239,12 +243,23 @@ class ControladorTrajetoriaDrone(Node):
         )
         return waypoints
 
+    def _agora_ns(self):
+        if self.sim_time_ns is not None:
+            return self.sim_time_ns
+        return self.get_clock().now().nanoseconds
+
+    def clock_callback(self, msg):
+        self.sim_time_ns = msg.clock.sec * 1_000_000_000 + msg.clock.nanosec
+
     def odom_callback(self, msg):
         p = msg.pose.pose.position
         novo_x = p.x
         novo_y = p.y
         novo_z = p.z
-        now_ns = self.get_clock().now().nanoseconds
+        stamp_ns = msg.header.stamp.sec * 1_000_000_000 + msg.header.stamp.nanosec
+        now_ns = self.sim_time_ns if self.sim_time_ns is not None else stamp_ns
+        if now_ns <= 0:
+            now_ns = self.get_clock().now().nanoseconds
         novo_roll, novo_pitch, novo_yaw = _rpy_from_quat(msg.pose.pose.orientation)
 
         if self.usar_velocidade_por_diferenca and self.ultimo_odom_ns is not None:
@@ -317,7 +332,7 @@ class ControladorTrajetoriaDrone(Node):
         self.integral_y = 0.0
         self.integral_z = 0.0
 
-    def _atualizar_integrador(self, erro_x, erro_y, erro_z):
+    def _atualizar_integrador(self, erro_x, erro_y, erro_z, dt):
         if self.ganho_integral_xy <= 0.0:
             self.integral_x = 0.0
             self.integral_y = 0.0
@@ -325,23 +340,31 @@ class ControladorTrajetoriaDrone(Node):
             self.integral_z = 0.0
 
         self.integral_x = _limitar(
-            self.integral_x + erro_x * self.timer_period if self.ganho_integral_xy > 0.0 else 0.0,
+            self.integral_x + erro_x * dt if self.ganho_integral_xy > 0.0 else 0.0,
             self.limite_integral_xy,
         )
         self.integral_y = _limitar(
-            self.integral_y + erro_y * self.timer_period if self.ganho_integral_xy > 0.0 else 0.0,
+            self.integral_y + erro_y * dt if self.ganho_integral_xy > 0.0 else 0.0,
             self.limite_integral_xy,
         )
         self.integral_z = _limitar(
-            self.integral_z + erro_z * self.timer_period if self.ganho_integral_z > 0.0 else 0.0,
+            self.integral_z + erro_z * dt if self.ganho_integral_z > 0.0 else 0.0,
             self.limite_integral_z,
         )
 
     def timer_callback(self):
         if self.x is None:
             return
+        now_ns = self._agora_ns()
         if self.tempo_inicio_ns is None:
-            self.tempo_inicio_ns = self.get_clock().now().nanoseconds
+            self.tempo_inicio_ns = now_ns
+            self.ultimo_timer_ns = now_ns
+            self.last_log_ns = now_ns
+
+        dt_controle = self.timer_period
+        if self.ultimo_timer_ns is not None:
+            dt_controle = max(0.0, (now_ns - self.ultimo_timer_ns) * 1e-9)
+        self.ultimo_timer_ns = now_ns
 
         alvo_x, alvo_y, alvo_z = self.waypoints[self.indice_waypoint]
 
@@ -350,7 +373,7 @@ class ControladorTrajetoriaDrone(Node):
         erro_xy = math.hypot(erro_x, erro_y)
         erro_z = alvo_z - self.z
         velocidade_xy = math.hypot(self.vx, self.vy)
-        self._atualizar_integrador(erro_x, erro_y, erro_z)
+        self._atualizar_integrador(erro_x, erro_y, erro_z, dt_controle)
 
         vx_mundo = (
             self.ganho_posicao_xy * erro_x
@@ -393,7 +416,7 @@ class ControladorTrajetoriaDrone(Node):
         )
         chegou_velocidade = velocidade_xy <= self.tolerancia_velocidade and abs(self.vz) <= self.tolerancia_velocidade
         if chegou_posicao and chegou_velocidade:
-            self.tempo_no_alvo += self.timer_period
+            self.tempo_no_alvo += dt_controle
         else:
             self.tempo_no_alvo = 0.0
             self.ultimo_waypoint_atingido = False
@@ -422,10 +445,9 @@ class ControladorTrajetoriaDrone(Node):
             self._resetar_integradores()
             self.get_logger().info(f'Avancando para waypoint {self.indice_waypoint}/{len(self.waypoints) - 1}')
 
-        now = self.get_clock().now()
-        if (now - self.last_log_time).nanoseconds >= self.log_periodo_ns:
-            self.last_log_time = now
-            tempo_s = (now.nanoseconds - self.tempo_inicio_ns) * 1e-9
+        if self.last_log_ns is None or now_ns - self.last_log_ns >= self.log_periodo_ns:
+            self.last_log_ns = now_ns
+            tempo_s = (now_ns - self.tempo_inicio_ns) * 1e-9
             estado = 'hover' if self.tempo_no_alvo > 0.0 else 'transitando'
             if self.ultimo_waypoint_atingido:
                 estado = 'concluido'

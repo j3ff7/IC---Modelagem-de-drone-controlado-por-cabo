@@ -18,7 +18,7 @@ spawn original
 + hover estável
 ```
 
-O marco intermediario atual e mais estreito: explicar por que um comando vertical aberto (`cmd_vel.linear.z > 0`) sobe corretamente sem tether, mas quase nao produz subida quando o tether `ball` esta conectado.
+O marco intermediario atual foi resolvido: a aparente falta de resposta vertical com tether vinha de diagnosticos em tempo de parede enquanto a simulação com cabo rodava muito abaixo de tempo real. Com `/clock`, `cmd_vel.linear.z > 0` produz subida coerente também com tether `ball`.
 
 ## What Works
 
@@ -76,8 +76,8 @@ L=3.0 m: z_min = -0.648 m
 - O pico de tensão aparece porque o cabo nasce esticado ou em configuração incompatível com a referência/solo.
 - A folga horizontal reduz o pico inicial, mas a junta fixa `ponta_cabo -> cabo_sensor_link` transmite momento artificial ao drone durante o assentamento.
 - A conexão `ball` praticamente elimina esse momento e reduz o pitch máximo para menos de `1 deg`; ela agora é a baseline física provisória.
-- O teste aberto `velocity_test` mostra que a falha de subida permanece mesmo sem controlador de posicao: o comando `cmd_vel.z` chega ao Gazebo, mas a resposta vertical quase desaparece quando o cabo esta acoplado ao drone.
-- No ensaio curto com tether `ball`, `L=2.5 m`, `vz_cmd=0.25`, as juntas internas do cabo mantiveram margem minima maior que `60%`; nao ha evidencia de saturacao de junta como causa imediata.
+- `velocity_test` agora usa `/clock`; com tether `ball`, `L=2.5 m`, `vz_cmd=0.25`, o drone sobe de `z ~= 0.33 m` para `z ~= 0.60 m` em cerca de `2 s` simulados, com pitch menor que `1.5 deg`, momento nulo e juntas longe do limite.
+- O controlador de posição também usa `/clock` para derivadas, integradores, hovering e logs.
 
 ## Constraints / Do Not Change
 
@@ -86,7 +86,7 @@ L=3.0 m: z_min = -0.648 m
 - Não alterar modelo físico do drone para DJI Matrice 100 por enquanto.
 - Não alterar a convenção angular sem atualizar testes, tabelas esperadas e documentação.
 - Não editar manualmente `models/cabo.sdf` como fonte primária; ele é gerado por `models/gerar_cabo.py`.
-- Não ajustar ganhos do controlador de posicao para mascarar a falha vertical ate concluir o diagnostico do `velocity_test`.
+- Interpretar testes com cabo em tempo simulado (`t_sim`), não em tempo de parede, porque o RTF pode cair para cerca de `0.04-0.10` com o cabo de 50 links.
 
 ## Recent Results
 
@@ -201,25 +201,22 @@ z final 0.60 m:
   resultado: não atingiu o waypoint na janela testada; saturação z persistiu
 ```
 
-Resultados do teste aberto de velocidade vertical:
+Resultados antigos do teste aberto de velocidade vertical, antes de usar `/clock`, estão superados porque mediam duração em tempo de parede. Resultado válido atual:
 
 ```text
-sem tether, vz_cmd=0.25:
-  dz ~1.50 m em 8 s
-  vz_mean ~0.225 m/s
-  resposta vertical coerente
-
-tether livre, vz_cmd=0.25:
-  dz ~0.00 m em 8 s
-  vz_mean ~0.000 m/s
-  pitch max ~0.4 deg
-
-tether ancorado, vz_cmd=0.25:
-  dz ~0.02-0.04 m em 8 s
-  vz_mean ~0.001-0.004 m/s
-  pitch max <0.5 deg
+velocity_test, tether ball livre, vz_cmd=0.25:
+  t_sim=0.50 s, t_wall=8.90 s, z=0.337 m, vz=0.126 m/s
+  t_sim=1.00 s, t_wall=19.90 s, z=0.418 m, vz=0.184 m/s
+  t_sim=1.50 s, t_wall=31.75 s, z=0.510 m, vz=0.186 m/s
+  t_sim=2.00 s, t_wall=42.85 s, z=0.599 m, vz=0.176 m/s
   |M| conexao = 0.000 Nm
-  juntas proximas do limite = 0
+
+velocity_test, tether ball ancorado, vz_cmd=0.25:
+  t_sim=0.50 s, t_wall=5.25 s, z=0.341 m, vz=0.139 m/s
+  t_sim=1.00 s, t_wall=15.75 s, z=0.426 m, vz=0.184 m/s
+  t_sim=1.50 s, t_wall=27.40 s, z=0.519 m, vz=0.184 m/s
+  t_sim=2.00 s, t_wall=38.20 s, z=0.609 m, vz=0.177 m/s
+  |M| conexao = 0.000 Nm
 ```
 
 Diagnostico atualizado:
@@ -229,19 +226,19 @@ causa pouco provavel: ganhos do controlador de posicao
 causa pouco provavel: sinal/frame de cmd_vel.z
 causa pouco provavel: saturacao das juntas do cabo no ensaio curto
 causa pouco provavel como unica explicacao: massa simples do cabo
-causa mais provavel: interacao entre MulticopterVelocityControl, topologia de conexao e modelo multibody do tether
+causa confirmada da falsa falha vertical: uso de tempo de parede em simulação com RTF baixo
 ```
 
 Proximos testes recomendados:
 
 ```text
-1. Conectar temporariamente o cabo diretamente em meu_drone::base_link.
-2. Alternativamente, transformar cabo_sensor_link em filho de base_link, mantendo base_link como referencia central do drone.
-3. Aplicar uma carga externa simples ao drone sem cabo multibody para comparar com a carga do tether.
-4. Revisar parametros do MulticopterMotorModel/MulticopterVelocityControl contra exemplos oficiais do Gazebo Sim 6.
+1. Continuar validando trajetorias em tempo simulado.
+2. Medir e reduzir o custo computacional/RTF do cabo de 50 links.
+3. Retomar investigacao estrutural apenas se a falha persistir quando medida por t_sim.
+4. Para testes automatizados com tether, usar timeouts reais muito maiores que a duracao simulada desejada.
 ```
 
-Resultados atualizados de subida vertical, comparando sem tether e tether ball:
+Resultados abaixo sao anteriores a correcao por `/clock` e ficam mantidos apenas como historico do diagnostico contaminado por tempo de parede:
 
 ```text
 sem tether, limite_vel_z=0.25:
@@ -350,7 +347,7 @@ Com cabo + spawn original: instável, pitch próximo de ±90 deg, tensão máxim
 Último commit remoto conhecido no branch atual:
 
 ```text
-d1ac633 (HEAD -> shared, origin/shared) Ajusta controle de trajetoria do drone
+c73e8a6 (shared, origin/shared) Adiciona diagnostico aberto de resposta vertical
 ```
 
-Observação: o worktree atual possui alterações não commitadas e arquivos não rastreados relevantes, incluindo `README.md`, configs adicionais e estes documentos.
+Observação: após a correção por `/clock`, o próximo commit deverá atualizar esta referência.

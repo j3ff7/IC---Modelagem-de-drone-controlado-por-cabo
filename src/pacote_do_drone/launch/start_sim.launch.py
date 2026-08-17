@@ -20,6 +20,84 @@ def _float_launch(context, nome, default):
     return default if valor == '' else float(valor)
 
 
+def _int_launch(context, nome, default):
+    valor = LaunchConfiguration(nome).perform(context).strip()
+    return default if valor == '' else int(valor)
+
+
+def _payload_xml(massa):
+    return f'''
+      <link name="payload_teste">
+        <pose relative_to="meu_drone::base_link">0 0 0 0 0 0</pose>
+        <inertial>
+          <mass>{massa}</mass>
+          <inertia><ixx>0.0005</ixx><ixy>0</ixy><ixz>0</ixz><iyy>0.0005</iyy><iyz>0</iyz><izz>0.0005</izz></inertia>
+        </inertial>
+        <visual name="visual">
+          <geometry><sphere><radius>0.035</radius></sphere></geometry>
+          <material><ambient>0.1 0.8 0.1 1</ambient><diffuse>0.1 0.8 0.1 1</diffuse></material>
+        </visual>
+      </link>
+      <joint name="payload_teste_joint" type="fixed">
+        <parent>meu_drone::base_link</parent>
+        <child>payload_teste</child>
+      </joint>'''
+
+
+def _pendulo_xml(n_links, massa_total, comprimento_total, attach_link):
+    n_links = max(1, n_links)
+    massa_link = massa_total / n_links
+    comprimento_link = comprimento_total / n_links
+    ixx = (1.0 / 12.0) * massa_link * comprimento_link * comprimento_link
+    xml = ''
+    parent = f'meu_drone::{attach_link}'
+    for i in range(n_links):
+        nome = f'pendulo_link_{i + 1}'
+        joint = f'pendulo_joint_{i + 1}'
+        pose_link = f'0 0 -{0.5 * comprimento_link} 0 0 0' if i == 0 else f'0 0 -{comprimento_link} 0 0 0'
+        pose_joint = '0 0 0 0 0 0' if i == 0 else f'0 0 -{0.5 * comprimento_link} 0 0 0'
+        joint_type = 'ball' if i == 0 else 'revolute'
+        axis_xml = ''
+        if i > 0:
+            axis_xml = '''
+        <axis>
+          <xyz>0 1 0</xyz>
+          <limit><lower>-3.14159</lower><upper>3.14159</upper><effort>5</effort><velocity>10</velocity></limit>
+          <dynamics><damping>0.02</damping><friction>0.001</friction></dynamics>
+        </axis>'''
+        sensor_xml = ''
+        if i == 0:
+            sensor_xml = '''
+        <sensor name="sensor_pendulo_conexao" type="force_torque">
+          <always_on>true</always_on>
+          <update_rate>50</update_rate>
+          <topic>/cabo/conexao_drone</topic>
+        </sensor>'''
+        xml += f'''
+      <link name="{nome}">
+        <pose relative_to="{parent}">{pose_link}</pose>
+        <inertial>
+          <pose>0 0 0 0 0 0</pose>
+          <mass>{massa_link}</mass>
+          <inertia><ixx>{ixx}</ixx><ixy>0</ixy><ixz>0</ixz><iyy>{ixx}</iyy><iyz>0</iyz><izz>1e-5</izz></inertia>
+        </inertial>
+        <visual name="visual">
+          <geometry><cylinder><radius>0.006</radius><length>{comprimento_link}</length></cylinder></geometry>
+          <material><ambient>0 0 0 1</ambient><diffuse>0 0 0 1</diffuse></material>
+        </visual>
+        <collision name="collision">
+          <geometry><cylinder><radius>0.006</radius><length>{comprimento_link}</length></cylinder></geometry>
+        </collision>
+      </link>
+      <joint name="{joint}" type="{joint_type}">
+        <pose relative_to="{parent}">{pose_joint}</pose>
+        <parent>{parent}</parent>
+        <child>{nome}</child>{axis_xml}{sensor_xml}
+      </joint>'''
+        parent = nome
+    return xml
+
+
 def _criar_mundo_diagnostico(context, pkg_share, params):
     models_path = os.path.join(pkg_share, 'models')
     caminho_drone_sdf = os.path.join(models_path, 'meu_drone', 'meu_drone.sdf')
@@ -53,14 +131,37 @@ def _criar_mundo_diagnostico(context, pkg_share, params):
     spawn_yaw = _float_launch(context, 'spawn_yaw', yaw_base)
     usar_cabo = _bool_launch(context, 'usar_cabo')
     prender_ancora = _bool_launch(context, 'prender_ancora')
+    tether_mode = LaunchConfiguration('tether_mode').perform(context).strip().lower()
+    tether_attach_link = LaunchConfiguration('tether_attach_link').perform(context).strip()
+    arquitetura_modelos = LaunchConfiguration('arquitetura_modelos').perform(context).strip().lower()
+    if arquitetura_modelos not in ('nested', 'world'):
+        print(f"AVISO: arquitetura_modelos={arquitetura_modelos!r} invalida. Usando nested.")
+        arquitetura_modelos = 'nested'
+    if tether_attach_link not in ('cabo_sensor_link', 'base_link'):
+        print(f"AVISO: tether_attach_link={tether_attach_link!r} invalido. Usando cabo_sensor_link.")
+        tether_attach_link = 'cabo_sensor_link'
     conexao_cabo_drone = str(params.get('connection_type', 'fixed')).strip().lower()
     if conexao_cabo_drone not in ('fixed', 'ball'):
         print(f"AVISO: connection_type={conexao_cabo_drone!r} invalido. Usando fixed.")
         conexao_cabo_drone = 'fixed'
+    if tether_mode not in ('completo', 'desacoplado', 'carga', 'pendulo'):
+        print(f"AVISO: tether_mode={tether_mode!r} invalido. Usando completo.")
+        tether_mode = 'completo'
 
     cabo_xml = ''
     juntas_cabo_xml = ''
-    if usar_cabo:
+    diagnostico_xml = ''
+    if tether_mode == 'carga':
+        diagnostico_xml = _payload_xml(_float_launch(context, 'massa_diagnostico', 0.30))
+    elif tether_mode == 'pendulo':
+        diagnostico_xml = _pendulo_xml(
+            _int_launch(context, 'pendulo_links', 1),
+            _float_launch(context, 'massa_diagnostico', 0.30),
+            _float_launch(context, 'comprimento_diagnostico', 0.50),
+            tether_attach_link,
+        )
+
+    if usar_cabo and tether_mode in ('completo', 'desacoplado'):
         junta_ancora_xml = ''
         if prender_ancora:
             junta_ancora_xml = '''
@@ -75,29 +176,83 @@ def _criar_mundo_diagnostico(context, pkg_share, params):
         <pose>{ancora_x} {ancora_y} {ancora_z} 0 0 {yaw_base}</pose>
         <static>false</static>
       </include>'''
-        juntas_cabo_xml = f'''
+        if tether_mode == 'desacoplado':
+            juntas_cabo_xml = f'''
+{junta_ancora_xml}'''
+        else:
+            juntas_cabo_xml = f'''
 {junta_ancora_xml}
       <joint name="cabo_drone_joint" type="fixed">
         <parent>cabo_dinamico::ponta_cabo</parent>
-        <child>meu_drone::cabo_sensor_link</child>
+        <child>meu_drone::{tether_attach_link}</child>
         <sensor name="sensor_conexao_drone" type="force_torque">
           <always_on>true</always_on>
           <update_rate>50</update_rate>
           <topic>/cabo/conexao_drone</topic>
         </sensor>
       </joint>'''
-        if conexao_cabo_drone == 'ball':
+        if tether_mode != 'desacoplado' and conexao_cabo_drone == 'ball':
             juntas_cabo_xml = f'''
 {junta_ancora_xml}
       <joint name="cabo_drone_joint" type="ball">
         <parent>cabo_dinamico::ponta_cabo</parent>
-        <child>meu_drone::cabo_sensor_link</child>
+        <child>meu_drone::{tether_attach_link}</child>
         <sensor name="sensor_conexao_drone" type="force_torque">
           <always_on>true</always_on>
           <update_rate>50</update_rate>
           <topic>/cabo/conexao_drone</topic>
         </sensor>
       </joint>'''
+    if arquitetura_modelos == 'world':
+        juntas_cabo_xml = juntas_cabo_xml.replace(
+            '<parent>ancora_cabo</parent>',
+            '<parent>ancora_model::ancora_cabo</parent>',
+        )
+
+    ancora_link_xml = f'''
+      <link name="ancora_cabo">
+        <pose>{ancora_x} {ancora_y} {ancora_z} 0 0 0</pose>
+        <inertial>
+          <mass>10</mass>
+          <inertia><ixx>1</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1</iyy><iyz>0</iyz><izz>1</izz></inertia>
+        </inertial>
+        <visual name="visual">
+          <geometry><sphere><radius>0.015</radius></sphere></geometry>
+          <material><ambient>0.9 0.05 0.05 1</ambient><diffuse>0.9 0.05 0.05 1</diffuse></material>
+        </visual>
+      </link>'''
+    drone_include_xml = f'''
+      <include>
+        <uri>file://{caminho_drone_sdf}</uri>
+        <name>meu_drone</name>
+        <pose>{spawn_x} {spawn_y} {spawn_z} 0 0 {spawn_yaw}</pose>
+      </include>'''
+    if arquitetura_modelos == 'world':
+        if diagnostico_xml:
+            print('AVISO: arquitetura_modelos=world ignora modos carga/pendulo nesta versao diagnostica.')
+        corpo_simulacao_xml = f'''
+    <model name="ancora_model">
+      <static>true</static>
+{ancora_link_xml}
+    </model>
+{cabo_xml}
+{drone_include_xml}
+{juntas_cabo_xml}'''
+    else:
+        corpo_simulacao_xml = f'''
+    <model name="sistema_cabo_drone">
+      <pose>0 0 0 0 0 0</pose>
+{ancora_link_xml}
+
+      <joint name="fixa_ancora_cabo_mundo" type="fixed">
+        <parent>world</parent>
+        <child>ancora_cabo</child>
+      </joint>
+{cabo_xml}
+{drone_include_xml}
+{diagnostico_xml}
+{juntas_cabo_xml}
+    </model>'''
 
     world = f'''<?xml version="1.0" ?>
 <sdf version="1.8">
@@ -140,34 +295,7 @@ def _criar_mundo_diagnostico(context, pkg_share, params):
       </link>
     </model>
 
-    <model name="sistema_cabo_drone">
-      <pose>0 0 0 0 0 0</pose>
-
-      <link name="ancora_cabo">
-        <pose>{ancora_x} {ancora_y} {ancora_z} 0 0 0</pose>
-        <inertial>
-          <mass>10</mass>
-          <inertia><ixx>1</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1</iyy><iyz>0</iyz><izz>1</izz></inertia>
-        </inertial>
-        <visual name="visual">
-          <geometry><sphere><radius>0.015</radius></sphere></geometry>
-          <material><ambient>0.9 0.05 0.05 1</ambient><diffuse>0.9 0.05 0.05 1</diffuse></material>
-        </visual>
-      </link>
-
-      <joint name="fixa_ancora_cabo_mundo" type="fixed">
-        <parent>world</parent>
-        <child>ancora_cabo</child>
-      </joint>
-{cabo_xml}
-
-      <include>
-        <uri>file://{caminho_drone_sdf}</uri>
-        <name>meu_drone</name>
-        <pose>{spawn_x} {spawn_y} {spawn_z} 0 0 {spawn_yaw}</pose>
-      </include>
-{juntas_cabo_xml}
-    </model>
+{corpo_simulacao_xml}
   </world>
 </sdf>
 '''
@@ -180,6 +308,8 @@ def _criar_mundo_diagnostico(context, pkg_share, params):
         f'usar_cabo={usar_cabo}, spawn=({spawn_x:.2f}, {spawn_y:.2f}, {spawn_z:.2f}, yaw={spawn_yaw:.2f}), '
         f'conexao_cabo_drone={conexao_cabo_drone}, '
         f'prender_ancora={prender_ancora}, '
+        f'tether_mode={tether_mode}, tether_attach_link={tether_attach_link}, '
+        f'arquitetura_modelos={arquitetura_modelos}, '
         f'arquivo={caminho_world}'
     )
     gz_args = f'{caminho_world} -v4 -r'
@@ -224,10 +354,13 @@ def generate_launch_description():
             '/cabo/tensao_drone@geometry_msgs/msg/WrenchStamped[gz.msgs.Wrench',
             '/cabo/tensao_carretel@geometry_msgs/msg/WrenchStamped[gz.msgs.Wrench',
             '/cabo/conexao_drone@geometry_msgs/msg/WrenchStamped[gz.msgs.Wrench',
+            '/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock',
             '/meu_drone/odom@nav_msgs/msg/Odometry[gz.msgs.Odometry',
             '/meu_drone/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist',
             '/world/mundo_ic/model/sistema_cabo_drone/model/meu_drone/joint_state@sensor_msgs/msg/JointState[gz.msgs.Model',
             '/world/mundo_ic/model/sistema_cabo_drone/model/cabo_dinamico/joint_state@sensor_msgs/msg/JointState[gz.msgs.Model',
+            '/world/mundo_ic/model/meu_drone/joint_state@sensor_msgs/msg/JointState[gz.msgs.Model',
+            '/world/mundo_ic/model/cabo_dinamico/joint_state@sensor_msgs/msg/JointState[gz.msgs.Model',
             '/world/mundo_ic/pose/info@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V',
         ],
         output='screen'
@@ -307,6 +440,36 @@ def generate_launch_description():
             'prender_ancora',
             default_value='true',
             description='Fixa a raiz do cabo na ancora. Use false para diagnostico com tether livre conectado ao drone.',
+        ),
+        DeclareLaunchArgument(
+            'tether_mode',
+            default_value='completo',
+            description='Modo diagnostico do tether: completo, desacoplado, carga ou pendulo.',
+        ),
+        DeclareLaunchArgument(
+            'tether_attach_link',
+            default_value='cabo_sensor_link',
+            description='Link do drone usado pela junta do tether: cabo_sensor_link ou base_link.',
+        ),
+        DeclareLaunchArgument(
+            'arquitetura_modelos',
+            default_value='nested',
+            description='Arquitetura diagnostica: nested mantem sistema_cabo_drone; world coloca drone/cabo/ancora como modelos do mundo.',
+        ),
+        DeclareLaunchArgument(
+            'massa_diagnostico',
+            default_value='0.30',
+            description='Massa total para modos diagnosticos carga/pendulo, em kg.',
+        ),
+        DeclareLaunchArgument(
+            'comprimento_diagnostico',
+            default_value='0.50',
+            description='Comprimento total para o pendulo diagnostico, em metros.',
+        ),
+        DeclareLaunchArgument(
+            'pendulo_links',
+            default_value='1',
+            description='Numero de links do pendulo diagnostico.',
         ),
         DeclareLaunchArgument(
             'velocity_test',
