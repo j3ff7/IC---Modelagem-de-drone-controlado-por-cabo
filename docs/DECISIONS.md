@@ -156,6 +156,28 @@ Continuar usando tempo de parede e aumentar timeouts reais. Isso preservaria o e
 Consequências:
 Ensaios com cabo devem ser interpretados em tempo simulado (`t_sim`). O tempo de parede (`t_wall`) continua útil apenas para estimar custo computacional/RTF.
 
+## 2026-08-17 Separar Estabilização De Hover
+
+Contexto:
+Considerar chegada ao waypoint por uma amostra instantânea pode aceitar uma passagem transitória pelo alvo como se fosse hover.
+
+Decisão:
+O controlador passa a usar dois tempos em simulação:
+
+```text
+tempo_estabilizacao:
+  tempo continuo dentro das tolerancias de posição e velocidade antes de iniciar hover
+
+tempo_hover:
+  tempo simulado de permanência após estabilização
+```
+
+Justificativa:
+Isso torna os testes de sensor mais robustos, pois as estatísticas de azimuth/elevation devem ser coletadas depois que o drone estabilizou, não durante a aproximação.
+
+Consequências:
+Os arquivos de trajetória continuam definindo `tempo_hover`; `tempo_estabilizacao` é parâmetro de launch/controlador. A lógica e os ganhos do controlador foram preservados.
+
 ## 2026-08-16 Conexão Tether-Drone Deve Permitir Orientação Passiva
 
 Contexto:

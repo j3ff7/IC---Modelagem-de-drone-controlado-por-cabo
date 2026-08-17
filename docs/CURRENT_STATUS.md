@@ -77,7 +77,9 @@ L=3.0 m: z_min = -0.648 m
 - A folga horizontal reduz o pico inicial, mas a junta fixa `ponta_cabo -> cabo_sensor_link` transmite momento artificial ao drone durante o assentamento.
 - A conexão `ball` praticamente elimina esse momento e reduz o pitch máximo para menos de `1 deg`; ela agora é a baseline física provisória.
 - `velocity_test` agora usa `/clock`; com tether `ball`, `L=2.5 m`, `vz_cmd=0.25`, o drone sobe de `z ~= 0.33 m` para `z ~= 0.60 m` em cerca de `2 s` simulados, com pitch menor que `1.5 deg`, momento nulo e juntas longe do limite.
-- O controlador de posição também usa `/clock` para derivadas, integradores, hovering e logs.
+- O controlador de posição também usa `/clock` para derivadas, integradores, estabilização, hovering e logs.
+- `tempo_estabilizacao` foi separado de `tempo_hover`.
+- `hover_metrics` coleta estatísticas de posição, tensão, atitude e azimuth/elevation em janelas de tempo simulado.
 
 ## Constraints / Do Not Change
 
@@ -236,6 +238,23 @@ Proximos testes recomendados:
 2. Medir e reduzir o custo computacional/RTF do cabo de 50 links.
 3. Retomar investigacao estrutural apenas se a falha persistir quando medida por t_sim.
 4. Para testes automatizados com tether, usar timeouts reais muito maiores que a duracao simulada desejada.
+```
+
+Resultados recentes de controlador com tether `ball`, `L=2.5 m`, massa `0.30 kg`:
+
+```text
+z=0.60 m:
+  chegou a erro_z~0.09 m em t_sim~6.0 s
+  entrou em estabilizacao no waypoint final
+  RTF~0.04-0.07
+  pitch <= ~1.2 deg no trecho observado
+
+z=1.00 m:
+  chegou a z~0.88 m em t_sim~9.0 s
+  erro_z~0.12 m no timeout real
+  RTF_med~0.05
+  pos_std final ~(0.028,0.000,0.012) m
+  az_std~0.03 deg, el_std~3.70 deg na janela final observada
 ```
 
 Resultados abaixo sao anteriores a correcao por `/clock` e ficam mantidos apenas como historico do diagnostico contaminado por tempo de parede:

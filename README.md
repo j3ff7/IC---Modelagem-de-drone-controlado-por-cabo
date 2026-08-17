@@ -56,6 +56,7 @@ waypoints_file:=config/trajetoria_slack_hover_centro.json
 tolerancia_posicao:=0.18
 tolerancia_altura:=0.15
 histerese_chegada:=1.6
+tempo_estabilizacao:=1.0
 tempo_hover:=10.0
 controlar_heading:=false
 heading_fixo:=0.0
@@ -210,6 +211,24 @@ usar_cabo:=true prender_ancora:=false
 Resultado atual do caso acima com tether `ball`, `L=2.5 m` e massa total `0.30 kg`: o comando chega ao Gazebo (`cmd_z_pub=0.25`) e o drone sobe de `z ~= 0.33 m` para `z ~= 0.60 m` em cerca de `2 s` simulados, com `pitch` pequeno e `|M|=0`.
 
 Sem tether, o mesmo teste roda próximo do tempo real. Com o tether de 50 links, o RTF cai bastante; por isso avalie sempre `t_sim`, não o tempo de parede.
+
+### Métricas de hover
+
+Para registrar estabilidade de posição, tensão e ângulos sem poluir o terminal:
+
+```bash
+ros2 launch pacote_do_drone start_sim.launch.py \
+  controlador_trajetoria:=true \
+  hover_metrics:=true \
+  waypoints_file:=config/trajetoria_teste_z100.json \
+  metricas_target_x:=2.0 metricas_target_y:=0.0 metricas_target_z:=1.0 \
+  metricas_inicio_s:=0.0 \
+  metricas_duracao_s:=10.0 \
+  metricas_janela_final_s:=5.0 \
+  headless:=true
+```
+
+O nó imprime `RTF`, erro, tensão e um resumo final com média/desvio de posição, roll/pitch, tensão, azimuth e elevation.
 
 ### Diagnostico da geometria inicial do cabo
 

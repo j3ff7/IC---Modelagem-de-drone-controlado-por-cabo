@@ -388,6 +388,7 @@ def generate_launch_description():
             'tolerancia_posicao': ParameterValue(LaunchConfiguration('tolerancia_posicao'), value_type=float),
             'tolerancia_altura': ParameterValue(LaunchConfiguration('tolerancia_altura'), value_type=float),
             'histerese_chegada': ParameterValue(LaunchConfiguration('histerese_chegada'), value_type=float),
+            'tempo_estabilizacao': ParameterValue(LaunchConfiguration('tempo_estabilizacao'), value_type=float),
             'tempo_hover': ParameterValue(LaunchConfiguration('tempo_hover'), value_type=float),
             'repetir': ParameterValue(LaunchConfiguration('repetir'), value_type=bool),
             'controlar_heading': ParameterValue(LaunchConfiguration('controlar_heading'), value_type=bool),
@@ -421,6 +422,22 @@ def generate_launch_description():
             'yaw_rate_cmd': ParameterValue(LaunchConfiguration('yaw_rate_cmd'), value_type=float),
             'duracao': ParameterValue(LaunchConfiguration('velocity_test_duracao'), value_type=float),
             'log_periodo': ParameterValue(LaunchConfiguration('log_periodo'), value_type=float),
+        }],
+        output='screen',
+    )
+
+    hover_metrics = Node(
+        package='pacote_do_drone',
+        executable='hover_metrics',
+        condition=IfCondition(LaunchConfiguration('hover_metrics')),
+        parameters=[{
+            'target_x': ParameterValue(LaunchConfiguration('metricas_target_x'), value_type=float),
+            'target_y': ParameterValue(LaunchConfiguration('metricas_target_y'), value_type=float),
+            'target_z': ParameterValue(LaunchConfiguration('metricas_target_z'), value_type=float),
+            'inicio_s': ParameterValue(LaunchConfiguration('metricas_inicio_s'), value_type=float),
+            'duracao_s': ParameterValue(LaunchConfiguration('metricas_duracao_s'), value_type=float),
+            'janela_final_s': ParameterValue(LaunchConfiguration('metricas_janela_final_s'), value_type=float),
+            'log_periodo_s': ParameterValue(LaunchConfiguration('metricas_log_periodo_s'), value_type=float),
         }],
         output='screen',
     )
@@ -572,6 +589,11 @@ def generate_launch_description():
             description='Tempo em hovering no waypoint antes de avancar.',
         ),
         DeclareLaunchArgument(
+            'tempo_estabilizacao',
+            default_value='1.0',
+            description='Tempo simulado continuo dentro das tolerancias antes de iniciar a contagem de hovering.',
+        ),
+        DeclareLaunchArgument(
             'repetir',
             default_value='false',
             description='Repete continuamente a sequencia de waypoints.',
@@ -661,10 +683,23 @@ def generate_launch_description():
             default_value='6',
             description='Numero de links usados para estimar a tangente local do cabo no sensor.',
         ),
+        DeclareLaunchArgument(
+            'hover_metrics',
+            default_value='false',
+            description='Ativa coleta compacta de metricas de hover e angulos em tempo simulado.',
+        ),
+        DeclareLaunchArgument('metricas_target_x', default_value='2.0'),
+        DeclareLaunchArgument('metricas_target_y', default_value='0.0'),
+        DeclareLaunchArgument('metricas_target_z', default_value='1.0'),
+        DeclareLaunchArgument('metricas_inicio_s', default_value='0.0'),
+        DeclareLaunchArgument('metricas_duracao_s', default_value='10.0'),
+        DeclareLaunchArgument('metricas_janela_final_s', default_value='5.0'),
+        DeclareLaunchArgument('metricas_log_periodo_s', default_value='2.0'),
         AppendEnvironmentVariable(name='GZ_SIM_RESOURCE_PATH', value=models_path),
         gazebo,
         bridge,
         sensores,
         controlador_trajetoria,
         velocity_test,
+        hover_metrics,
     ])

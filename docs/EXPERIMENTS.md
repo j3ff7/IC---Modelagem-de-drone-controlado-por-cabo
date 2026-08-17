@@ -786,3 +786,124 @@ A hipótese estrutural forte sobre `MulticopterVelocityControl` e topologia `bas
 
 Próxima ação:
 Manter `/clock` bridged e usar `t_sim` nos testes. Para melhorar usabilidade, reduzir custo computacional do cabo ou aumentar timeouts reais dos ensaios automatizados. So retomar investigacao estrutural se uma falha persistir quando medida em tempo simulado.
+
+## Experimento: Estabilização E Métricas Em Tempo Simulado
+
+Data:
+2026-08-17.
+
+Objetivo:
+Consolidar o controlador com tempo simulado, adicionar critério robusto de chegada ao waypoint e iniciar medições quantitativas de hover/ângulos.
+
+Alterações realizadas:
+
+- Auditoria de tempo no pacote ativo `src/pacote_do_drone`.
+- `sensores.py` e `cabo_monitor.py` passaram a usar `/clock` para cadência de log/CSV quando disponível.
+- `movimento_circular.py` ganhou `tempo_estabilizacao`, separado de `tempo_hover`.
+- Logs compactos do controlador agora incluem `RTF`.
+- Criado o nó `hover_metrics`, que mede:
+  - média/desvio de posição;
+  - erro médio/RMS/máximo;
+  - roll/pitch máximos;
+  - tensão média/máxima;
+  - média/desvio/min/max de azimuth/elevation.
+- Criados arquivos de teste:
+  - `trajetoria_teste_z060.json`;
+  - `trajetoria_teste_z100.json`;
+  - `trajetoria_teste_z150.json`;
+  - `trajetoria_teste_z200.json`;
+  - `trajetoria_sensor_n/s/e/w.json`.
+
+Auditoria de tempo:
+
+```text
+movimento_circular.py:
+  dinamica, derivadas, integradores, estabilizacao, hover e logs usam /clock.
+
+velocity_test.py:
+  duracao do comando, derivadas e logs usam /clock.
+
+sensores.py:
+  publicacao de angulos nao usa dt; log usa /clock.
+
+cabo_monitor.py:
+  monitor/CSV usam /clock quando disponivel.
+
+hover_metrics.py:
+  estatisticas usam /clock; tempo de parede e usado apenas para RTF.
+```
+
+Teste vertical `z=0.60 m`:
+
+```text
+spawn=(2.0, 0.0, 0.33)
+waypoints=(2.0,0.0,0.33) -> (2.0,0.0,0.60)
+tempo_estabilizacao=1.0 s
+tempo_hover=2.0 s
+tolerancia_altura=0.10 m
+
+resultado:
+  transicao WP0->WP1 em t_sim~3.2 s
+  t_sim=4.01 s: z=0.39 m, erro_z=0.21 m
+  t_sim=5.01 s: z=0.47 m, erro_z=0.13 m
+  t_sim=6.01 s: z=0.51 m, erro_z=0.09 m
+  estado=estabilizando no waypoint final
+  RTF observado: ~0.04 a 0.07
+  pitch max observado no trecho: ~1.2 deg
+  tensao maxima no trecho: ~1.70 N no carretel, ~0.35 N na conexao
+```
+
+Teste vertical `z=1.00 m`:
+
+```text
+spawn=(2.0, 0.0, 0.33)
+waypoints=(2.0,0.0,0.33) -> (2.0,0.0,1.00)
+tempo_estabilizacao=1.0 s
+tempo_hover=2.0 s
+tolerancia_altura=0.10 m
+
+resultado parcial ate timeout real:
+  transicao WP0->WP1 em t_sim~3.2 s
+  t_sim=4.00 s: z=0.50 m, erro_z=0.50 m
+  t_sim=5.01 s: z=0.73 m, erro_z=0.27 m
+  t_sim=6.01 s: z=0.83 m, erro_z=0.17 m
+  t_sim=9.01 s: z=0.88 m, erro_z=0.12 m
+  RTF observado: ~0.04 a 0.07
+  pitch max observado no trecho: ~0.9 deg
+  tensao maxima no trecho: ~1.70 N no carretel, ~0.70 N na conexao
+```
+
+Métricas coletadas no teste `z=1.00 m`, janela final antes do timeout real:
+
+```text
+RTF_med=0.05
+pos_mean=(1.994, 0.004, 0.860) m
+pos_std=(0.028, 0.000, 0.012) m
+err_mean/rms/max=0.143/0.143/0.178 m
+roll_max=0.01 deg
+pitch_max=0.90 deg
+T_mean/max=0.63/0.66 N
+az_mean/std/min/max=179.86/0.03/179.82/179.92 deg
+el_mean/std/min/max=33.17/3.70/28.96/38.94 deg
+```
+
+Interpretação:
+O controlador está fisicamente coerente e estável, mas a convergência vertical para alturas maiores é lenta com os ganhos atuais e sem termo integral. Como a orientação do pedido foi não alterar ganhos, isso fica registrado como característica atual da baseline.
+
+Testes preparados mas ainda não concluídos nesta rodada:
+
+```text
+z=1.5 m
+z=2.0 m
+hover 10 s simulado em (2.0,0.0,1.0)
+hover 30 s simulado em (2.0,0.0,1.0)
+casos N/S/E/W em raio 1.0 m, z=2.0 m
+sweep 20/30/40/50 links
+comparacao janela_tangente_links=1 vs 3
+```
+
+Motivo:
+Com 50 links, o RTF observado ficou tipicamente em `0.04-0.07`; testes de 30 s simulados exigem timeouts reais muito maiores.
+
+Próxima ação:
+Rodar as baterias longas com `hover_metrics` e timeouts reais dimensionados por RTF, ou primeiro executar o sweep de discretização para encontrar uma configuração com RTF melhor sem degradar ângulos/tensão.

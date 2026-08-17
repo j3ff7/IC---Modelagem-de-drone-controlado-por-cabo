@@ -7,6 +7,7 @@ import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import WrenchStamped
 from nav_msgs.msg import Odometry
+from rosgraph_msgs.msg import Clock
 from sensor_msgs.msg import JointState
 from std_msgs.msg import Float64
 from tf2_msgs.msg import TFMessage
@@ -33,7 +34,9 @@ class LeitorCabo(Node):
     def __init__(self):
         super().__init__('leitor_cabo_node')
         self.declare_parameter('janela_tangente_links', 6)
+        self.sim_time_ns = None
 
+        self.create_subscription(Clock, '/clock', self.clock_callback, 10)
         self.subscription_tensao = self.create_subscription(
             WrenchStamped,
             '/cabo/tensao_drone',
@@ -70,7 +73,7 @@ class LeitorCabo(Node):
         self.elevation_tangente_ancora_pub = self.create_publisher(Float64, '/cabo/ancora/elevation_graus', 10)
         self.azimuth_joint_pub = self.create_publisher(Float64, '/cabo/azimuth_joint_graus', 10)
         self.elevation_joint_pub = self.create_publisher(Float64, '/cabo/elevation_joint_graus', 10)
-        self.last_log_time = self.get_clock().now()
+        self.last_log_ns = None
         self.orientacao_modelo_cabo = None
         self.orientacao_segmento_final = None
         self.posicao_modelo_cabo = None
@@ -81,6 +84,14 @@ class LeitorCabo(Node):
         self.posicao_ancora = self._ler_posicao_ancora()
         self.offset_sensor_corpo = (0.0, 0.0, -0.05)
         self.janela_tangente_links = max(1, int(self.get_parameter('janela_tangente_links').value))
+
+    def _agora_ns(self):
+        if self.sim_time_ns is not None:
+            return self.sim_time_ns
+        return self.get_clock().now().nanoseconds
+
+    def clock_callback(self, msg):
+        self.sim_time_ns = msg.clock.sec * 1_000_000_000 + msg.clock.nanosec
 
     def _ler_posicao_ancora(self):
         try:
@@ -219,9 +230,9 @@ class LeitorCabo(Node):
             self.azimuth_tangente_ancora_pub.publish(Float64(data=azimuth_tangente_ancora_deg))
             self.elevation_tangente_ancora_pub.publish(Float64(data=elevation_tangente_ancora_deg))
 
-        now = self.get_clock().now()
-        if (now - self.last_log_time).nanoseconds >= 500_000_000:
-            self.last_log_time = now
+        now_ns = self._agora_ns()
+        if self.last_log_ns is None or now_ns - self.last_log_ns >= 500_000_000:
+            self.last_log_ns = now_ns
             sufixo = ' | perto de vertical' if elevation_saturado(elevation_deg) else ''
             texto_ancora = 'indisponivel'
             if azimuth_tangente_ancora_deg is not None and elevation_tangente_ancora_deg is not None:

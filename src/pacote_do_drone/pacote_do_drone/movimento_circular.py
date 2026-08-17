@@ -50,6 +50,7 @@ class ControladorTrajetoriaDrone(Node):
         self.declare_parameter('tolerancia_posicao', 0.18)
         self.declare_parameter('tolerancia_altura', 0.15)
         self.declare_parameter('histerese_chegada', 1.6)
+        self.declare_parameter('tempo_estabilizacao', 1.0)
         self.declare_parameter('tempo_hover', 3.0)
         self.declare_parameter('repetir', True)
         self.declare_parameter('controlar_heading', False)
@@ -81,6 +82,7 @@ class ControladorTrajetoriaDrone(Node):
         self.tolerancia_posicao = float(self.get_parameter('tolerancia_posicao').value)
         self.tolerancia_altura = float(self.get_parameter('tolerancia_altura').value)
         self.histerese_chegada = max(1.0, float(self.get_parameter('histerese_chegada').value))
+        self.tempo_estabilizacao = max(0.0, float(self.get_parameter('tempo_estabilizacao').value))
         self.tempo_hover = max(0.0, float(self.get_parameter('tempo_hover').value))
         self.repetir = bool(self.get_parameter('repetir').value)
         self.controlar_heading = bool(self.get_parameter('controlar_heading').value)
@@ -119,6 +121,7 @@ class ControladorTrajetoriaDrone(Node):
         self.ultimo_odom_ns = None
         self.yaw = 0.0
         self.indice_waypoint = 0
+        self.tempo_estavel = 0.0
         self.tempo_no_alvo = 0.0
         self.integral_x = 0.0
         self.integral_y = 0.0
@@ -134,6 +137,8 @@ class ControladorTrajetoriaDrone(Node):
         self.sim_time_ns = None
         self.last_log_ns = None
         self.tempo_inicio_ns = None
+        self.wall_inicio_ns = None
+        self.wall_last_log_ns = None
         self.ultimo_timer_ns = None
 
         self.publisher_ = self.create_publisher(Twist, '/meu_drone/cmd_vel', 10)
@@ -154,7 +159,7 @@ class ControladorTrajetoriaDrone(Node):
         self.get_logger().info(
             f'Trajetoria por sequencia: {len(self.waypoints)} waypoints, '
             f'centro_ref=({self.centro_x:.2f}, {self.centro_y:.2f}), '
-            f'hover={self.tempo_hover:.1f} s, repetir={self.repetir}, '
+            f'estabilizacao={self.tempo_estabilizacao:.1f} s, hover={self.tempo_hover:.1f} s, repetir={self.repetir}, '
             f'controlar_heading={self.controlar_heading}, heading={math.degrees(self.heading_fixo):.1f} deg, '
             f'cmd_frame={self.cmd_vel_frame}, velocidade_por_diferenca={self.usar_velocidade_por_diferenca}'
         )
@@ -358,6 +363,9 @@ class ControladorTrajetoriaDrone(Node):
         now_ns = self._agora_ns()
         if self.tempo_inicio_ns is None:
             self.tempo_inicio_ns = now_ns
+            wall_now_ns = self.get_clock().now().nanoseconds
+            self.wall_inicio_ns = wall_now_ns
+            self.wall_last_log_ns = wall_now_ns
             self.ultimo_timer_ns = now_ns
             self.last_log_ns = now_ns
 
@@ -409,15 +417,18 @@ class ControladorTrajetoriaDrone(Node):
         msg.angular.z = yaw_rate
         self.publisher_.publish(msg)
 
-        fator_tolerancia = self.histerese_chegada if self.tempo_no_alvo > 0.0 else 1.0
+        fator_tolerancia = self.histerese_chegada if self.tempo_estavel > 0.0 else 1.0
         chegou_posicao = (
             erro_xy <= self.tolerancia_posicao * fator_tolerancia
             and abs(erro_z) <= self.tolerancia_altura * fator_tolerancia
         )
         chegou_velocidade = velocidade_xy <= self.tolerancia_velocidade and abs(self.vz) <= self.tolerancia_velocidade
         if chegou_posicao and chegou_velocidade:
-            self.tempo_no_alvo += dt_controle
+            self.tempo_estavel += dt_controle
+            if self.tempo_estavel >= self.tempo_estabilizacao:
+                self.tempo_no_alvo += dt_controle
         else:
+            self.tempo_estavel = 0.0
             self.tempo_no_alvo = 0.0
             self.ultimo_waypoint_atingido = False
 
@@ -442,13 +453,20 @@ class ControladorTrajetoriaDrone(Node):
                 f'cmd=({msg.linear.x:.2f},{msg.linear.y:.2f},{msg.linear.z:.2f},{msg.angular.z:.2f})'
             )
             self.tempo_no_alvo = 0.0
+            self.tempo_estavel = 0.0
             self._resetar_integradores()
             self.get_logger().info(f'Avancando para waypoint {self.indice_waypoint}/{len(self.waypoints) - 1}')
 
         if self.last_log_ns is None or now_ns - self.last_log_ns >= self.log_periodo_ns:
+            prev_log_ns = self.last_log_ns
             self.last_log_ns = now_ns
             tempo_s = (now_ns - self.tempo_inicio_ns) * 1e-9
-            estado = 'hover' if self.tempo_no_alvo > 0.0 else 'transitando'
+            wall_now_ns = self.get_clock().now().nanoseconds
+            dt_sim_log = self.log_periodo_ns * 1e-9 if prev_log_ns is None else (now_ns - prev_log_ns) * 1e-9
+            dt_wall_log = max(1e-9, (wall_now_ns - (self.wall_last_log_ns or wall_now_ns)) * 1e-9)
+            rtf = dt_sim_log / dt_wall_log
+            self.wall_last_log_ns = wall_now_ns
+            estado = 'hover' if self.tempo_no_alvo > 0.0 else ('estabilizando' if self.tempo_estavel > 0.0 else 'transitando')
             if self.ultimo_waypoint_atingido:
                 estado = 'concluido'
             rotores = '-'
@@ -457,11 +475,12 @@ class ControladorTrajetoriaDrone(Node):
                 if all(valor is not None for valor in valores):
                     rotores = '[' + ','.join(f'{valor:.0f}' for valor in valores) + '] rad/s'
             self.get_logger().info(
-                f't={tempo_s:.2f}s | WP {self.indice_waypoint} | estado={estado} | '
+                f't={tempo_s:.2f}s | RTF={rtf:.2f} | WP {self.indice_waypoint} | estado={estado} | '
                 f'pos=({self.x:.2f},{self.y:.2f},{self.z:.2f}) '
                 f'ref=({alvo_x:.2f},{alvo_y:.2f},{alvo_z:.2f}) '
                 f'err=({erro_x:.2f},{erro_y:.2f},{erro_z:.2f}) '
                 f'vel=({self.vx:.2f},{self.vy:.2f},{self.vz:.2f}) '
+                f'estavel={self.tempo_estavel:.1f}/{self.tempo_estabilizacao:.1f}s '
                 f'hover={self.tempo_no_alvo:.1f}/{self.tempo_hover:.1f}s '
                 f'rpy=({math.degrees(self.roll):.1f}, {math.degrees(self.pitch):.1f}, '
                 f'{math.degrees(self.yaw):.1f}/{math.degrees(self.heading_fixo):.1f})deg '

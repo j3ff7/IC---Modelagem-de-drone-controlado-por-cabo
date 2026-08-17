@@ -4,6 +4,7 @@ import sys
 
 import rclpy
 from rclpy.node import Node
+from rosgraph_msgs.msg import Clock
 from std_msgs.msg import Float64
 
 from pacote_do_drone.cabo_angulos import ELEVATION_LIMIT_DEG, elevation_saturado
@@ -22,6 +23,7 @@ def _barra(valor, limite, largura=31):
 class CaboMonitor(Node):
     def __init__(self, csv_path=None, rate_hz=5.0):
         super().__init__('cabo_monitor')
+        self.create_subscription(Clock, '/clock', self._clock_callback, 10)
         self.create_subscription(Float64, '/cabo/azimuth_graus', self._azimuth_callback, 10)
         self.create_subscription(Float64, '/cabo/elevation_graus', self._elevation_callback, 10)
         self.create_subscription(Float64, '/cabo/azimuth_ancora_graus', self._azimuth_ancora_callback, 10)
@@ -31,7 +33,8 @@ class CaboMonitor(Node):
         self.create_subscription(Float64, '/cabo/azimuth_joint_graus', self._azimuth_joint_callback, 10)
         self.create_subscription(Float64, '/cabo/elevation_joint_graus', self._elevation_joint_callback, 10)
         self.period_ns = int(1e9 / max(rate_hz, 0.1))
-        self.last_print = self.get_clock().now()
+        self.sim_time_ns = None
+        self.last_print_ns = None
         self.azimuth_deg = None
         self.elevation_deg = None
         self.azimuth_ancora_deg = None
@@ -61,6 +64,14 @@ class CaboMonitor(Node):
             self.get_logger().info(f'Gravando CSV em {csv_path}')
 
         self.get_logger().info('Lendo angulos do cabo: drone, reta sensor-ancora e ancora.')
+
+    def _agora_ns(self):
+        if self.sim_time_ns is not None:
+            return self.sim_time_ns
+        return self.get_clock().now().nanoseconds
+
+    def _clock_callback(self, msg):
+        self.sim_time_ns = msg.clock.sec * 1_000_000_000 + msg.clock.nanosec
 
     def destroy_node(self):
         if self.csv_file:
@@ -104,7 +115,8 @@ class CaboMonitor(Node):
             return
 
         saturado = elevation_saturado(self.elevation_deg)
-        tempo_s = self.get_clock().now().nanoseconds * 1e-9
+        now_ns = self._agora_ns()
+        tempo_s = now_ns * 1e-9
 
         if self.csv_writer:
             self.csv_writer.writerow([
@@ -120,10 +132,9 @@ class CaboMonitor(Node):
                 int(saturado),
             ])
 
-        now = self.get_clock().now()
-        if (now - self.last_print).nanoseconds < self.period_ns:
+        if self.last_print_ns is not None and now_ns - self.last_print_ns < self.period_ns:
             return
-        self.last_print = now
+        self.last_print_ns = now_ns
 
         aviso = ' SAT' if saturado else ''
         linha = (
