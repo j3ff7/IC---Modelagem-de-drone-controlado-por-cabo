@@ -52,6 +52,7 @@ def _criar_mundo_diagnostico(context, pkg_share, params):
     spawn_z = _float_launch(context, 'spawn_z', spawn_z_default)
     spawn_yaw = _float_launch(context, 'spawn_yaw', yaw_base)
     usar_cabo = _bool_launch(context, 'usar_cabo')
+    prender_ancora = _bool_launch(context, 'prender_ancora')
     conexao_cabo_drone = str(params.get('connection_type', 'fixed')).strip().lower()
     if conexao_cabo_drone not in ('fixed', 'ball'):
         print(f"AVISO: connection_type={conexao_cabo_drone!r} invalido. Usando fixed.")
@@ -60,6 +61,13 @@ def _criar_mundo_diagnostico(context, pkg_share, params):
     cabo_xml = ''
     juntas_cabo_xml = ''
     if usar_cabo:
+        junta_ancora_xml = ''
+        if prender_ancora:
+            junta_ancora_xml = '''
+      <joint name="ancora_carretel_cabo" type="fixed">
+        <parent>ancora_cabo</parent>
+        <child>cabo_dinamico::raiz_cabo</child>
+      </joint>'''
         cabo_xml = f'''
       <include>
         <uri>file://{caminho_cabo_sdf}</uri>
@@ -67,12 +75,8 @@ def _criar_mundo_diagnostico(context, pkg_share, params):
         <pose>{ancora_x} {ancora_y} {ancora_z} 0 0 {yaw_base}</pose>
         <static>false</static>
       </include>'''
-        juntas_cabo_xml = '''
-      <joint name="ancora_carretel_cabo" type="fixed">
-        <parent>ancora_cabo</parent>
-        <child>cabo_dinamico::raiz_cabo</child>
-      </joint>
-
+        juntas_cabo_xml = f'''
+{junta_ancora_xml}
       <joint name="cabo_drone_joint" type="fixed">
         <parent>cabo_dinamico::ponta_cabo</parent>
         <child>meu_drone::cabo_sensor_link</child>
@@ -83,12 +87,8 @@ def _criar_mundo_diagnostico(context, pkg_share, params):
         </sensor>
       </joint>'''
         if conexao_cabo_drone == 'ball':
-            juntas_cabo_xml = '''
-      <joint name="ancora_carretel_cabo" type="fixed">
-        <parent>ancora_cabo</parent>
-        <child>cabo_dinamico::raiz_cabo</child>
-      </joint>
-
+            juntas_cabo_xml = f'''
+{junta_ancora_xml}
       <joint name="cabo_drone_joint" type="ball">
         <parent>cabo_dinamico::ponta_cabo</parent>
         <child>meu_drone::cabo_sensor_link</child>
@@ -179,6 +179,7 @@ def _criar_mundo_diagnostico(context, pkg_share, params):
         'Mundo diagnostico: '
         f'usar_cabo={usar_cabo}, spawn=({spawn_x:.2f}, {spawn_y:.2f}, {spawn_z:.2f}, yaw={spawn_yaw:.2f}), '
         f'conexao_cabo_drone={conexao_cabo_drone}, '
+        f'prender_ancora={prender_ancora}, '
         f'arquivo={caminho_world}'
     )
     gz_args = f'{caminho_world} -v4 -r'
@@ -226,6 +227,7 @@ def generate_launch_description():
             '/meu_drone/odom@nav_msgs/msg/Odometry[gz.msgs.Odometry',
             '/meu_drone/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist',
             '/world/mundo_ic/model/sistema_cabo_drone/model/meu_drone/joint_state@sensor_msgs/msg/JointState[gz.msgs.Model',
+            '/world/mundo_ic/model/sistema_cabo_drone/model/cabo_dinamico/joint_state@sensor_msgs/msg/JointState[gz.msgs.Model',
             '/world/mundo_ic/pose/info@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V',
         ],
         output='screen'
@@ -275,6 +277,21 @@ def generate_launch_description():
         output='screen',
     )
 
+    velocity_test = Node(
+        package='pacote_do_drone',
+        executable='velocity_test',
+        condition=IfCondition(LaunchConfiguration('velocity_test')),
+        parameters=[{
+            'vx_cmd': ParameterValue(LaunchConfiguration('vx_cmd'), value_type=float),
+            'vy_cmd': ParameterValue(LaunchConfiguration('vy_cmd'), value_type=float),
+            'vz_cmd': ParameterValue(LaunchConfiguration('vz_cmd'), value_type=float),
+            'yaw_rate_cmd': ParameterValue(LaunchConfiguration('yaw_rate_cmd'), value_type=float),
+            'duracao': ParameterValue(LaunchConfiguration('velocity_test_duracao'), value_type=float),
+            'log_periodo': ParameterValue(LaunchConfiguration('log_periodo'), value_type=float),
+        }],
+        output='screen',
+    )
+
     return LaunchDescription([
         DeclareLaunchArgument(
             'controlador_trajetoria',
@@ -285,6 +302,41 @@ def generate_launch_description():
             'usar_cabo',
             default_value='true',
             description='Inclui o cabo dinamico e as juntas de ancoragem. Use false para diagnostico do controlador sem tether.',
+        ),
+        DeclareLaunchArgument(
+            'prender_ancora',
+            default_value='true',
+            description='Fixa a raiz do cabo na ancora. Use false para diagnostico com tether livre conectado ao drone.',
+        ),
+        DeclareLaunchArgument(
+            'velocity_test',
+            default_value='false',
+            description='Publica cmd_vel constante para diagnostico aberto do MulticopterVelocityControl.',
+        ),
+        DeclareLaunchArgument(
+            'vx_cmd',
+            default_value='0.0',
+            description='Comando linear X usado por velocity_test.',
+        ),
+        DeclareLaunchArgument(
+            'vy_cmd',
+            default_value='0.0',
+            description='Comando linear Y usado por velocity_test.',
+        ),
+        DeclareLaunchArgument(
+            'vz_cmd',
+            default_value='0.25',
+            description='Comando linear Z usado por velocity_test.',
+        ),
+        DeclareLaunchArgument(
+            'yaw_rate_cmd',
+            default_value='0.0',
+            description='Comando angular Z usado por velocity_test.',
+        ),
+        DeclareLaunchArgument(
+            'velocity_test_duracao',
+            default_value='8.0',
+            description='Duracao em segundos do comando constante do velocity_test.',
         ),
         DeclareLaunchArgument(
             'headless',
@@ -451,4 +503,5 @@ def generate_launch_description():
         bridge,
         sensores,
         controlador_trajetoria,
+        velocity_test,
     ])

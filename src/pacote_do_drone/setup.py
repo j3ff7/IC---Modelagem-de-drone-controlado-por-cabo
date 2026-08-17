@@ -50,6 +50,7 @@ setup(
             'sensores = pacote_do_drone.sensores:main',
             'cabo_monitor = pacote_do_drone.cabo_monitor:main',
             'movimento_circular = pacote_do_drone.movimento_circular:main',
+            'velocity_test = pacote_do_drone.velocity_test:main',
             'test_tensao = pacote_do_drone.test_tensao:main',
         ],
     },

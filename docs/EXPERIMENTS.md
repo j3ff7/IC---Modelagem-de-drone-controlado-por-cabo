@@ -571,3 +571,122 @@ A estratégia depende da consistência entre spawn, primeiro waypoint e geometri
 
 Próxima ação:
 Confirmar o conteúdo atual dos arquivos `trajetoria_slack_*.json`, pois há inconsistência documentada para o caso `n`.
+
+## Experimento: Resposta Vertical Aberta Com Tether Ball
+
+Data:
+2026-08-17.
+
+Objetivo:
+Separar o controlador de posicao da resposta vertical do plugin `MulticopterVelocityControl` quando o drone esta acoplado ao cabo.
+
+Hipótese:
+Se o drone sobe corretamente sem tether ao receber `cmd_vel.linear.z > 0`, mas nao sobe com tether mesmo sem controlador de posicao, o problema esta depois da geracao de referencia: plugin, modelo fisico acoplado, restricoes do cabo ou parametrizacao do multirotor.
+
+Configuração baseline:
+
+```text
+L = 2.5 m
+massa total do cabo = 0.30 kg
+num_links = 50
+length = 0.05 m
+mass = 0.00588 kg
+initial_shape = sine_slack horizontal
+connection_type = ball
+cmd_vel_frame = body
+janela_tangente_links = 3
+spawn = (2.0, 0.0, 0.33) m
+```
+
+No de teste:
+
+```bash
+ros2 launch pacote_do_drone start_sim.launch.py \
+  velocity_test:=true \
+  controlador_trajetoria:=false \
+  usar_cabo:=true \
+  prender_ancora:=true \
+  headless:=true \
+  spawn_x:=2.0 spawn_y:=0.0 spawn_z:=0.33 spawn_yaw:=0.0 \
+  vz_cmd:=0.25 \
+  velocity_test_duracao:=8.0 \
+  log_periodo:=0.5
+```
+
+O no `velocity_test` publica `/meu_drone/cmd_vel` constante e registra:
+
+```text
+t, z, vz, az, cmd_z_pub, RPY, F_raw, F_body_est, |F|, |M|, rotores, margem das juntas do cabo
+```
+
+Resultados do sweep de comando vertical:
+
+```text
+caso                vz_cmd  dz [m]  z_final [m]  vz_mean [m/s]  vz_max [m/s]  |F|max [N]  |M|max [Nm]  pitch max [deg]
+sem tether          0.10    0.568   0.896        0.089          0.101         0.00       0.000        0.0
+tether livre        0.10   -0.029   0.299       -0.005          0.000         1.53       0.000        0.4
+tether ancorado     0.10   -0.011   0.317       -0.002          0.003         4.11       0.000        0.1
+
+sem tether          0.25    1.505   1.833        0.225          0.252         0.00       0.000        0.0
+tether livre        0.25    0.001   0.329       -0.000          0.003         7.71       0.000        0.4
+tether ancorado     0.25    0.020   0.348        0.001          0.007         2.00       0.000        0.2
+
+sem tether          0.50    3.048   3.372        0.443          0.504         0.00       0.000        0.0
+tether livre        0.50    0.066   0.394        0.008          0.016         4.79       0.000        0.4
+tether ancorado     0.50    0.166   0.494        0.018          0.027         1.09       0.000        0.6
+```
+
+Teste adicional executado apos adicionar `JointStatePublisher` ao cabo:
+
+```text
+tether ancorado, vz_cmd=0.25:
+  cmd_z_pub = 0.25 ate 8 s
+  z = 0.328 m em t=2.15 s
+  z = 0.336 m em t=8.00 s
+  z = 0.362 m em t=12.70 s, apos comando zerar
+  |F|max observado no trecho = 2.00 N
+  |M| = 0.000 Nm
+  pitch max observado = ~0.5 deg
+  margem minima das juntas do cabo = ~64% no fim do ensaio
+  juntas proximas do limite = 0
+```
+
+Sweep de massa/comprimento com `vz_cmd=0.25`:
+
+```text
+caso                 massa total  L [m]  ancora  dz [m]  z_final [m]  vz_mean [m/s]  |F|max [N]  pitch max [deg]
+mass030_L25_anchor   0.30 kg      2.5    sim     0.038   0.366        0.004          0.99       0.3
+mass010_L25_anchor   0.10 kg      2.5    sim     0.072   0.400        0.008          0.64       0.2
+mass003_L25_anchor   0.03 kg      2.5    sim     0.113   0.441        0.012          0.17       0.0
+mass030_L25_free     0.30 kg      2.5    nao     0.006   0.334        0.001          7.71       0.4
+mass003_L25_free     0.03 kg      2.5    nao     0.058   0.386        0.004          0.23       0.0
+mass030_L30_anchor   0.30 kg      3.0    sim     0.013   0.341        0.000          0.77       0.2
+```
+
+Interpretação das hipóteses:
+
+```text
+H1 - MulticopterVelocityControl afetado pelo multibody conectado: provavel.
+Evidencia: sem tether o drone segue cmd_vel.z; com tether livre e ancorado a resposta vertical quase desaparece.
+
+H2 - forcas/restricoes do solver nao totalmente capturadas por /cabo/conexao_drone: provavel.
+Evidencia: mesmo quando a forca medida na conexao e pequena, a resposta vertical e fortemente alterada.
+
+H3 - juntas internas do cabo em limite: improvavel neste ensaio.
+Evidencia: margem dinamica minima maior que 60% e zero juntas proximas do limite no teste curto.
+
+H4 - massa/inercia simples do cabo domina a falha: improvavel como causa unica.
+Evidencia: reduzir massa total de 0.30 kg para 0.03 kg melhora pouco, mas nao recupera a subida normal.
+
+H5 - parametrizacao/interpretacao de empuxo do modelo deve ser revisada: provavel como risco de modelo.
+Evidencia: os parametros `forceConstant`/`maxRotVelocity` geram uma margem nominal absurdamente alta se interpretados diretamente, mas o mesmo drone sem tether sobe corretamente; portanto nao explica sozinho a diferenca com tether.
+
+H6 - sinal ou frame de cmd_vel.z errado: improvavel.
+Evidencia: documentacao oficial do Gazebo Sim 6 indica velocidade linear no frame do corpo; sem tether, `vz_cmd > 0` produz subida coerente.
+```
+
+Conclusão:
+O problema atual nao deve ser tratado ajustando ganhos do controlador de posicao. O caso aberto mostra que o comando vertical chega ao Gazebo e funciona sem tether, mas perde efetividade quando qualquer cadeia do cabo esta acoplada ao drone, mesmo com raiz livre e sem momento na conexao `ball`.
+
+Próxima ação:
+Investigar a topologia de conexao entre `meu_drone::base_link`, `cabo_sensor_link` e o cabo. Um teste diagnostico recomendado e conectar o tether diretamente ao `base_link`, ou transformar o sensor em link filho do `base_link`, para verificar se o `MulticopterVelocityControl` e o `comLinkName=base_link` sao afetados pela cadeia externa ligada ao link do sensor. Tambem vale testar uma carga externa simples aplicada ao drone, sem multibody do cabo, para separar carga fisica de restricao articulada.

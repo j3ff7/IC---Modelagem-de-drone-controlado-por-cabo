@@ -18,6 +18,8 @@ spawn original
 + hover estável
 ```
 
+O marco intermediario atual e mais estreito: explicar por que um comando vertical aberto (`cmd_vel.linear.z > 0`) sobe corretamente sem tether, mas quase nao produz subida quando o tether `ball` esta conectado.
+
 ## What Works
 
 - O workspace compila com:
@@ -74,6 +76,8 @@ L=3.0 m: z_min = -0.648 m
 - O pico de tensão aparece porque o cabo nasce esticado ou em configuração incompatível com a referência/solo.
 - A folga horizontal reduz o pico inicial, mas a junta fixa `ponta_cabo -> cabo_sensor_link` transmite momento artificial ao drone durante o assentamento.
 - A conexão `ball` praticamente elimina esse momento e reduz o pitch máximo para menos de `1 deg`; ela agora é a baseline física provisória.
+- O teste aberto `velocity_test` mostra que a falha de subida permanece mesmo sem controlador de posicao: o comando `cmd_vel.z` chega ao Gazebo, mas a resposta vertical quase desaparece quando o cabo esta acoplado ao drone.
+- No ensaio curto com tether `ball`, `L=2.5 m`, `vz_cmd=0.25`, as juntas internas do cabo mantiveram margem minima maior que `60%`; nao ha evidencia de saturacao de junta como causa imediata.
 
 ## Constraints / Do Not Change
 
@@ -82,6 +86,7 @@ L=3.0 m: z_min = -0.648 m
 - Não alterar modelo físico do drone para DJI Matrice 100 por enquanto.
 - Não alterar a convenção angular sem atualizar testes, tabelas esperadas e documentação.
 - Não editar manualmente `models/cabo.sdf` como fonte primária; ele é gerado por `models/gerar_cabo.py`.
+- Não ajustar ganhos do controlador de posicao para mascarar a falha vertical ate concluir o diagnostico do `velocity_test`.
 
 ## Recent Results
 
@@ -194,6 +199,46 @@ z final 0.60 m:
   pitch máximo: ~0.7 deg
   erro final: ~0.24 m
   resultado: não atingiu o waypoint na janela testada; saturação z persistiu
+```
+
+Resultados do teste aberto de velocidade vertical:
+
+```text
+sem tether, vz_cmd=0.25:
+  dz ~1.50 m em 8 s
+  vz_mean ~0.225 m/s
+  resposta vertical coerente
+
+tether livre, vz_cmd=0.25:
+  dz ~0.00 m em 8 s
+  vz_mean ~0.000 m/s
+  pitch max ~0.4 deg
+
+tether ancorado, vz_cmd=0.25:
+  dz ~0.02-0.04 m em 8 s
+  vz_mean ~0.001-0.004 m/s
+  pitch max <0.5 deg
+  |M| conexao = 0.000 Nm
+  juntas proximas do limite = 0
+```
+
+Diagnostico atualizado:
+
+```text
+causa pouco provavel: ganhos do controlador de posicao
+causa pouco provavel: sinal/frame de cmd_vel.z
+causa pouco provavel: saturacao das juntas do cabo no ensaio curto
+causa pouco provavel como unica explicacao: massa simples do cabo
+causa mais provavel: interacao entre MulticopterVelocityControl, topologia de conexao e modelo multibody do tether
+```
+
+Proximos testes recomendados:
+
+```text
+1. Conectar temporariamente o cabo diretamente em meu_drone::base_link.
+2. Alternativamente, transformar cabo_sensor_link em filho de base_link, mantendo base_link como referencia central do drone.
+3. Aplicar uma carga externa simples ao drone sem cabo multibody para comparar com a carga do tether.
+4. Revisar parametros do MulticopterMotorModel/MulticopterVelocityControl contra exemplos oficiais do Gazebo Sim 6.
 ```
 
 Resultados atualizados de subida vertical, comparando sem tether e tether ball:

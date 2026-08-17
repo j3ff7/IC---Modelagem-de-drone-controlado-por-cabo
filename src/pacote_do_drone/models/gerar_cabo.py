@@ -335,6 +335,7 @@ sdf += '''
       <parent>final_segment</parent>
       <child>ponta_cabo</child>
     </joint>
+    <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher"/>
   </model>
 </sdf>
 '''.format(

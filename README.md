@@ -113,6 +113,9 @@ O launch possui opcoes para isolar controlador, spawn e tether sem alterar perma
 
 ```bash
 usar_cabo:=true|false
+prender_ancora:=true|false
+velocity_test:=true|false
+vz_cmd:=0.25
 spawn_x:=0.0
 spawn_y:=0.0
 spawn_z:=2.0
@@ -175,6 +178,38 @@ Com cabo + spawn original: nao concluiu no tempo testado; pitch perto de +/-90 d
 ```
 
 A causa mais provavel da falha de hovering nos testes anteriores e a combinacao de erro inicial grande com o cabo inicialmente quase esticado, o que induz atitudes muito grandes no drone. Nessas atitudes, o comando vertical do controlador de velocidade fica pouco efetivo. Antes de ajustar ganhos, valide sempre o caso sem cabo e o caso com cabo usando spawn proximo ao waypoint.
+
+### Teste aberto de velocidade vertical
+
+Para separar o controlador de posicao da resposta do plugin do multicopter, use o no `velocity_test`. Ele publica um `Twist` constante em `/meu_drone/cmd_vel`, mede odometria, RPY, rotores, forca/momento na conexao cabo-drone e margem das juntas internas do cabo.
+
+```bash
+ros2 launch pacote_do_drone start_sim.launch.py \
+  velocity_test:=true \
+  controlador_trajetoria:=false \
+  usar_cabo:=true \
+  prender_ancora:=true \
+  headless:=true \
+  spawn_x:=2.0 spawn_y:=0.0 spawn_z:=0.33 spawn_yaw:=0.0 \
+  vz_cmd:=0.25 \
+  velocity_test_duracao:=8.0 \
+  log_periodo:=0.5 \
+  janela_tangente_links:=3
+```
+
+Variantes importantes:
+
+```bash
+# Sem cabo: resposta vertical esperada do drone/controlador interno.
+usar_cabo:=false
+
+# Cabo conectado ao drone, mas raiz livre: separa efeito da ancora fixa.
+usar_cabo:=true prender_ancora:=false
+```
+
+Resultado atual do caso acima com tether `ball`, `L=2.5 m` e massa total `0.30 kg`: o comando chega ao Gazebo (`cmd_z_pub=0.25`), o drone fica praticamente em `z ~= 0.32-0.36 m`, `pitch < 0.5 deg`, `|M|=0`, e as juntas do cabo mantem margem minima maior que `60%` no ensaio curto. Portanto, a falha de subida nao e causada por saturacao das juntas do cabo nesse caso.
+
+Sem tether, o mesmo teste de `cmd_vel.z` produz subida coerente. Com tether livre ou ancorado, a resposta vertical fica muito reduzida. A suspeita atual e a interacao entre o `MulticopterVelocityControl`, o modelo multibody do cabo e a topologia de conexao, nao os ganhos do controlador de posicao.
 
 ### Diagnostico da geometria inicial do cabo
 
