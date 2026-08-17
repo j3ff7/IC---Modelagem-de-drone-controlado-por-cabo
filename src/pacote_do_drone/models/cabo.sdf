@@ -68,10 +68,10 @@
       </collision>
       <inertial>
         <pose>0.02953177741695574 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>1.4585431290076948e-07</iyy><iyz>0</iyz><izz>1.4585431290076948e-07</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>8.75125877404617e-07</iyy><iyz>0</iyz><izz>8.75125877404617e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -126,10 +126,10 @@
       </collision>
       <inertial>
         <pose>0.029468741075455825 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>1.452344500953762e-07</iyy><iyz>0</iyz><izz>1.452344500953762e-07</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>8.714067005722574e-07</iyy><iyz>0</iyz><izz>8.714067005722574e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -184,10 +184,10 @@
       </collision>
       <inertial>
         <pose>0.029343261586741037 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>1.4400450009131866e-07</iyy><iyz>0</iyz><izz>1.4400450009131866e-07</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>8.640270005479121e-07</iyy><iyz>0</iyz><izz>8.640270005479121e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -242,10 +242,10 @@
       </collision>
       <inertial>
         <pose>0.029156528593256542 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>1.421838599348977e-07</iyy><iyz>0</iyz><izz>1.421838599348977e-07</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>8.531031596093863e-07</iyy><iyz>0</iyz><izz>8.531031596093863e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -300,10 +300,10 @@
       </collision>
       <inertial>
         <pose>0.02891033471362558 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>1.3980124220897737e-07</iyy><iyz>0</iyz><izz>1.3980124220897737e-07</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>8.388074532538644e-07</iyy><iyz>0</iyz><izz>8.388074532538644e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -358,10 +358,10 @@
       </collision>
       <inertial>
         <pose>0.028607085369020294 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>1.368942222184025e-07</iyy><iyz>0</iyz><izz>1.368942222184025e-07</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>8.21365333310415e-07</iyy><iyz>0</iyz><izz>8.21365333310415e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -416,10 +416,10 @@
       </collision>
       <inertial>
         <pose>0.028249811900789134 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>1.3350864540499455e-07</iyy><iyz>0</iyz><izz>1.3350864540499455e-07</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>8.010518724299673e-07</iyy><iyz>0</iyz><izz>8.010518724299673e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -474,10 +474,10 @@
       </collision>
       <inertial>
         <pose>0.027842187881437573 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>1.2969790433754488e-07</iyy><iyz>0</iyz><izz>1.2969790433754488e-07</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>7.781874260252693e-07</iyy><iyz>0</iyz><izz>7.781874260252693e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -532,10 +532,10 @@
       </collision>
       <inertial>
         <pose>0.027388548338214132 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>1.2552209667911534e-07</iyy><iyz>0</iyz><izz>1.2552209667911534e-07</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>7.531325800746921e-07</iyy><iyz>0</iyz><izz>7.531325800746921e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -590,10 +590,10 @@
       </collision>
       <inertial>
         <pose>0.02689391128984236 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>1.2104707741098504e-07</iyy><iyz>0</iyz><izz>1.2104707741098504e-07</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>7.262824644659104e-07</iyy><iyz>0</iyz><izz>7.262824644659104e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -648,10 +648,10 @@
       </collision>
       <inertial>
         <pose>0.02636400048478146 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>1.1634342026025949e-07</iyy><iyz>0</iyz><izz>1.1634342026025949e-07</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>6.98060521561557e-07</iyy><iyz>0</iyz><izz>6.98060521561557e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -706,10 +706,10 @@
       </collision>
       <inertial>
         <pose>0.025805267451824772 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>1.1148530471003449e-07</iyy><iyz>0</iyz><izz>1.1148530471003449e-07</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>6.689118282602069e-07</iyy><iyz>0</iyz><izz>6.689118282602069e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -764,10 +764,10 @@
       </collision>
       <inertial>
         <pose>0.025224909848556576 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>1.0654934614463442e-07</iyy><iyz>0</iyz><izz>1.0654934614463442e-07</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>6.392960768678066e-07</iyy><iyz>0</iyz><izz>6.392960768678066e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -822,10 +822,10 @@
       </collision>
       <inertial>
         <pose>0.024630881540769214 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>1.0161338757923426e-07</iyy><iyz>0</iyz><izz>1.0161338757923426e-07</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>6.096803254754056e-07</iyy><iyz>0</iyz><izz>6.096803254754056e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -880,10 +880,10 @@
       </collision>
       <inertial>
         <pose>0.024031887819604428 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>9.67552720290086e-08</iyy><iyz>0</iyz><izz>9.67552720290086e-08</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>5.805316321740517e-07</iyy><iyz>0</iyz><izz>5.805316321740517e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -938,10 +938,10 @@
       </collision>
       <inertial>
         <pose>0.02343735670398222 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>9.205161487828337e-08</iyy><iyz>0</iyz><izz>9.205161487828337e-08</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>5.523096892697003e-07</iyy><iyz>0</iyz><izz>5.523096892697003e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -996,10 +996,10 @@
       </collision>
       <inertial>
         <pose>0.02285737460122926 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>8.757659561015341e-08</iyy><iyz>0</iyz><izz>8.757659561015341e-08</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>5.254595736609204e-07</iyy><iyz>0</iyz><izz>5.254595736609204e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -1054,10 +1054,10 @@
       </collision>
       <inertial>
         <pose>0.022302572221838877 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>8.340078795172316e-08</iyy><iyz>0</iyz><izz>8.340078795172316e-08</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>5.00404727710339e-07</iyy><iyz>0</iyz><izz>5.00404727710339e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -1112,10 +1112,10 @@
       </collision>
       <inertial>
         <pose>0.021783945494460968 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>7.959004688427439e-08</iyy><iyz>0</iyz><izz>7.959004688427439e-08</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>4.775402813056463e-07</iyy><iyz>0</iyz><izz>4.775402813056463e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -1170,10 +1170,10 @@
       </collision>
       <inertial>
         <pose>0.02131259769303584 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>7.62044700708661e-08</iyy><iyz>0</iyz><izz>7.62044700708661e-08</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>4.5722682042519665e-07</iyy><iyz>0</iyz><izz>4.5722682042519665e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -1228,10 +1228,10 @@
       </collision>
       <inertial>
         <pose>0.020899394739602988 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>7.329745008029084e-08</iyy><iyz>0</iyz><izz>7.329745008029084e-08</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>4.3978470048174505e-07</iyy><iyz>0</iyz><izz>4.3978470048174505e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -1286,10 +1286,10 @@
       </collision>
       <inertial>
         <pose>0.02055453706912967 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>7.091483235437095e-08</iyy><iyz>0</iyz><izz>7.091483235437095e-08</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>4.254889941262257e-07</iyy><iyz>0</iyz><izz>4.254889941262257e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -1344,10 +1344,10 @@
       </collision>
       <inertial>
         <pose>0.0202870686198795 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>6.909419219794992e-08</iyy><iyz>0</iyz><izz>6.909419219794992e-08</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>4.1456515318769957e-07</iyy><iyz>0</iyz><izz>4.1456515318769957e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -1402,10 +1402,10 @@
       </collision>
       <inertial>
         <pose>0.02010436403280025 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>6.786424219389206e-08</iyy><iyz>0</iyz><izz>6.786424219389206e-08</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>4.0718545316335243e-07</iyy><iyz>0</iyz><izz>4.0718545316335243e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -1460,10 +1460,10 @@
       </collision>
       <inertial>
         <pose>0.020011653513165646 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>6.724437938849917e-08</iyy><iyz>0</iyz><izz>6.724437938849917e-08</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>4.03466276330995e-07</iyy><iyz>0</iyz><izz>4.03466276330995e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -1518,10 +1518,10 @@
       </collision>
       <inertial>
         <pose>0.020011653513165646 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>6.724437938849917e-08</iyy><iyz>0</iyz><izz>6.724437938849917e-08</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>4.03466276330995e-07</iyy><iyz>0</iyz><izz>4.03466276330995e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -1576,10 +1576,10 @@
       </collision>
       <inertial>
         <pose>0.020104364032800314 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>6.78642421938925e-08</iyy><iyz>0</iyz><izz>6.78642421938925e-08</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>4.0718545316335497e-07</iyy><iyz>0</iyz><izz>4.0718545316335497e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -1634,10 +1634,10 @@
       </collision>
       <inertial>
         <pose>0.02028706861987949 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>6.909419219794984e-08</iyy><iyz>0</iyz><izz>6.909419219794984e-08</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>4.1456515318769915e-07</iyy><iyz>0</iyz><izz>4.1456515318769915e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -1692,10 +1692,10 @@
       </collision>
       <inertial>
         <pose>0.02055453706912956 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>7.09148323543702e-08</iyy><iyz>0</iyz><izz>7.09148323543702e-08</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>4.2548899412622123e-07</iyy><iyz>0</iyz><izz>4.2548899412622123e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -1750,10 +1750,10 @@
       </collision>
       <inertial>
         <pose>0.020899394739603044 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>7.329745008029123e-08</iyy><iyz>0</iyz><izz>7.329745008029123e-08</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>4.397847004817474e-07</iyy><iyz>0</iyz><izz>4.397847004817474e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -1808,10 +1808,10 @@
       </collision>
       <inertial>
         <pose>0.02131259769303584 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>7.62044700708661e-08</iyy><iyz>0</iyz><izz>7.62044700708661e-08</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>4.5722682042519665e-07</iyy><iyz>0</iyz><izz>4.5722682042519665e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -1866,10 +1866,10 @@
       </collision>
       <inertial>
         <pose>0.02178394549446099 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>7.959004688427453e-08</iyy><iyz>0</iyz><izz>7.959004688427453e-08</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>4.775402813056473e-07</iyy><iyz>0</iyz><izz>4.775402813056473e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -1924,10 +1924,10 @@
       </collision>
       <inertial>
         <pose>0.022302572221838925 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>8.340078795172352e-08</iyy><iyz>0</iyz><izz>8.340078795172352e-08</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>5.004047277103412e-07</iyy><iyz>0</iyz><izz>5.004047277103412e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -1982,10 +1982,10 @@
       </collision>
       <inertial>
         <pose>0.02285737460122926 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>8.757659561015341e-08</iyy><iyz>0</iyz><izz>8.757659561015341e-08</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>5.254595736609204e-07</iyy><iyz>0</iyz><izz>5.254595736609204e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -2040,10 +2040,10 @@
       </collision>
       <inertial>
         <pose>0.023437356703982098 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>9.205161487828243e-08</iyy><iyz>0</iyz><izz>9.205161487828243e-08</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>5.523096892696945e-07</iyy><iyz>0</iyz><izz>5.523096892696945e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -2098,10 +2098,10 @@
       </collision>
       <inertial>
         <pose>0.024031887819604476 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>9.6755272029009e-08</iyy><iyz>0</iyz><izz>9.6755272029009e-08</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>5.80531632174054e-07</iyy><iyz>0</iyz><izz>5.80531632174054e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -2156,10 +2156,10 @@
       </collision>
       <inertial>
         <pose>0.024630881540769214 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>1.0161338757923426e-07</iyy><iyz>0</iyz><izz>1.0161338757923426e-07</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>6.096803254754056e-07</iyy><iyz>0</iyz><izz>6.096803254754056e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -2214,10 +2214,10 @@
       </collision>
       <inertial>
         <pose>0.02522490984855654 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>1.0654934614463413e-07</iyy><iyz>0</iyz><izz>1.0654934614463413e-07</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>6.392960768678048e-07</iyy><iyz>0</iyz><izz>6.392960768678048e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -2272,10 +2272,10 @@
       </collision>
       <inertial>
         <pose>0.025805267451824775 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>1.1148530471003451e-07</iyy><iyz>0</iyz><izz>1.1148530471003451e-07</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>6.68911828260207e-07</iyy><iyz>0</iyz><izz>6.68911828260207e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -2330,10 +2330,10 @@
       </collision>
       <inertial>
         <pose>0.0263640004847815 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>1.1634342026025987e-07</iyy><iyz>0</iyz><izz>1.1634342026025987e-07</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>6.980605215615593e-07</iyy><iyz>0</iyz><izz>6.980605215615593e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -2388,10 +2388,10 @@
       </collision>
       <inertial>
         <pose>0.026893911289842243 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>1.21047077410984e-07</iyy><iyz>0</iyz><izz>1.21047077410984e-07</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>7.262824644659041e-07</iyy><iyz>0</iyz><izz>7.262824644659041e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -2446,10 +2446,10 @@
       </collision>
       <inertial>
         <pose>0.027388548338214153 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>1.2552209667911553e-07</iyy><iyz>0</iyz><izz>1.2552209667911553e-07</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>7.531325800746932e-07</iyy><iyz>0</iyz><izz>7.531325800746932e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -2504,10 +2504,10 @@
       </collision>
       <inertial>
         <pose>0.027842187881437636 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>1.2969790433754546e-07</iyy><iyz>0</iyz><izz>1.2969790433754546e-07</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>7.781874260252728e-07</iyy><iyz>0</iyz><izz>7.781874260252728e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -2562,10 +2562,10 @@
       </collision>
       <inertial>
         <pose>0.028249811900789117 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>1.335086454049944e-07</iyy><iyz>0</iyz><izz>1.335086454049944e-07</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>8.010518724299664e-07</iyy><iyz>0</iyz><izz>8.010518724299664e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -2620,10 +2620,10 @@
       </collision>
       <inertial>
         <pose>0.028607085369020346 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>1.36894222218403e-07</iyy><iyz>0</iyz><izz>1.36894222218403e-07</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>8.213653333104179e-07</iyy><iyz>0</iyz><izz>8.213653333104179e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -2678,10 +2678,10 @@
       </collision>
       <inertial>
         <pose>0.02891033471362561 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>1.3980124220897764e-07</iyy><iyz>0</iyz><izz>1.3980124220897764e-07</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>8.388074532538659e-07</iyy><iyz>0</iyz><izz>8.388074532538659e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -2736,10 +2736,10 @@
       </collision>
       <inertial>
         <pose>0.029156528593256386 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>1.421838599348962e-07</iyy><iyz>0</iyz><izz>1.421838599348962e-07</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>8.531031596093772e-07</iyy><iyz>0</iyz><izz>8.531031596093772e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -2794,10 +2794,10 @@
       </collision>
       <inertial>
         <pose>0.029343261586741082 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>1.440045000913191e-07</iyy><iyz>0</iyz><izz>1.440045000913191e-07</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>8.640270005479148e-07</iyy><iyz>0</iyz><izz>8.640270005479148e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -2852,10 +2852,10 @@
       </collision>
       <inertial>
         <pose>0.029468741075455857 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>1.4523445009537653e-07</iyy><iyz>0</iyz><izz>1.4523445009537653e-07</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>8.714067005722593e-07</iyy><iyz>0</iyz><izz>8.714067005722593e-07</izz>
         </inertia>
       </inertial>
     </link>
@@ -2915,10 +2915,10 @@
       </collision>
       <inertial>
         <pose>0.029531777416955774 0 0 0 0 0</pose>
-        <mass>0.0005</mass>
+        <mass>0.003</mass>
         <inertia>
-          <ixx>1e-09</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>1.4585431290076983e-07</iyy><iyz>0</iyz><izz>1.4585431290076983e-07</izz>
+          <ixx>6e-09</ixx><ixy>0</ixy><ixz>0</ixz>
+          <iyy>8.751258774046191e-07</iyy><iyz>0</iyz><izz>8.751258774046191e-07</izz>
         </inertia>
       </inertial>
     </link>

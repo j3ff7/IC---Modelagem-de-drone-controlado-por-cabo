@@ -393,8 +393,10 @@ class ControladorTrajetoriaDrone(Node):
             + self.ganho_integral_xy * self.integral_y
             - self.ganho_velocidade_xy * self.vy
         )
-        vx_mundo = _limitar(vx_mundo, self.limite_vel_xy)
-        vy_mundo = _limitar(vy_mundo, self.limite_vel_xy)
+        vx_mundo_bruto = vx_mundo
+        vy_mundo_bruto = vy_mundo
+        vx_mundo = _limitar(vx_mundo_bruto, self.limite_vel_xy)
+        vy_mundo = _limitar(vy_mundo_bruto, self.limite_vel_xy)
 
         vz_bruto = (
             self.ganho_altura * erro_z
@@ -485,6 +487,7 @@ class ControladorTrajetoriaDrone(Node):
                 f'rpy=({math.degrees(self.roll):.1f}, {math.degrees(self.pitch):.1f}, '
                 f'{math.degrees(self.yaw):.1f}/{math.degrees(self.heading_fixo):.1f})deg '
                 f'cmd=({msg.linear.x:.2f},{msg.linear.y:.2f},{msg.linear.z:.2f},{msg.angular.z:.2f}) '
+                f'cmd_xy_raw=({vx_mundo_bruto:.2f},{vy_mundo_bruto:.2f}) '
                 f'cmd_z_raw/lim={vz_bruto:.2f}/{self.limite_vel_z:.2f} '
                 f'sat_xy/z={int(saturou_xy)}/{int(saturou_z)} '
                 f'tensoes D/C={self.tensao_drone:.2f}/{self.tensao_carretel:.2f} N '

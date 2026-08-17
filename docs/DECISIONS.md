@@ -2,6 +2,53 @@
 
 Este arquivo registra decisões técnicas relevantes já inferíveis pelo repositório ou pelo contexto disponível nesta sessão.
 
+## 2026-08-17 Revisar Densidade Linear Para `0.06 kg/m`
+
+Contexto:
+A baseline anterior derivada de `0.01 kg/m` deixou o cabo dinamico com apenas `0.031 kg` incluindo auxiliares. Foi solicitado revisar para `rho_linear = 0.06 kg/m`, mantendo `L=2.5 m`, `N=50`, `connection_type=ball`, `initial_shape=sine_slack horizontal`, `cmd_vel_frame=body`, `/clock` e `janela_tangente_metros=0.15`.
+
+Decisão:
+Usar `densidade_linear_kg_m = 0.06 kg/m` como baseline atual do branch.
+
+Valores resultantes:
+
+```text
+mass por segmento     0.003000 kg
+massa segmentos       0.150 kg
+auxiliares            ~0.006 kg
+massa dinamica total  ~0.156 kg
+```
+
+Justificativa:
+O teste vertical permanece estavel e o caso N passa a ser reproduzivel com um ajuste pequeno de integral/amortecimento do controlador. A nova massa preserva uma escala fisica mais plausivel que o cabo antigo de `0.30 kg`, sem ficar leve demais para os testes de interacao.
+
+Consequências:
+A decisão antiga de `0.01 kg/m` fica supersedida para a baseline ativa. Ela permanece no histórico apenas como experimento comparativo.
+
+## 2026-08-17 Usar Integral Pequena Para Compensar Erro Estacionario Do Tether
+
+Contexto:
+Com `rho_linear = 0.06 kg/m`, o caso N sem integral ficava perto do alvo, com atitude pequena e sem saturacao persistente, mas estacionava em torno de `z=1.87 m` para referencia `z=2.0 m`.
+
+Decisão:
+Atualizar os defaults do launch para uma compensacao conservadora:
+
+```text
+ganho_altura        1.5
+ganho_integral_xy   0.05
+ganho_integral_z    0.08
+ganho_velocidade_xy 1.4
+limite_vel_xy       0.35 m/s
+tolerancia_posicao  0.12 m
+tolerancia_altura   0.10 m
+```
+
+Justificativa:
+O caso N concluiu com erro medio final de aproximadamente `0.10 m`, `roll_max=0.89 deg`, `pitch_max=0.20 deg`, `Tmax=1.15 N` e sem saturacao persistente.
+
+Consequências:
+Essa e uma compensacao de erro estacionario causada pelo cabo, nao uma mudanca estrutural do controlador. Novos ajustes devem ser comparados contra essa baseline.
+
 ## 2026-08-15 Usar `src/pacote_do_drone` Como Fonte Principal Da Simulação Gazebo
 
 Contexto:

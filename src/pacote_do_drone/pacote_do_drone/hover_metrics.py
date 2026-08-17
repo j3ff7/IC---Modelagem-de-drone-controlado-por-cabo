@@ -148,6 +148,7 @@ class HoverMetrics(Node):
                 'erro_z_abs': abs(dz),
                 'roll': math.degrees(self.rpy[0]),
                 'pitch': math.degrees(self.rpy[1]),
+                'yaw': math.degrees(self.rpy[2]),
                 'tensao': self.tensao,
                 'fx': self.forca[0],
                 'fy': self.forca[1],
@@ -188,6 +189,7 @@ class HoverMetrics(Node):
         erros = [s['erro'] for s in janela]
         rolls = [abs(s['roll']) for s in janela]
         pitches = [abs(s['pitch']) for s in janela]
+        yaws = [s['yaw'] for s in janela]
         tensoes = [s['tensao'] for s in janela]
         fxs = [s['fx'] for s in janela]
         fys = [s['fy'] for s in janela]
@@ -214,6 +216,7 @@ class HoverMetrics(Node):
             f'pos_std=({_std(xs):.3f},{_std(ys):.3f},{_std(zs):.3f}) | '
             f'err_mean/rms/max={_mean(erros):.3f}/{_rms(erros):.3f}/{_max(erros):.3f} m | '
             f'roll_max={_max(rolls):.2f} deg | pitch_max={_max(pitches):.2f} deg | '
+            f'yaw_mean/std={_mean(yaws):.2f}/{_std(yaws):.2f} deg | '
             f'T_mean/max={_mean(tensoes):.2f}/{_max(tensoes):.2f} N | '
             f'F_mean=({_mean(fxs):.2f},{_mean(fys):.2f},{_mean(fzs):.2f}) N | '
             f'cmd_abs_max=({_max(cmd_xs):.2f},{_max(cmd_ys):.2f},{_max(cmd_zs):.2f}) m/s | '

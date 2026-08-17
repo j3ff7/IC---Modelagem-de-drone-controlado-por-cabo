@@ -1,5 +1,50 @@
 # Current Status
 
+## Atualização 2026-08-17
+
+A baseline fisica atual foi revisada para uma densidade linear mais realista:
+
+```text
+comprimento_total_m      2.500 m
+num_links                50
+length por segmento      0.050 m
+densidade_linear_kg_m    0.060 kg/m
+massa por segmento       0.003000 kg
+massa dos segmentos      0.150 kg
+links auxiliares         ~0.006 kg
+massa dinamica total     ~0.156 kg
+connection_type          ball
+initial_shape            sine_slack horizontal
+cmd_vel_frame            body
+janela_tangente_metros   0.15 m
+```
+
+O teste vertical com essa massa concluiu de forma estavel, sem saturacao persistente:
+
+```text
+target                 (2.0, 0.0, 1.0) m
+pos_mean final         (1.988, 0.005, 0.856) m
+err_mean/rms/max       0.145 / 0.150 / 0.244 m
+roll_max/pitch_max     0.02 / 0.45 deg
+T_mean/max             0.33 / 0.38 N
+sat_xyz                0.0 / 0.0 / 0.0 %
+```
+
+O teste N sem integral pequena melhorou, mas ficou `NO-GO`: estabilizou perto de `(0.02, 0.98, 1.87) m` para referencia `(0.0, 1.0, 2.0) m`, com erro medio final `~0.13 m`, sem saturacao persistente e com atitude pequena. A causa provavel era erro estacionario contra a carga/tensao do cabo.
+
+Com defaults revisados do controlador (`ganho_altura=1.5`, `ganho_integral_xy=0.05`, `ganho_integral_z=0.08`, `ganho_velocidade_xy=1.4`, `limite_vel_xy=0.35`, tolerancias `0.12/0.10 m`), o caso N concluiu:
+
+```text
+pos_mean final         (-0.052, 1.040, 1.926) m
+err_mean/rms/max       0.100 / 0.101 / 0.126 m
+roll_max/pitch_max     0.89 / 0.20 deg
+T_mean/max             1.10 / 1.15 N
+sat_xyz                0.0 / 0.0 / 0.0 %
+az/el tangente drone   -29.36 +/- 0.90 deg / 34.91 +/- 0.75 deg
+```
+
+Diagnostico atual: o controlador e a configuracao fisica estao proximos de uma baseline funcional para um waypoint cardeal com tether conectado. A validacao angular completa N/S/E/W ainda precisa ser executada nesta nova baseline; portanto o sensor no drone esta parcialmente validado por estabilidade e coerencia dinamica, mas ainda nao por varredura cardeal completa.
+
 ## Current Goal
 
 Criar uma base confiável para simular e validar um drone conectado a cabo no Gazebo, separando:

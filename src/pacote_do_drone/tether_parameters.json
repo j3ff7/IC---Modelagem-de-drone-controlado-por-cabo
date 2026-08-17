@@ -1,10 +1,10 @@
 {
   "num_links": 50,
   "comprimento_total_m": 2.5,
-  "densidade_linear_kg_m": 0.01,
+  "densidade_linear_kg_m": 0.06,
   "length": 0.05,
   "radius": 0.002,
-  "mass": 0.0005,
+  "mass": 0.003,
   "dummy_mass": 0.0001,
   "root_mass": 0.0005,
   "tip_mass": 0.0005,

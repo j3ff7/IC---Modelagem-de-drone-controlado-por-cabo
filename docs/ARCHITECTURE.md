@@ -2,6 +2,51 @@
 
 Este documento descreve apenas a arquitetura confirmada no estado atual do repositório.
 
+## Baseline Atual 2026-08-17
+
+Parâmetros físicos confirmados:
+
+```text
+Drone:
+  arquivo                 src/pacote_do_drone/models/meu_drone/meu_drone.sdf
+  base_link               1.500 kg
+  rotores                 4 x 0.005 kg
+  cabo_sensor_link        0.020 kg
+  cabo_azimuth_link       0.010 kg
+  massa total aproximada  1.550 kg
+
+Cabo:
+  fonte                   src/pacote_do_drone/tether_parameters.json
+  gerador                 src/pacote_do_drone/models/gerar_cabo.py
+  SDF gerado              src/pacote_do_drone/models/cabo.sdf
+  num_links               50
+  length por segmento     0.050 m
+  comprimento total       2.500 m
+  densidade_linear_kg_m   0.060 kg/m
+  massa por segmento      0.003000 kg
+  massa dos segmentos     0.150 kg
+  massa dinamica total    ~0.156 kg incluindo auxiliares
+  connection_type         ball
+  initial_shape           sine_slack horizontal
+  ancora                  (0.0, 0.0, 0.33) m
+```
+
+Defaults do controlador no launch principal:
+
+```text
+cmd_vel_frame            body
+tolerancia_posicao       0.12 m
+tolerancia_altura        0.10 m
+ganho_altura             1.5
+ganho_integral_xy        0.05
+ganho_integral_z         0.08
+ganho_velocidade_xy      1.4
+limite_vel_xy            0.35 m/s
+janela_tangente_metros   0.15 m
+```
+
+`hover_metrics.py` registra tambem yaw medio/desvio e `movimento_circular.py` imprime `cmd_xy_raw`, para separar comando proporcional bruto de saturacao/transformacao para `body`.
+
 ## Visão Geral
 
 O projeto é um workspace ROS 2 Humble com dois pacotes Python principais:

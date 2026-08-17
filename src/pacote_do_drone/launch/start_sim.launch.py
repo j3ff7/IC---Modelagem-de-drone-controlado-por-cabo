@@ -579,12 +579,12 @@ def generate_launch_description():
         ),
         DeclareLaunchArgument(
             'tolerancia_posicao',
-            default_value='0.18',
+            default_value='0.12',
             description='Erro XY maximo para considerar que o drone chegou ao waypoint.',
         ),
         DeclareLaunchArgument(
             'tolerancia_altura',
-            default_value='0.15',
+            default_value='0.10',
             description='Erro Z maximo para considerar que o drone chegou ao waypoint.',
         ),
         DeclareLaunchArgument(
@@ -619,22 +619,22 @@ def generate_launch_description():
         ),
         DeclareLaunchArgument(
             'ganho_altura',
-            default_value='1.0',
+            default_value='1.5',
             description='Ganho proporcional de altura do controlador externo.',
         ),
         DeclareLaunchArgument(
             'ganho_integral_xy',
-            default_value='0.0',
+            default_value='0.05',
             description='Ganho integral XY para compensar perturbacoes do cabo.',
         ),
         DeclareLaunchArgument(
             'ganho_integral_z',
-            default_value='0.0',
+            default_value='0.08',
             description='Ganho integral Z para compensar perturbacoes do cabo.',
         ),
         DeclareLaunchArgument(
             'ganho_velocidade_xy',
-            default_value='0.8',
+            default_value='1.4',
             description='Amortecimento por velocidade XY.',
         ),
         DeclareLaunchArgument(
@@ -644,7 +644,7 @@ def generate_launch_description():
         ),
         DeclareLaunchArgument(
             'limite_vel_xy',
-            default_value='0.6',
+            default_value='0.35',
             description='Velocidade maxima comandada no plano XY.',
         ),
         DeclareLaunchArgument(

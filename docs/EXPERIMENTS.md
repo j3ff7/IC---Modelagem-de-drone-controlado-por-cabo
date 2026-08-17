@@ -2,6 +2,78 @@
 
 Este arquivo registra experimentos técnicos para evitar repetição de investigações já realizadas.
 
+## Experimento: Densidade Linear Fisica E Caso N
+
+Data:
+2026-08-17.
+
+Objetivo:
+Substituir a massa artificial de `0.30 kg` do cabo por uma densidade linear fisica de `0.06 kg/m`, mantendo `L=2.5 m`, `N=50`, `connection_type=ball`, `initial_shape=sine_slack horizontal`, `cmd_vel_frame=body`, `/clock` e `janela_tangente_metros=0.15`.
+
+Configuração:
+
+```text
+comprimento_total_m      2.500 m
+num_links                50
+length por segmento      0.050 m
+densidade_linear_kg_m    0.060 kg/m
+massa por segmento       0.003000 kg
+massa dos segmentos      0.150 kg
+links auxiliares         ~0.006 kg
+massa dinamica total     ~0.156 kg
+```
+
+Resultado do teste vertical:
+
+```text
+target                 (2.0, 0.0, 1.0) m
+pos_mean final         (1.988, 0.005, 0.856) m
+err_mean/rms/max       0.145 / 0.150 / 0.244 m
+roll_max/pitch_max     0.02 / 0.45 deg
+T_mean/max             0.33 / 0.38 N
+sat_xyz                0.0 / 0.0 / 0.0 %
+```
+
+Resultado do caso N sem integral:
+
+```text
+target                 (0.0, 1.0, 2.0) m
+pos final observado    aproximadamente (0.02, 0.98, 1.87) m
+err final              ~0.13 m
+T                      ~1.1 N
+atitude                pequena
+saturacao              nao persistente
+resultado              NO-GO por erro estacionario em z
+```
+
+Ajuste minimo testado:
+
+```text
+ganho_altura        1.5
+ganho_integral_xy   0.05
+ganho_integral_z    0.08
+ganho_velocidade_xy 1.4
+limite_vel_xy       0.35 m/s
+tolerancia_posicao  0.12 m
+tolerancia_altura   0.10 m
+```
+
+Resultado do caso N com ajuste minimo:
+
+```text
+sequencia concluida    sim
+pos_mean final         (-0.052, 1.040, 1.926) m
+err_mean/rms/max       0.100 / 0.101 / 0.126 m
+roll_max/pitch_max     0.89 / 0.20 deg
+T_mean/max             1.10 / 1.15 N
+sat_xyz                0.0 / 0.0 / 0.0 %
+az tangente drone      -29.36 +/- 0.90 deg
+el tangente drone       34.91 +/- 0.75 deg
+```
+
+Conclusão:
+A reducao de massa elimina carga artificial excessiva e o ajuste integral pequeno compensa o erro estacionario causado pelo tether sem criar atitude grande ou saturacao persistente. O caso N passa a ser uma baseline pratica, mas a validacao angular N/S/E/W ainda precisa ser executada.
+
 ## Experimento: Validação Unitária Dos Ângulos Do Cabo
 
 Data:
