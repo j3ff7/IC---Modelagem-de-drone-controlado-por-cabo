@@ -244,21 +244,6 @@
       <dimensions>3</dimensions>
     </plugin>
 
-   <!--<include>
-      <uri>file:///home/joseubu/IC/src/pacote_do_drone/models/cabo.sdf</uri>
-      <name>cabo_dinamico</name>
-      <pose>0 0 0.14 0 1.5708 0</pose> 
-    </include>
-
-    <joint name="ancora_drone_cabo" type="fixed">
-      <parent>base_link</parent>
-      <child>cabo_dinamico::raiz_cabo</child> 
-      <sensor name="sensor_tracao" type="force_torque">
-        <always_on>true</always_on>
-        <update_rate>50</update_rate>
-        <topic>/tensao_cabo</topic>
-      </sensor>
-    </joint>-->
 
     <plugin filename="gz-sim-forcetorque-system" name="gz::sim::systems::ForceTorque"/>
 

@@ -329,6 +329,8 @@ sdf = f"""<?xml version="1.0" ?>
 <sdf version="1.8">
   <model name="cabo_flexivel">
     <self_collide>false</self_collide>
+    
+    <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher"/>
 
     <link name="raiz_cabo">
       <pose>0 0 0 0 0 0</pose>
@@ -474,7 +476,7 @@ sdf += f"""
       </collision>
     </link>
 
-    <joint name="joint_ponta" type="fixed">
+    <joint name="joint_ponta" type="universal">
       <parent>final_segment</parent>
       <child>ponta_cabo</child>
       <pose>0 0 0 0 0 0</pose>
