@@ -147,6 +147,32 @@
       </axis>
     </joint>
 
+    <link name="tether_attach">
+      <pose>0 0 -0.007 0 0 0</pose>
+      <inertial>
+        <mass>0.001</mass>
+        <inertia>
+          <ixx>1e-6</ixx> <iyy>1e-6</iyy> <izz>1e-6</izz>
+          <ixy>0</ixy> <ixz>0</ixz> <iyz>0</iyz>
+        </inertia>
+      </inertial>
+      <visual name="visual_tether_attach">
+        <geometry><sphere><radius>0.012</radius></sphere></geometry>
+        <material>
+          <ambient>0.6 0.05 0.05 1</ambient>
+          <diffuse>0.6 0.05 0.05 1</diffuse>
+        </material>
+      </visual>
+      <collision name="collision_tether_attach">
+        <geometry><sphere><radius>0.006</radius></sphere></geometry>
+      </collision>
+    </link>
+
+    <joint name="tether_attach_fixed_joint" type="fixed">
+      <parent>base_link</parent>
+      <child>tether_attach</child>
+    </joint>
+
     <plugin
       filename="gz-sim-multicopter-control-system"
       name="gz::sim::systems::MulticopterVelocityControl">

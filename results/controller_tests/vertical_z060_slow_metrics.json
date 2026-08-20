@@ -1,0 +1,13 @@
+{
+  "rmse_x": 0.16583464342976306,
+  "rmse_y": 0.6512112988531769,
+  "rmse_z": 0.1184825276681475,
+  "erro_final_3d": 1.1843458772457478,
+  "overshoot_z": 0.02863199999999999,
+  "tempo_convergencia_z_0p10": 11.8,
+  "rtf_medio": 0.24998887166666742,
+  "t_sim_final": 12.0,
+  "t_wall_final": 48.00005,
+  "roll_max_abs_deg": 12.864404,
+  "pitch_max_abs_deg": 9.912484
+}

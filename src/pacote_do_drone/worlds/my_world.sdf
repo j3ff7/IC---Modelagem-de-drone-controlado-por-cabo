@@ -50,15 +50,15 @@
     </model>
 
     <include>
-      <uri>file:///home/joseubu/IC/src/pacote_do_drone/models/carretel/carretel.sdf</uri>
+      <uri>file:///home/lima/codes/ic/drone-cabo/src/pacote_do_drone/models/carretel/carretel.sdf</uri>
       <name>meu_carretel</name>
       <pose>0 0 0 0 0 0</pose>
     </include>
 
     <include>
-      <uri>file:///home/joseubu/IC/src/pacote_do_drone/models/cabo.sdf</uri>
+      <uri>file:///home/lima/codes/ic/drone-cabo/src/pacote_do_drone/models/cabo.sdf</uri>
       <name>cabo_dinamico</name>
-      <pose>0.0 0.18 0.35 0 0 0</pose>
+      <pose>0.0 0.18 0.19 0 0 0</pose>
       <static>false</static>
     </include>
 
@@ -69,14 +69,15 @@
     </joint>
     
     <include>
-      <uri>file:///home/joseubu/IC/src/pacote_do_drone/models/meu_drone/meu_drone.sdf</uri>
+      <uri>file:///home/lima/codes/ic/drone-cabo/src/pacote_do_drone/models/meu_drone/meu_drone.sdf</uri>
       <name>meu_drone</name>
-      <pose>2.396508 0.180000 0.227589 0 0 0.000000</pose>
+      <pose>2.399419 0.180000 0.144213 0 0 0.000000</pose>
     </include>
 
     <joint name="cabo_drone_joint" type="ball">
       <parent>cabo_dinamico::ponta_cabo</parent>
-      <child>meu_drone::base_link</child>
+      <child>meu_drone::tether_attach</child>
+      <pose relative_to="meu_drone::tether_attach">0 0 0 0 0 0</pose>
     </joint>
   </world>
 </sdf>

@@ -6,9 +6,10 @@ import math
 # CAMINHOS E PASTAS
 # ============================================================
 
-caminho_json   = '/home/joseubu/IC/src/pacote_do_drone/tether_parameters.json'
-pasta_models   = '/home/joseubu/IC/src/pacote_do_drone/models/'
-pasta_worlds   = '/home/joseubu/IC/src/pacote_do_drone/worlds/'
+package_dir    = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+caminho_json   = os.path.join(package_dir, 'tether_parameters.json')
+pasta_models   = os.path.join(package_dir, 'models')
+pasta_worlds   = os.path.join(package_dir, 'worlds')
 caminho_sdf    = os.path.join(pasta_models, 'cabo.sdf')
 caminho_world  = os.path.join(pasta_worlds, 'my_world.sdf')
 
@@ -390,18 +391,6 @@ for i in range(1, num_links+1):
         <topic>/cabo/tensao_drone</topic>
       </sensor>"""
 
-    visual_ponta_xml = ""
-    if i == num_links:
-        visual_ponta_xml = f"""
-      <visual name="visual_ponta_vermelha">
-        <pose>{seg_len:.6f} 0 0 0 0 0</pose>
-        <geometry><sphere><radius>{raio_ponta}</radius></sphere></geometry>
-        <material>
-          <ambient>0.8 0.1 0.1 1</ambient>
-          <diffuse>0.8 0.1 0.1 1</diffuse>
-        </material>
-      </visual>"""
-
     dynamics_xml = f"""
       <dynamics>
         <damping>{damping_junta}</damping>
@@ -423,7 +412,6 @@ for i in range(1, num_links+1):
           <diffuse>0 0 0 1</diffuse>
         </material>
       </visual>
-{visual_ponta_xml}
       <collision name="collision">
         <pose>{seg_len/2:.6f} 0 0 0 1.5708 0</pose>
         <geometry><cylinder><radius>{collision_radius_seg}</radius><length>{collision_length_seg:.6f}</length></cylinder></geometry>
@@ -460,6 +448,7 @@ for i in range(1, num_links+1):
 ponta_x = p_final[0] - ancora_x
 ponta_y = p_final[1] - ancora_y
 ponta_z = p_final[2] - ancora_z
+ultimo_seg_len = dist3(pontos_cabo[-2], pontos_cabo[-1])
 
 sdf += f"""
     <link name="ponta_cabo">
@@ -474,12 +463,19 @@ sdf += f"""
       <collision name="collision_ponta">
         <geometry><sphere><radius>{raio_ponta}</radius></sphere></geometry>
       </collision>
+      <visual name="visual_ponta_vermelha">
+        <geometry><sphere><radius>{raio_ponta}</radius></sphere></geometry>
+        <material>
+          <ambient>0.8 0.1 0.1 1</ambient>
+          <diffuse>0.8 0.1 0.1 1</diffuse>
+        </material>
+      </visual>
     </link>
 
-    <joint name="joint_ponta" type="universal">
+    <joint name="joint_ponta" type="fixed">
       <parent>final_segment</parent>
       <child>ponta_cabo</child>
-      <pose>0 0 0 0 0 0</pose>
+      <pose relative_to="final_segment">{ultimo_seg_len:.6f} 0 0 0 0 0</pose>
     </joint>
   </model>
 </sdf>
@@ -545,13 +541,13 @@ world = f"""<?xml version="1.0" ?>
     </model>
 
     <include>
-      <uri>file:///home/joseubu/IC/src/pacote_do_drone/models/carretel/carretel.sdf</uri>
+      <uri>file://{os.path.join(pasta_models, 'carretel', 'carretel.sdf')}</uri>
       <name>meu_carretel</name>
       <pose>0 0 0 0 0 0</pose>
     </include>
 
     <include>
-      <uri>file:///home/joseubu/IC/src/pacote_do_drone/models/cabo.sdf</uri>
+      <uri>file://{caminho_sdf}</uri>
       <name>cabo_dinamico</name>
       <pose>{ancora_x} {ancora_y} {ancora_z} 0 0 0</pose>
       <static>false</static>
@@ -564,14 +560,15 @@ world = f"""<?xml version="1.0" ?>
     </joint>
     
     <include>
-      <uri>file://{pasta_models}meu_drone/meu_drone.sdf</uri>
+      <uri>file://{os.path.join(pasta_models, 'meu_drone', 'meu_drone.sdf')}</uri>
       <name>meu_drone</name>
       <pose>{drone_spawn_x:.6f} {drone_spawn_y:.6f} {drone_spawn_z:.6f} 0 0 {yaw_base:.6f}</pose>
     </include>
 
     <joint name="cabo_drone_joint" type="ball">
       <parent>cabo_dinamico::ponta_cabo</parent>
-      <child>meu_drone::base_link</child>
+      <child>meu_drone::tether_attach</child>
+      <pose relative_to="meu_drone::tether_attach">0 0 0 0 0 0</pose>
     </joint>
   </world>
 </sdf>
