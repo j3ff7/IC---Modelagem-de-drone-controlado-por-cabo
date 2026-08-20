@@ -3,17 +3,30 @@ from rclpy.node import Node
 from geometry_msgs.msg import Twist, WrenchStamped
 from nav_msgs.msg import Odometry
 import math
+import json
+
+caminho_json   = '/home/joseubu/IC/src/pacote_do_drone/tether_parameters.json'
+
+with open(caminho_json, 'r') as f:
+    params = json.load(f)
+
+num_links = max(3, int(params.get("num_links", 50)))
+
+length = params.get("length", 0.05)
+
+comprimento = length*num_links
 
 class ControladorDrone(Node):
     def __init__(self):
         super().__init__('controlador_pairar_drone')
         
+        
         # ==========================================
         # PARÂMETROS DO VOO
         # ==========================================
-        self.altura_alvo = 2.0     
-        self.x_alvo = 0.0  
-        self.y_alvo = 0.0  
+        self.altura_alvo = 1.5
+        self.x_alvo = 0
+        self.y_alvo = 0 
         # ==========================================
 
         self.z_atual = 0.0
@@ -24,9 +37,18 @@ class ControladorDrone(Node):
         self.tensao_carretel = 0.0
         
         # ==========================================
+        # VARIÁVEIS PARA O LOG NA TELA
+        # ==========================================
+        self.cmd_x = 0.0
+        self.cmd_y = 0.0
+        self.cmd_z = 0.0
+        self.erro_xy_atual = 0.0
+        self.erro_z_atual = 0.0
+        
+        # ==========================================
         # VARIÁVEIS DO PID
         # ==========================================
-        self.dt = 0.05  # Tempo de cada iteração do timer (10Hz)
+        self.dt = 0.02  # Tempo de cada iteração do controle (20Hz)
         
         # Memória para o termo Derivativo (erro anterior)
         self.erro_x_ant = 0.0
@@ -36,24 +58,27 @@ class ControladorDrone(Node):
         self.soma_erro_x = 0.0
         self.soma_erro_y = 0.0
         
-        # Ganhos do PID (Ajuste esses valores se o drone oscilar)
-        self.kp = 5.0   # Força de ida ao alvo
-        self.ki = 1.0  # Força contra o repuxo do cabo
-        self.kd = 3.0   # Freio para não passar do alvo
+        # Ganhos do PID
+        self.kp = 8.0   
+        self.ki = 1 
+        self.kd = 5.0   
         # ==========================================
 
-        # Publishers
+        # Publishers e Subscribers
         self.publisher_ = self.create_publisher(Twist, '/meu_drone/cmd_vel', 10)
-        
-        # Subscribers
         self.sub_odom = self.create_subscription(Odometry, '/meu_drone/odom', self.odom_callback, 10)
         self.sub_tensao_drone = self.create_subscription(WrenchStamped, '/cabo/tensao_drone', self.tensao_drone_callback, 10)
         self.sub_tensao_carretel = self.create_subscription(WrenchStamped, '/cabo/tensao_carretel', self.tensao_carretel_callback, 10)
         
-        self.timer = self.create_timer(self.dt, self.timer_callback)
+        # TIMER DO PID (Roda rápido: 20 vezes por segundo)
+        self.timer_controle = self.create_timer(self.dt, self.timer_callback)
+        
+        # TIMER DO LOG (Roda devagar: a cada 0.5 segundos)
+        self.timer_log = self.create_timer(0.5, self.imprimir_log)
+        
         self.get_logger().info(f"Iniciando voo. Subindo para {self.altura_alvo}m e centralizando no carretel...")
 
-    def odom_callback(self, msg):
+    def odom_callback(self, msg):   
         self.x_atual = msg.pose.pose.position.x
         self.y_atual = msg.pose.pose.position.y
         self.z_atual = msg.pose.pose.position.z
@@ -86,16 +111,16 @@ class ControladorDrone(Node):
         erro_x = self.x_alvo - self.x_atual
         erro_y = self.y_alvo - self.y_atual
         
-        # Cálculo Integral (acumula o erro no tempo)
+        # Cálculo Integral 
         self.soma_erro_x += erro_x * self.dt
         self.soma_erro_y += erro_y * self.dt
         
-        # Trava do Integral (Anti-windup) para não acumular força infinita
-        limite_int = 2.0
+        # Trava do Integral
+        limite_int = 0.4
         self.soma_erro_x = max(-limite_int, min(limite_int, self.soma_erro_x))
         self.soma_erro_y = max(-limite_int, min(limite_int, self.soma_erro_y))
         
-        # Cálculo Derivativo (taxa de variação do erro)
+        # Cálculo Derivativo
         deriv_x = (erro_x - self.erro_x_ant) / self.dt
         deriv_y = (erro_y - self.erro_y_ant) / self.dt
         
@@ -103,28 +128,35 @@ class ControladorDrone(Node):
         comando_x = (self.kp * erro_x) + (self.ki * self.soma_erro_x) + (self.kd * deriv_x)
         comando_y = (self.kp * erro_y) + (self.ki * self.soma_erro_y) + (self.kd * deriv_y)
         
-        # Atualiza a memória para a próxima iteração
+        # Atualiza a memória
         self.erro_x_ant = erro_x
         self.erro_y_ant = erro_y
         
         # Trava final de velocidade física
-        limite_xy = 1.5
+        limite_xy = 1.0
         msg.linear.x = max(-limite_xy, min(limite_xy, comando_x))
         msg.linear.y = max(-limite_xy, min(limite_xy, comando_y))
         msg.angular.z = 0.0
         
-        self.get_logger().info(f"Comandos (m/s) -> X: {msg.linear.x:.2f} | Y: {msg.linear.y:.2f} | Z: {msg.linear.z:.2f}")
-
         self.publisher_.publish(msg)
         
-        # --- 3. STATUS LOG ---
-        erro_xy = math.hypot(erro_x, erro_y)
-        fase_atual = "Pairando" if abs(erro_z) < 0.1 and erro_xy < 0.1 else "Posicionando"
+        # Salva os valores atuais para o print
+        self.cmd_x = msg.linear.x
+        self.cmd_y = msg.linear.y
+        self.cmd_z = msg.linear.z
+        self.erro_xy_atual = math.hypot(erro_x, erro_y)
+        self.erro_z_atual = erro_z
 
+    def imprimir_log(self):
+        # Esta função roda isolada, a cada 0.5 segundos, só para imprimir os dados
+        fase_atual = "Pairando" if abs(self.erro_z_atual) < 0.1 and self.erro_xy_atual < 0.1 else "Posicionando"
+        
+        self.get_logger().info(f"Comandos (m/s) -> X: {self.cmd_x:.2f} | Y: {self.cmd_y:.2f} | Z: {self.cmd_z:.2f}")
         self.get_logger().info(
             f"[{fase_atual}] Pos: (X:{self.x_atual:.2f}, Y:{self.y_atual:.2f}, Z:{self.z_atual:.2f}) | "
             f"Tensões: D={self.tensao_drone:.2f}N / C={self.tensao_carretel:.2f}N"
         )
+        self.get_logger().info("-" * 40) # Apenas uma linha para separar no terminal
 
 def main(args=None):
     rclpy.init(args=args)
