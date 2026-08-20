@@ -2,6 +2,30 @@
 
 Este arquivo registra decisões técnicas relevantes já inferíveis pelo repositório ou pelo contexto disponível nesta sessão.
 
+## 2026-08-20 Congelar Baseline Para Testes Cardeais Estáticos
+
+Contexto:
+Os testes N/S/E/W foram executados com a mesma configuracao fisica, os mesmos ganhos e `cmd_vel_frame:=body`. O objetivo era verificar se havia assimetria grosseira ou falha do controlador antes de prosseguir para trajetorias mais complexas.
+
+Decisão:
+Manter a baseline atual para novos testes estaticos:
+
+```text
+L=2.5 m
+N=50
+densidade_linear_kg_m=0.06
+connection_type=ball
+initial_shape=sine_slack horizontal
+janela_tangente_metros=0.15
+cmd_vel_frame=body
+```
+
+Justificativa:
+Os quatro casos cardeais concluem a sequencia, mantem atitude pequena, tensao maxima em torno de `1.1-1.2 N`, erro final RMS menor ou igual a `0.10 m` e sem saturacao persistente na janela final.
+
+Consequências:
+Nao retunar ganhos por direcao. A proxima frente deve ser validar redundantemente a medicao angular da tangente local e estudar a acomodacao lenta do cabo, especialmente no caso W.
+
 ## 2026-08-17 Revisar Densidade Linear Para `0.06 kg/m`
 
 Contexto:
@@ -161,7 +185,7 @@ Experimentos devem registrar tensão inicial, pico de tensão, pitch/roll, erro 
 Contexto:
 Foi solicitado usar um cabo de massa total aproximadamente `0.30 kg`.
 
-Decisão:
+Decisão histórica supersedida:
 Configuração atual usa `50` segmentos de `0.00588 kg`, `50` dummies de `0.0001 kg`, raiz `0.0005 kg` e ponta `0.0005 kg`, totalizando `0.300 kg`.
 
 Justificativa:
@@ -171,7 +195,7 @@ Alternativas consideradas:
 Massa anterior não registrada com segurança neste documento.
 
 Consequências:
-Mudanças em `num_links` ou `length` devem redistribuir massa por segmento se a massa total de `0.30 kg` for preservada.
+Esta decisao foi supersedida em 2026-08-17 pela densidade linear `0.06 kg/m`. A baseline ativa nao e mais `0.30 kg`; para `L=2.5 m`, ela usa `0.150 kg` nos segmentos e aproximadamente `0.156 kg` incluindo links auxiliares. Mudancas futuras devem seguir a densidade linear ativa, salvo novo experimento documentado.
 
 ## 2026-08-17 Usar Tempo Simulado Em Testes E Controle
 

@@ -407,6 +407,14 @@ def generate_launch_description():
             'ganho_velocidade_z': ParameterValue(LaunchConfiguration('ganho_velocidade_z'), value_type=float),
             'limite_vel_xy': ParameterValue(LaunchConfiguration('limite_vel_xy'), value_type=float),
             'limite_vel_z': ParameterValue(LaunchConfiguration('limite_vel_z'), value_type=float),
+            'limite_integral_xy': ParameterValue(
+                LaunchConfiguration('limite_integral_xy'),
+                value_type=float,
+            ),
+            'limite_integral_z': ParameterValue(
+                LaunchConfiguration('limite_integral_z'),
+                value_type=float,
+            ),
             'tolerancia_velocidade': ParameterValue(LaunchConfiguration('tolerancia_velocidade'), value_type=float),
             'heading_fixo': ParameterValue(LaunchConfiguration('heading_fixo'), value_type=float),
             'cmd_vel_frame': ParameterValue(LaunchConfiguration('cmd_vel_frame'), value_type=str),
@@ -631,6 +639,16 @@ def generate_launch_description():
             'ganho_integral_z',
             default_value='0.08',
             description='Ganho integral Z para compensar perturbacoes do cabo.',
+        ),
+        DeclareLaunchArgument(
+            'limite_integral_xy',
+            default_value='1.5',
+            description='Clamp anti-windup para os estados integrais X/Y, em m*s.',
+        ),
+        DeclareLaunchArgument(
+            'limite_integral_z',
+            default_value='1.0',
+            description='Clamp anti-windup para o estado integral Z, em m*s.',
         ),
         DeclareLaunchArgument(
             'ganho_velocidade_xy',

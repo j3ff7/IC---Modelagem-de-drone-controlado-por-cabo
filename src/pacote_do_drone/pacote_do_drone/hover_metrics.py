@@ -137,6 +137,7 @@ class HoverMetrics(Node):
         dy = self.pos[1] - self.target[1]
         dz = self.pos[2] - self.target[2]
         erro = math.sqrt(dx * dx + dy * dy + dz * dz)
+        erro_xy = math.hypot(dx, dy)
 
         if t >= self.inicio_s and self.azimuth is not None and self.elevation is not None:
             self.samples.append({
@@ -145,6 +146,8 @@ class HoverMetrics(Node):
                 'y': self.pos[1],
                 'z': self.pos[2],
                 'erro': erro,
+                'erro_xy': erro_xy,
+                'erro_z': dz,
                 'erro_z_abs': abs(dz),
                 'roll': math.degrees(self.rpy[0]),
                 'pitch': math.degrees(self.rpy[1]),
@@ -187,6 +190,9 @@ class HoverMetrics(Node):
         ys = [s['y'] for s in janela]
         zs = [s['z'] for s in janela]
         erros = [s['erro'] for s in janela]
+        erros_xy = [s['erro_xy'] for s in janela]
+        erros_z = [s['erro_z'] for s in janela]
+        erros_z_abs = [s['erro_z_abs'] for s in janela]
         rolls = [abs(s['roll']) for s in janela]
         pitches = [abs(s['pitch']) for s in janela]
         yaws = [s['yaw'] for s in janela]
@@ -215,6 +221,10 @@ class HoverMetrics(Node):
             f'pos_mean=({_mean(xs):.3f},{_mean(ys):.3f},{_mean(zs):.3f}) | '
             f'pos_std=({_std(xs):.3f},{_std(ys):.3f},{_std(zs):.3f}) | '
             f'err_mean/rms/max={_mean(erros):.3f}/{_rms(erros):.3f}/{_max(erros):.3f} m | '
+            f'err_xy_mean/rms/max='
+            f'{_mean(erros_xy):.3f}/{_rms(erros_xy):.3f}/{_max(erros_xy):.3f} m | '
+            f'err_z_mean/rms/max='
+            f'{_mean(erros_z):.3f}/{_rms(erros_z):.3f}/{_max(erros_z_abs):.3f} m | '
             f'roll_max={_max(rolls):.2f} deg | pitch_max={_max(pitches):.2f} deg | '
             f'yaw_mean/std={_mean(yaws):.2f}/{_std(yaws):.2f} deg | '
             f'T_mean/max={_mean(tensoes):.2f}/{_max(tensoes):.2f} N | '

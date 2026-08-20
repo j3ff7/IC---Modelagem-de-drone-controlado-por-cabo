@@ -163,6 +163,14 @@ class ControladorTrajetoriaDrone(Node):
             f'controlar_heading={self.controlar_heading}, heading={math.degrees(self.heading_fixo):.1f} deg, '
             f'cmd_frame={self.cmd_vel_frame}, velocidade_por_diferenca={self.usar_velocidade_por_diferenca}'
         )
+        self.get_logger().info(
+            f'Ganhos: Kp_xy={self.ganho_posicao_xy:.2f}, Kp_z={self.ganho_altura:.2f}, '
+            f'Ki_xy={self.ganho_integral_xy:.2f}, Ki_z={self.ganho_integral_z:.2f}, '
+            f'Kd_xy={self.ganho_velocidade_xy:.2f}, Kd_z={self.ganho_velocidade_z:.2f}, '
+            f'lim_int_xy/z='
+            f'{self.limite_integral_xy:.2f}/{self.limite_integral_z:.2f}, '
+            f'lim_cmd_xy/z={self.limite_vel_xy:.2f}/{self.limite_vel_z:.2f}'
+        )
 
     def _ler_ancora(self):
         try:
@@ -452,7 +460,8 @@ class ControladorTrajetoriaDrone(Node):
                 f'ref_nova=({proximo_x:.2f},{proximo_y:.2f},{proximo_z:.2f}) '
                 f'err_ant=({erro_x:.2f},{erro_y:.2f},{erro_z:.2f}) '
                 f'vel=({self.vx:.2f},{self.vy:.2f},{self.vz:.2f}) '
-                f'cmd=({msg.linear.x:.2f},{msg.linear.y:.2f},{msg.linear.z:.2f},{msg.angular.z:.2f})'
+                f'cmd=({msg.linear.x:.2f},{msg.linear.y:.2f},{msg.linear.z:.2f},{msg.angular.z:.2f}) '
+                f'I_pre_reset=({self.integral_x:.2f},{self.integral_y:.2f},{self.integral_z:.2f})'
             )
             self.tempo_no_alvo = 0.0
             self.tempo_estavel = 0.0
@@ -486,9 +495,12 @@ class ControladorTrajetoriaDrone(Node):
                 f'hover={self.tempo_no_alvo:.1f}/{self.tempo_hover:.1f}s '
                 f'rpy=({math.degrees(self.roll):.1f}, {math.degrees(self.pitch):.1f}, '
                 f'{math.degrees(self.yaw):.1f}/{math.degrees(self.heading_fixo):.1f})deg '
-                f'cmd=({msg.linear.x:.2f},{msg.linear.y:.2f},{msg.linear.z:.2f},{msg.angular.z:.2f}) '
+                f'cmd=({msg.linear.x:.2f},{msg.linear.y:.2f},'
+                f'{msg.linear.z:.2f},{msg.angular.z:.2f}) '
                 f'cmd_xy_raw=({vx_mundo_bruto:.2f},{vy_mundo_bruto:.2f}) '
                 f'cmd_z_raw/lim={vz_bruto:.2f}/{self.limite_vel_z:.2f} '
+                f'I=({self.integral_x:.2f},{self.integral_y:.2f},'
+                f'{self.integral_z:.2f}) '
                 f'sat_xy/z={int(saturou_xy)}/{int(saturou_z)} '
                 f'tensoes D/C={self.tensao_drone:.2f}/{self.tensao_carretel:.2f} N '
                 f'conexao |F|/|M|={self.conexao_forca_modulo:.2f}/{self.conexao_momento_modulo:.3f} '

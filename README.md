@@ -71,11 +71,14 @@ ganho_velocidade_xy      1.4
 ganho_velocidade_z       0.45
 limite_vel_xy            0.35 m/s
 limite_vel_z             0.50 m/s
+limite_integral_xy       1.50
+limite_integral_z        1.00
 cmd_vel_frame            body
 janela_tangente_metros   0.15 m
 ```
 
 O controlador usa `/clock` para derivadas, integracao, hovering e logs. Com 50 links, o RTF pode ficar perto de `0.08-0.10`; interprete sempre `t_sim`, nao tempo de parede.
+O integrador possui anti-windup por saturacao interna e e resetado ao trocar de waypoint. Os logs do controlador imprimem os ganhos, limites, estado dos integradores e saturacoes.
 
 ## Teste Vertical
 
@@ -91,14 +94,18 @@ ros2 launch pacote_do_drone start_sim.launch.py \
 
 Resultado observado com `rho=0.06 kg/m`: hover estavel, `roll_max~0.02 deg`, `pitch_max~0.45 deg`, `T_mean/max~0.33/0.38 N`, sem saturacao persistente.
 
-## Teste N
+## Testes Cardeais Do Drone
 
-`config/trajetoria_sensor_n.json`:
+Cada caso usa dois waypoints: subida inicial ate `(2.0, 0.0, 1.0)` e deslocamento para o ponto cardinal em `z=2.0`. A ancora do cabo fica em `(0.0, 0.0, 0.33)`.
 
 ```text
-WP0: (2.0, 0.0, 1.0)
-WP1: (0.0, 1.0, 2.0)
+N: WP1 = ( 0.0,  1.0, 2.0)
+S: WP1 = ( 0.0, -1.0, 2.0)
+E: WP1 = ( 1.0,  0.0, 2.0)
+W: WP1 = (-1.0,  0.0, 2.0)
 ```
+
+Comandos:
 
 ```bash
 ros2 launch pacote_do_drone start_sim.launch.py \
@@ -111,21 +118,28 @@ ros2 launch pacote_do_drone start_sim.launch.py \
   log_periodo:=2.0 metricas_log_periodo_s:=2.0
 ```
 
-Resultado observado:
+Troque `trajetoria_sensor_n.json` por `trajetoria_sensor_s.json`, `trajetoria_sensor_e.json` ou `trajetoria_sensor_w.json` e ajuste `metricas_target_x/y` para o waypoint final correspondente.
+
+Resultado observado com a baseline atual:
 
 ```text
-sequencia concluida: sim
-pos_mean final       (-0.052, 1.040, 1.926) m
-err_mean/rms/max     0.100 / 0.101 / 0.126 m
-roll_max             0.89 deg
-pitch_max            0.20 deg
-T_mean/max           1.10 / 1.15 N
-sat_xyz              0.0 / 0.0 / 0.0 %
-az tangente drone    -29.36 +/- 0.90 deg
-el tangente drone     34.91 +/- 0.75 deg
+Caso  pos_mean final          err_rms  roll/pitch max   T max   az/el tangente drone
+N     (-0.052,  1.039,1.927)  0.100 m  0.89/0.20 deg   1.15 N  -29.4 / 35.0 deg
+S     (-0.051, -1.030,1.923)  0.099 m  0.95/0.23 deg   1.18 N   15.5 / 35.3 deg
+E     ( 0.951,  0.001,1.933)  0.084 m  0.02/0.36 deg   1.07 N  178.2 / 36.8 deg
+W     (-1.024,  0.001,1.922)  0.081 m  0.03/0.84 deg   1.16 N -163.7 / 49.7 deg
 ```
 
-Antes da integral pequena, o mesmo caso estacionava perto de `z=1.87 m` para referencia `z=2.0 m` e nao entrava no criterio. Isso indica erro estacionario contra a carga/tensao do cabo, nao uma falha de frame ou saturacao de comando.
+Todos os quatro casos concluem a sequencia, ficam sem saturacao persistente na janela final e mantem atitude pequena. O caso W percorre a maior distancia horizontal desde o spawn e a tangente local do cabo continua acomodando lentamente apos a conclusao da sequencia; avalie os angulos apenas em uma janela estacionaria bem definida.
+
+Status:
+
+```text
+CONTROLADOR PARA TESTES ESTATICOS: APROVADO
+SENSOR DE ELEVATION: VALIDADO COMO TANGENTE LOCAL, pendente comparacao redundante independente
+SENSOR DE AZIMUTH: VALIDADO COMO TANGENTE LOCAL, pendente comparacao redundante independente
+SISTEMA PRONTO PARA PROXIMA ETAPA: SIM, para novos pontos estaticos controlados; ainda nao para trajetorias agressivas
+```
 
 ## Sensor De Angulo
 

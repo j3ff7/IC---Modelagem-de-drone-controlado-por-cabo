@@ -1,5 +1,47 @@
 # Current Status
 
+## Atualizacao 2026-08-20
+
+A baseline atual foi congelada para os testes cardeais do drone:
+
+```text
+comprimento_total_m      2.500 m
+num_links                50
+length por segmento      0.050 m
+densidade_linear_kg_m    0.060 kg/m
+massa por segmento       0.003000 kg
+massa dos segmentos      0.150 kg
+links auxiliares         ~0.006 kg
+massa dinamica total     ~0.156 kg
+connection_type          ball
+initial_shape            sine_slack horizontal
+cmd_vel_frame            body
+janela_tangente_metros   0.15 m
+```
+
+O controlador foi mantido com a logica validada. Foram adicionados apenas parametros/logs de diagnostico para os limites do integrador e metricas separadas de erro `xy` e erro `z`.
+
+Resultados headless dos casos cardeais, todos com `usar_cabo:=true`, `prender_ancora:=true`, `cmd_vel_frame:=body` e mesma configuracao fisica:
+
+```text
+Caso  alvo final          pos_mean final          err_rms  roll/pitch max   T max   sat_xyz
+N     ( 0.0,  1.0,2.0)   (-0.052,  1.039,1.927)  0.100 m  0.89/0.20 deg   1.15 N  0/0/0 %
+S     ( 0.0, -1.0,2.0)   (-0.051, -1.030,1.923)  0.099 m  0.95/0.23 deg   1.18 N  0/0/0 %
+E     ( 1.0,  0.0,2.0)   ( 0.951,  0.001,1.933)  0.084 m  0.02/0.36 deg   1.07 N  0/0/0 %
+W     (-1.0,  0.0,2.0)   (-1.024,  0.001,1.922)  0.081 m  0.03/0.84 deg   1.16 N  0/0/0 %
+```
+
+Conclusao atual:
+
+```text
+CONTROLADOR PARA TESTES ESTATICOS: APROVADO
+SENSOR DE ELEVATION: VALIDADO COMO TANGENTE LOCAL, pendente comparacao redundante independente
+SENSOR DE AZIMUTH: VALIDADO COMO TANGENTE LOCAL, pendente comparacao redundante independente
+SISTEMA PRONTO PARA PROXIMA ETAPA: SIM, para pontos estaticos; ainda nao para trajetorias agressivas
+```
+
+Observacao importante sobre o sensor: `/cabo/azimuth_graus` e `/cabo/elevation_graus` representam a tangente local do cabo no lado do drone, estimada com a ponta do cabo e um segmento dentro da janela fisica de aproximadamente `0.15 m`, expressa no frame do drone. Esses valores nao devem ser comparados diretamente com a reta sensor-ancora quando o cabo esta frouxo ou ainda acomodando. O caso W mostrou acomodacao lenta da tangente local depois que o drone ja havia concluido o hover.
+
 ## Atualização 2026-08-17
 
 A baseline fisica atual foi revisada para uma densidade linear mais realista:
@@ -78,7 +120,7 @@ colcon build --symlink-install --packages-select pacote_do_drone cabo_avaliacao
   - funções de ângulo do cabo em `pacote_do_drone`;
   - cenários e catenária geométrica em `cabo_avaliacao`.
 - `cabo_avaliacao` fornece mundos estáticos com postes e modos `reto`, `articulado` e `catenaria`.
-- A massa atual do cabo está consistente em torno de `0.30 kg` para `L=2.5 m`.
+- A massa atual do cabo está consistente em torno de `0.156 kg` para `L=2.5 m`.
 - O controlador de waypoints publica em `/meu_drone/cmd_vel` e possui logging compacto para posição, referência, erro, RPY, comando, `cmd_z_raw`, saturação, tensões, força/momento da conexão cabo-drone e rotores.
 - O cálculo de ângulos no frame do drone possui testes unitários, incluindo cabo vertical com drone nivelado e com pitch de 10 graus.
 
@@ -101,7 +143,7 @@ L      = 2.0 m
 
 o cabo nasce sem folga geométrica (`slack = 0.0 m`) e reproduz o pico de tensão alto.
 
-- A configuração atual usa `L=2.5 m`, folga horizontal no lado `+y`, `N=50`, massa total dinâmica de `0.30 kg` e `connection_type=ball`.
+- A configuração atual usa `L=2.5 m`, folga horizontal no lado `+y`, `N=50`, massa total dinâmica de `~0.156 kg` e `connection_type=ball`.
 - No teste de assentamento em `L=2.5 m` com conexão fixa, o pico de tensão cai bastante em relação a `L=2.0 m`, mas ainda aparece pitch sustentado de aproximadamente `30 deg`. Com conexão `ball`, esse pitch cai para menos de `1 deg`.
 - Aumentar para `L=3.0 m` cria uma curva lateral grande e gerou pico muito alto na âncora.
 - Uma senóide vertical entre as extremidades atuais atravessaria o chão:
@@ -126,7 +168,7 @@ L=3.0 m: z_min = -0.648 m
 - `tempo_estabilizacao` foi separado de `tempo_hover`.
 - `hover_metrics` coleta estatísticas de posição, tensão, atitude e azimuth/elevation em janelas de tempo simulado.
 - `sensores.py` usa `janela_tangente_metros=0.15` por padrão para estimar a tangente local em comprimento físico, equivalente a 3 links no cabo baseline.
-- A massa dos segmentos do tether agora é derivada de `densidade_linear_kg_m=0.01 kg/m` e `comprimento_total_m=2.5 m`, resultando em `0.025 kg` nos segmentos e `0.031 kg` incluindo links auxiliares.
+- A massa dos segmentos do tether agora é derivada de `densidade_linear_kg_m=0.06 kg/m` e `comprimento_total_m=2.5 m`, resultando em `0.150 kg` nos segmentos e `~0.156 kg` incluindo links auxiliares.
 
 ## Constraints / Do Not Change
 

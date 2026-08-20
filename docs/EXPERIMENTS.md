@@ -2,6 +2,67 @@
 
 Este arquivo registra experimentos técnicos para evitar repetição de investigações já realizadas.
 
+## Experimento: Validacao Cardinal N/S/E/W Com Drone
+
+Data:
+2026-08-20.
+
+Objetivo:
+Repetir no drone os casos geometricos de postes em quatro direcoes cardeais, mantendo um waypoint final estacionario por vez, para separar estabilidade do controlador e acomodacao do cabo.
+
+Configuracao fixa:
+
+```text
+L                      2.500 m
+num_links              50
+rho                    0.060 kg/m
+mass por segmento      0.003000 kg
+connection_type        ball
+initial_shape          sine_slack horizontal
+cmd_vel_frame          body
+janela_tangente        0.15 m
+tempo_hover            5.0 s
+```
+
+Waypoints:
+
+```text
+WP0 comum: (2.0, 0.0, 1.0)
+N:         (0.0,  1.0, 2.0)
+S:         (0.0, -1.0, 2.0)
+E:         (1.0,  0.0, 2.0)
+W:         (-1.0, 0.0, 2.0)
+```
+
+Resultados na janela final de metricas:
+
+```text
+Caso  concluiu  pos_mean final          err_rms  err_xy_rms  err_z_rms  roll/pitch max   T mean/max
+N     sim       (-0.052,  1.039,1.927)  0.100 m  0.068 m     0.073 m    0.89/0.20 deg   1.10/1.15 N
+S     sim       (-0.051, -1.030,1.923)  0.099 m  0.063 m     0.077 m    0.95/0.23 deg   1.13/1.18 N
+E     sim       ( 0.951,  0.001,1.933)  0.084 m  0.050 m     0.067 m    0.02/0.36 deg   1.05/1.07 N
+W     sim       (-1.024,  0.001,1.922)  0.081 m  0.024 m     0.078 m    0.03/0.84 deg   1.16/1.16 N
+```
+
+Angulos da tangente local no lado do drone:
+
+```text
+Caso  az mean/std/min/max                 el mean/std/min/max
+N     -29.35 / 0.92 / -30.74 / -27.97    34.98 / 0.75 / 33.70 / 35.94 deg
+S      15.53 / 0.87 /  14.25 /  17.00    35.33 / 0.46 / 34.50 / 35.91 deg
+E     178.16 / 0.01 / 178.15 / 178.18    36.77 / 0.39 / 36.23 / 37.45 deg
+W    -163.68 / 1.22 /-165.68 /-161.28    49.74 / 0.13 / 49.51 / 49.98 deg
+```
+
+Diagnostico do controlador:
+Os quatro casos concluem a sequencia e, na janela final, nao apresentam saturacao persistente de comando. Os integradores atingem o clamp durante transientes longos, especialmente no deslocamento ate N/S/W, mas sao limitados e resetados na troca de waypoint. A atitude permanece pequena, logo nao ha evidencia de falha de frame ou ganho nesses ensaios estaticos.
+
+Diagnostico do sensor:
+Os topicos principais representam a tangente local do cabo perto do drone, nao a reta drone-ancora. No caso W, a posicao do drone ja estava estavel enquanto a tangente local continuava acomodando lentamente; por isso os angulos devem ser avaliados apenas em janela estacionaria definida, e uma comparacao redundante entre estimador por pose e outro estimador independente ainda deve ser adicionada antes de declarar validacao metrologica completa.
+
+Conclusao:
+Controlador aprovado para testes estaticos cardeais. Sensor coerente com a definicao implementada de tangente local no frame do drone, mas ainda pendente de uma validacao redundante independente para azimuth/elevation em cabo dinamico frouxo.
+
 ## Experimento: Densidade Linear Fisica E Caso N
 
 Data:
