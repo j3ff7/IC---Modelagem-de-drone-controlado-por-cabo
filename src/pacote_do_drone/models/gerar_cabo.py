@@ -163,7 +163,7 @@ comprimento_total = num_links * length
 
 ancora_x = 0.0
 ancora_y = 0.18
-ancora_z = 0.35
+ancora_z = 0.19
 
 offset_conexao_drone_x = float(params.get("offset_conexao_drone_x", 0.0))
 offset_conexao_drone_y = float(params.get("offset_conexao_drone_y", 0.0))
@@ -306,7 +306,7 @@ print(f"Yaw sugerido:       {yaw_base:.6f} rad")
 
 limite_inercia_minima = 1e-5
 massa_raiz = 0.02
-raio_raiz_visual = 0.01
+raio_raiz_visual = 0.005
 ixx_raiz = max((2.0/5.0)*massa_raiz*raio_raiz_visual**2, limite_inercia_minima)
 
 massa_ponta = 0.005   # massa maior para estabilidade
