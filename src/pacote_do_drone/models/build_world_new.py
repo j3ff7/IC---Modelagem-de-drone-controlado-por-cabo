@@ -1,19 +1,20 @@
 import math
 import json
-import os
+from pathlib import Path
 
 # ============================================================
 # CAMINHOS E PASTAS
 # ============================================================
 
-caminho_json   = '/home/joseubu/IC/src/pacote_do_drone/tether_parameters.json'
-pasta_models   = '/home/joseubu/IC/src/pacote_do_drone/models/'
-pasta_worlds   = '/home/joseubu/IC/src/pacote_do_drone/worlds/'
-caminho_sdf    = os.path.join(pasta_models, 'cabo.sdf')
-caminho_world  = os.path.join(pasta_worlds, 'my_world.sdf')
+raiz_pacote = Path(__file__).resolve().parent.parent
+caminho_json = raiz_pacote / 'parameters' / 'tether_parameters.json'
+pasta_models = raiz_pacote / 'models'
+pasta_worlds = raiz_pacote / 'worlds'
+caminho_sdf = pasta_models / 'cabo.sdf'
+caminho_world = pasta_worlds / 'my_world.sdf'
 
-os.makedirs(pasta_models, exist_ok=True)
-os.makedirs(pasta_worlds, exist_ok=True)
+pasta_models.mkdir(exist_ok=True)
+pasta_worlds.mkdir(exist_ok=True)
 
 def clamp_min(valor, minimo):
     return max(float(valor), minimo)

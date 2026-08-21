@@ -13,8 +13,7 @@ def generate_launch_description():
     # Caminho para o seu novo arquivo de mundo
     world_path = os.path.join(pkg_share, 'worlds', 'my_world.sdf')
 
-    # Usando o mesmo caminho absoluto que usamos no gerar_cabo.py
-    caminho_json = '/home/joseubu/IC/src/pacote_do_drone/tether_parameters.json'
+    caminho_json = os.path.join(pkg_share, 'parameters', 'tether_parameters.json')
     
     try:
         with open(caminho_json, 'r') as f:
@@ -42,6 +41,10 @@ def generate_launch_description():
         package='ros_gz_bridge',
         executable='parameter_bridge',
         arguments=[
+            '/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock',
+            '/meu_drone/odom@nav_msgs/msg/Odometry[gz.msgs.Odometry',
+            '/cabo/tensao_drone@geometry_msgs/msg/WrenchStamped[gz.msgs.Wrench',
+            '/cabo/tensao_carretel@geometry_msgs/msg/WrenchStamped[gz.msgs.Wrench',
             '/tensao_cabo@geometry_msgs/msg/WrenchStamped[gz.msgs.Wrench',
             '/angulos_cabo@sensor_msgs/msg/JointState[gz.msgs.Model',
             '/meu_drone/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist'

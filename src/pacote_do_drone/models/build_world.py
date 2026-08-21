@@ -1,19 +1,20 @@
 import json
-import os
 import math
+from pathlib import Path
 
 # ============================================================
 # CAMINHOS E PASTAS
 # ============================================================
 
-caminho_json   = '/home/joseubu/IC/src/pacote_do_drone/tether_parameters.json'
-pasta_models   = '/home/joseubu/IC/src/pacote_do_drone/models/'
-pasta_worlds   = '/home/joseubu/IC/src/pacote_do_drone/worlds/'
-caminho_sdf    = os.path.join(pasta_models, 'cabo.sdf')
-caminho_world  = os.path.join(pasta_worlds, 'my_world.sdf')
+raiz_pacote = Path(__file__).resolve().parent.parent
+caminho_json = raiz_pacote / 'parameters' / 'tether_parameters.json'
+pasta_models = raiz_pacote / 'models'
+pasta_worlds = raiz_pacote / 'worlds'
+caminho_sdf = pasta_models / 'cabo.sdf'
+caminho_world = pasta_worlds / 'my_world.sdf'
 
-os.makedirs(pasta_models, exist_ok=True)
-os.makedirs(pasta_worlds, exist_ok=True)
+pasta_models.mkdir(exist_ok=True)
+pasta_worlds.mkdir(exist_ok=True)
 
 # ============================================================
 # FUNÇÕES AUXILIARES
@@ -500,7 +501,7 @@ world = f"""<?xml version="1.0" ?>
 
     <physics name="physics" type="ode">
       <max_step_size>0.0005</max_step_size>
-      <real_time_update_rate>1000</real_time_update_rate>
+      <real_time_update_rate>2000</real_time_update_rate>
       <real_time_factor>1.0</real_time_factor>
       <ode>
         <solver>
@@ -545,13 +546,13 @@ world = f"""<?xml version="1.0" ?>
     </model>
 
     <include>
-      <uri>file:///home/joseubu/IC/src/pacote_do_drone/models/carretel/carretel.sdf</uri>
+      <uri>model://carretel</uri>
       <name>meu_carretel</name>
       <pose>0 0 0 0 0 0</pose>
     </include>
 
     <include>
-      <uri>file:///home/joseubu/IC/src/pacote_do_drone/models/cabo.sdf</uri>
+      <uri>model://cabo.sdf</uri>
       <name>cabo_dinamico</name>
       <pose>{ancora_x} {ancora_y} {ancora_z} 0 0 0</pose>
       <static>false</static>
@@ -564,7 +565,7 @@ world = f"""<?xml version="1.0" ?>
     </joint>
     
     <include>
-      <uri>file://{pasta_models}meu_drone/meu_drone.sdf</uri>
+      <uri>model://meu_drone</uri>
       <name>meu_drone</name>
       <pose>{drone_spawn_x:.6f} {drone_spawn_y:.6f} {drone_spawn_z:.6f} 0 0 {yaw_base:.6f}</pose>
     </include>

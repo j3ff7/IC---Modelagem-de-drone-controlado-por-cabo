@@ -4,8 +4,10 @@ from geometry_msgs.msg import Twist, WrenchStamped
 from nav_msgs.msg import Odometry
 import math
 import json
+from pathlib import Path
 
-caminho_json   = '/home/joseubu/IC/src/pacote_do_drone/tether_parameters.json'
+raiz_pacote = Path(__file__).resolve().parent.parent
+caminho_json = raiz_pacote / 'parameters' / 'tether_parameters.json'
 
 with open(caminho_json, 'r') as f:
     params = json.load(f)
@@ -19,13 +21,15 @@ comprimento = length*num_links
 class ControladorDrone(Node):
     def __init__(self):
         super().__init__('controlador_pairar_drone')
+        if not self.has_parameter('use_sim_time'):
+            self.declare_parameter('use_sim_time', True)
         
         
         # ==========================================
         # PARÂMETROS DO VOO
         # ==========================================
-        self.altura_alvo = 1.5
-        self.x_alvo = 0
+        self.altura_alvo = 1
+        self.x_alvo = 1
         self.y_alvo = 0 
         # ==========================================
 
