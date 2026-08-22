@@ -1,180 +1,127 @@
 import rclpy
 from rclpy.node import Node
-from geometry_msgs.msg import Twist, WrenchStamped
 from nav_msgs.msg import Odometry
+from actuator_msgs.msg import Actuators # NOVO PACOTE
 import math
-import json
-from pathlib import Path
+import time
+import matplotlib.pyplot as plt
 
-raiz_pacote = Path(__file__).resolve().parent.parent
-caminho_json = raiz_pacote / 'parameters' / 'tether_parameters.json'
-
-with open(caminho_json, 'r') as f:
-    params = json.load(f)
-
-num_links = max(3, int(params.get("num_links", 50)))
-
-length = params.get("length", 0.05)
-
-comprimento = length*num_links
-
-class ControladorDrone(Node):
+class ControladorEmpuxo(Node):
     def __init__(self):
-        super().__init__('controlador_pairar_drone')
-        if not self.has_parameter('use_sim_time'):
-            self.declare_parameter('use_sim_time', True)
+        super().__init__('controlador_empuxo_raiz')
         
-        
-        # ==========================================
-        # PARÂMETROS DO VOO
-        # ==========================================
-        self.altura_alvo = 1
-        self.x_alvo = 1
-        self.y_alvo = 0 
-        # ==========================================
-
-        self.z_atual = 0.0
-        self.x_atual = 0.0
-        self.y_atual = 0.0
-        
-        self.tensao_drone = 0.0
-        self.tensao_carretel = 0.0
-        
-        # ==========================================
-        # VARIÁVEIS PARA O LOG NA TELA
-        # ==========================================
-        self.cmd_x = 0.0
-        self.cmd_y = 0.0
-        self.cmd_z = 0.0
-        self.erro_xy_atual = 0.0
-        self.erro_z_atual = 0.0
-        
-        # ==========================================
-        # VARIÁVEIS DO PID
-        # ==========================================
-        self.dt = 0.02  # Tempo de cada iteração do controle (20Hz)
-        
-        # Memória para o termo Derivativo (erro anterior)
-        self.erro_x_ant = 0.0
-        self.erro_y_ant = 0.0
-        
-        # Memória para o termo Integral (soma dos erros)
-        self.soma_erro_x = 0.0
-        self.soma_erro_y = 0.0
-        
-        # Ganhos do PID
-        self.kp = 8.0   
-        self.ki = 1 
-        self.kd = 5.0   
-        # ==========================================
-
-        # Publishers e Subscribers
-        self.publisher_ = self.create_publisher(Twist, '/meu_drone/cmd_vel', 10)
+        # Publicador de comandos diretamente para os motores
+        self.pub_motores = self.create_publisher(Actuators, '/meu_drone/command/motor_speed', 10)
         self.sub_odom = self.create_subscription(Odometry, '/meu_drone/odom', self.odom_callback, 10)
-        self.sub_tensao_drone = self.create_subscription(WrenchStamped, '/cabo/tensao_drone', self.tensao_drone_callback, 10)
-        self.sub_tensao_carretel = self.create_subscription(WrenchStamped, '/cabo/tensao_carretel', self.tensao_carretel_callback, 10)
         
-        # TIMER DO PID (Roda rápido: 20 vezes por segundo)
-        self.timer_controle = self.create_timer(self.dt, self.timer_callback)
+        # Variáveis de Estado
+        self.x_atual = self.y_atual = self.z_atual = 0.0
+        self.roll_atual = self.pitch_atual = self.yaw_atual = 0.0
         
-        # TIMER DO LOG (Roda devagar: a cada 0.5 segundos)
-        self.timer_log = self.create_timer(0.5, self.imprimir_log)
+        # Alvos
+        self.x_alvo = 1.0
+        self.y_alvo = 0.0
+        self.z_alvo = 1.0
         
-        self.get_logger().info(f"Iniciando voo. Subindo para {self.altura_alvo}m e centralizando no carretel...")
+        # Parâmetros Físicos do Drone (Estimados a partir do SDF)
+        self.massa = 1.5 
+        self.gravidade = 9.81
+        self.peso = self.massa * self.gravidade
+        self.k_f = 1.5e-03 # Constante de força do motor
+        
+        self.dt = 0.02
+        self.timer = self.create_timer(self.dt, self.timer_callback)
+        self.get_logger().info("Controlador Raiz Iniciado: Assumindo controle direto das hélices!")
 
     def odom_callback(self, msg):   
         self.x_atual = msg.pose.pose.position.x
         self.y_atual = msg.pose.pose.position.y
         self.z_atual = msg.pose.pose.position.z
+        
+        # Extrai os ângulos da odometria (Quaternions para Euler)
+        q = msg.pose.pose.orientation
+        self.roll_atual, self.pitch_atual, self.yaw_atual = self.euler_from_quaternion(q.x, q.y, q.z, q.w)
 
-    def tensao_drone_callback(self, msg):
-        fx = msg.wrench.force.x
-        fy = msg.wrench.force.y
-        fz = msg.wrench.force.z
-        self.tensao_drone = math.sqrt(fx**2 + fy**2 + fz**2)
-
-    def tensao_carretel_callback(self, msg):
-        fx = msg.wrench.force.x
-        fy = msg.wrench.force.y
-        fz = msg.wrench.force.z
-        self.tensao_carretel = math.sqrt(fx**2 + fy**2 + fz**2)
+    def euler_from_quaternion(self, x, y, z, w):
+        # Matemática para converter o sensor do Gazebo em Ângulos reais
+        t0 = +2.0 * (w * x + y * z)
+        t1 = +1.0 - 2.0 * (x * x + y * y)
+        roll = math.atan2(t0, t1)
+        
+        t2 = +2.0 * (w * y - z * x)
+        t2 = +1.0 if t2 > +1.0 else t2
+        t2 = -1.0 if t2 < -1.0 else t2
+        pitch = math.asin(t2)
+        
+        t3 = +2.0 * (w * z + x * y)
+        t4 = +1.0 - 2.0 * (y * y + z * z)
+        yaw = math.atan2(t3, t4)
+        return roll, pitch, yaw
 
     def timer_callback(self):
-        msg = Twist()
-        
-        # --- 1. CONTROLE DE ALTURA (Controlador P) ---
-        erro_z = self.altura_alvo - self.z_atual
-        kp_z = 2.0  
-        comando_z = kp_z * erro_z
-        
-        if comando_z > 2.0: comando_z = 2.0
-        if comando_z < -2.0: comando_z = -2.0
-        msg.linear.z = comando_z
-
-        # --- 2. CONTROLE PID PARA X e Y ---
+        # ----------------------------------------------------
+        # 1. CONTROLE DE POSIÇÃO (Gera ângulos desejados e Empuxo)
+        # ----------------------------------------------------
         erro_x = self.x_alvo - self.x_atual
         erro_y = self.y_alvo - self.y_atual
+        erro_z = self.z_alvo - self.z_atual
         
-        # Cálculo Integral 
-        self.soma_erro_x += erro_x * self.dt
-        self.soma_erro_y += erro_y * self.dt
+        # PIDs simplificados de Posição (ganhos baixos para estabilidade inicial)
+        kp_z = 1.0
+        empuxo_desejado = self.peso + (kp_z * erro_z) 
         
-        # Trava do Integral
-        limite_int = 0.4
-        self.soma_erro_x = max(-limite_int, min(limite_int, self.soma_erro_x))
-        self.soma_erro_y = max(-limite_int, min(limite_int, self.soma_erro_y))
+        kp_xy = 0.5
+        # Para ir para frente (X positivo), o drone tem que "abaixar o nariz" (Pitch negativo)
+        pitch_desejado = -kp_xy * erro_x
+        # Para ir para esquerda/direita, rolar
+        roll_desejado = kp_xy * erro_y 
         
-        # Cálculo Derivativo
-        deriv_x = (erro_x - self.erro_x_ant) / self.dt
-        deriv_y = (erro_y - self.erro_y_ant) / self.dt
-        
-        # Equação do PID
-        comando_x = (self.kp * erro_x) + (self.ki * self.soma_erro_x) + (self.kd * deriv_x)
-        comando_y = (self.kp * erro_y) + (self.ki * self.soma_erro_y) + (self.kd * deriv_y)
-        
-        # Atualiza a memória
-        self.erro_x_ant = erro_x
-        self.erro_y_ant = erro_y
-        
-        # Trava final de velocidade física
-        limite_xy = 1.0
-        msg.linear.x = max(-limite_xy, min(limite_xy, comando_x))
-        msg.linear.y = max(-limite_xy, min(limite_xy, comando_y))
-        msg.angular.z = 0.0
-        
-        self.publisher_.publish(msg)
-        
-        # Salva os valores atuais para o print
-        self.cmd_x = msg.linear.x
-        self.cmd_y = msg.linear.y
-        self.cmd_z = msg.linear.z
-        self.erro_xy_atual = math.hypot(erro_x, erro_y)
-        self.erro_z_atual = erro_z
+        # Travas de segurança de ângulo (máximo ~20 graus)
+        pitch_desejado = max(-0.35, min(0.35, pitch_desejado))
+        roll_desejado = max(-0.35, min(0.35, roll_desejado))
 
-    def imprimir_log(self):
-        # Esta função roda isolada, a cada 0.5 segundos, só para imprimir os dados
-        fase_atual = "Pairando" if abs(self.erro_z_atual) < 0.1 and self.erro_xy_atual < 0.1 else "Posicionando"
+        # ----------------------------------------------------
+        # 2. CONTROLE DE ATITUDE (Gera Torques nos eixos)
+        # ----------------------------------------------------
+        erro_roll = roll_desejado - self.roll_atual
+        erro_pitch = pitch_desejado - self.pitch_atual
         
-        self.get_logger().info(f"Comandos (m/s) -> X: {self.cmd_x:.2f} | Y: {self.cmd_y:.2f} | Z: {self.cmd_z:.2f}")
-        self.get_logger().info(
-            f"[{fase_atual}] Pos: (X:{self.x_atual:.2f}, Y:{self.y_atual:.2f}, Z:{self.z_atual:.2f}) | "
-            f"Tensões: D={self.tensao_drone:.2f}N / C={self.tensao_carretel:.2f}N"
-        )
-        self.get_logger().info("-" * 40) # Apenas uma linha para separar no terminal
+        kp_atitude = 10.0
+        cmd_roll = kp_atitude * erro_roll
+        cmd_pitch = kp_atitude * erro_pitch
+
+        # ----------------------------------------------------
+        # 3. MATRIZ DE MISTURA (Mixer) -> Distribui para as Hélices
+        # ----------------------------------------------------
+        # Calcula a velocidade base quadrada para manter o drone no ar
+        # Empuxo Total = 4 * k_f * velocidade_quadrada
+        base_quadrado = empuxo_desejado / (4.0 * self.k_f)
+        if base_quadrado < 0: base_quadrado = 0.0
+        
+        # Distribui o torque somando e subtraindo do empuxo base de cada hélice
+        # Motor 0 (Frente-Dir), Motor 1 (Trás-Esq), Motor 2 (Frente-Esq), Motor 3 (Trás-Dir)
+        m0_q = base_quadrado - cmd_pitch - cmd_roll
+        m1_q = base_quadrado + cmd_pitch + cmd_roll
+        m2_q = base_quadrado - cmd_pitch + cmd_roll
+        m3_q = base_quadrado + cmd_pitch - cmd_roll
+        
+        # Converte para velocidade angular (rad/s) garantindo que não dê raiz negativa
+        msg = Actuators()
+        msg.velocity = [
+            float(math.sqrt(max(0.0, m0_q))),
+            float(math.sqrt(max(0.0, m1_q))),
+            float(math.sqrt(max(0.0, m2_q))),
+            float(math.sqrt(max(0.0, m3_q)))
+        ]
+        
+        self.pub_motores.publish(msg)
 
 def main(args=None):
     rclpy.init(args=args)
-    node = ControladorDrone()
-    
-    try:
-        rclpy.spin(node)
-    except KeyboardInterrupt:
-        pass
-    finally:
-        node.get_logger().info("Parando o drone...")
-        node.publisher_.publish(Twist())
-        node.destroy_node()
-        rclpy.shutdown()
+    node = ControladorEmpuxo()
+    rclpy.spin(node)
+    node.destroy_node()
+    rclpy.shutdown()
 
 if __name__ == '__main__':
     main()

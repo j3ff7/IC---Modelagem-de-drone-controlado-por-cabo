@@ -47,7 +47,7 @@ def generate_launch_description():
             '/cabo/tensao_carretel@geometry_msgs/msg/WrenchStamped[gz.msgs.Wrench',
             '/tensao_cabo@geometry_msgs/msg/WrenchStamped[gz.msgs.Wrench',
             '/angulos_cabo@sensor_msgs/msg/JointState[gz.msgs.Model',
-            '/meu_drone/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist'
+            '/meu_drone/command/motor_speed@actuator_msgs/msg/Actuators]gz.msgs.Actuators'
         ],
         output='screen'
     )

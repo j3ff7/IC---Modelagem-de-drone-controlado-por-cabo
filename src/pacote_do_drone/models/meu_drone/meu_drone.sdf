@@ -147,90 +147,57 @@
       </axis>
     </joint>
 
-    <plugin
-      filename="gz-sim-multicopter-control-system"
-      name="gz::sim::systems::MulticopterVelocityControl">
-      <robotNamespace>meu_drone</robotNamespace>
-      <commandSubTopic>cmd_vel</commandSubTopic>
-      <comLinkName>base_link</comLinkName>
-      <velocityGain>4.0 4.0 6.0</velocityGain>
-      <attitudeGain>2 3 0.15</attitudeGain>
-      <angularRateGain>4.0 4.0 0.5</angularRateGain>
-      
-      <rotorConfiguration>
-        <rotor>
-          <jointName>rotor_0_joint</jointName>
-          <forceConstant>1.5e-03</forceConstant>
-          <momentConstant>0.090</momentConstant>
-          <direction>-1</direction>
-        </rotor>
-        <rotor>
-          <jointName>rotor_1_joint</jointName>
-          <forceConstant>1.5e-03</forceConstant>
-          <momentConstant>0.090</momentConstant>
-          <direction>-1</direction>
-        </rotor>
-        <rotor>
-          <jointName>rotor_2_joint</jointName>
-          <forceConstant>1.5e-03</forceConstant>
-          <momentConstant>0.090</momentConstant>
-          <direction>1</direction>
-        </rotor>
-        <rotor>
-          <jointName>rotor_3_joint</jointName>
-          <forceConstant>1.5e-03</forceConstant>
-          <momentConstant>0.090</momentConstant>
-          <direction>1</direction>
-        </rotor>
-      </rotorConfiguration>
-    </plugin>
     
     <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
       <jointName>rotor_0_joint</jointName>
       <linkName>rotor_0</linkName>
-      <motorNumber>0</motorNumber>
+      <actuator_number>0</actuator_number>
       <turningDirection>cw</turningDirection>
       <motorConstant>1.5e-03</motorConstant>
       <momentConstant>0.090</momentConstant>
       <maxRotVelocity>10000</maxRotVelocity>
       <rotorVelocitySlowdownSim>1</rotorVelocitySlowdownSim>
       <robotNamespace>meu_drone</robotNamespace>
+      <commandSubTopic>command/motor_speed</commandSubTopic>
     </plugin>
 
     <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
       <jointName>rotor_1_joint</jointName>
       <linkName>rotor_1</linkName>
-      <motorNumber>1</motorNumber>
+      <actuator_number>1</actuator_number>
       <turningDirection>cw</turningDirection>
       <motorConstant>1.5e-03</motorConstant>
       <momentConstant>0.090</momentConstant>
       <maxRotVelocity>10000</maxRotVelocity>
       <rotorVelocitySlowdownSim>1</rotorVelocitySlowdownSim>
       <robotNamespace>meu_drone</robotNamespace>
+      <commandSubTopic>command/motor_speed</commandSubTopic>
     </plugin>
 
     <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
       <jointName>rotor_2_joint</jointName>
       <linkName>rotor_2</linkName>
-      <motorNumber>2</motorNumber>
+      <actuator_number>2</actuator_number>
       <turningDirection>ccw</turningDirection>
       <motorConstant>1.5e-03</motorConstant>
       <momentConstant>0.090</momentConstant>
       <maxRotVelocity>10000</maxRotVelocity>
       <rotorVelocitySlowdownSim>1</rotorVelocitySlowdownSim>
       <robotNamespace>meu_drone</robotNamespace>
+      <commandSubTopic>command/motor_speed</commandSubTopic>
     </plugin>
 
     <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
       <jointName>rotor_3_joint</jointName>
       <linkName>rotor_3</linkName>
-      <motorNumber>3</motorNumber>
+      <actuator_number>3</actuator_number>
       <turningDirection>ccw</turningDirection>
       <motorConstant>1.5e-03</motorConstant>
       <momentConstant>0.090</momentConstant>
       <maxRotVelocity>10000</maxRotVelocity>
       <rotorVelocitySlowdownSim>1</rotorVelocitySlowdownSim>
       <robotNamespace>meu_drone</robotNamespace>
+      <commandSubTopic>command/motor_speed</commandSubTopic>
     </plugin>
 
     <!-- PLUGIN DE ODOMETRIA (Sensor de posição) -->
