@@ -19,8 +19,8 @@ setup(
         # Procura qualquer .sdf dentro da pasta worlds e instala na pasta share do pacote
         (os.path.join('share', package_name, 'worlds'), glob('worlds/*.sdf')),
         
-        # Instala o seu arquivo de parâmetros JSON que está na RAIZ do pacote
-        (os.path.join('share', package_name), ['tether_parameters.json']),
+        # Instala os parâmetros junto com a estrutura de diretórios do pacote
+        (os.path.join('share', package_name, 'parameters'), glob('parameters/*.json')),
 
         # Instala arquivos na pasta models (incluindo o cabo.sdf)
         (os.path.join('share', package_name, 'models'), glob('models/*.*')),
@@ -29,6 +29,7 @@ setup(
         (os.path.join('share', package_name, 'models/Gazebo'), glob('models/Gazebo/*.*')),
         
         # Instala a pasta do drone e suas malhas (meshes)
+        (os.path.join('share', package_name, 'models/carretel'), glob('models/carretel/*.*')),
         (os.path.join('share', package_name, 'models/meu_drone'), glob('models/meu_drone/*.*')),
         (os.path.join('share', package_name, 'models/meu_drone/meshes'), glob('models/meu_drone/meshes/*.*')),
     ],

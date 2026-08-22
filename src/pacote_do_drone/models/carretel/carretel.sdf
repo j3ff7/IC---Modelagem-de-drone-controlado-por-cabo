@@ -1,0 +1,97 @@
+<?xml version="1.0" ?>
+<sdf version="1.8">
+  <model name="carretel_ancora">
+    <self_collide>true</self_collide>
+    
+    <link name="base_suporte">
+      <pose>0 0 0 0 0 0</pose>
+      <inertial>
+        <mass>12.0</mass> 
+        <inertia><ixx>0.1</ixx><iyy>0.2</iyy><izz>0.2</izz></inertia>
+      </inertial>
+
+      <!-- Placa do Chão (Mais larga: 40cm de profundidade x 80cm de largura) -->
+      <visual name="base_visual">
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry><box><size>0.4 0.7 0.02</size></box></geometry>
+        <material><ambient>0.3 0.3 0.3 1</ambient></material>
+      </visual>
+      <collision name="base_colisao">
+        <pose>0 0 0.01 0 0 0</pose>
+        <geometry><box><size>0.4 0.7 0.02</size></box></geometry>
+      </collision>
+
+      <!-- Haste Esquerda (Mais baixa e mais afastada para a borda) -->
+      <visual name="haste_esq_visual">
+        <pose>0 0.23 0.15 0 0 0</pose> 
+        <geometry><box><size>0.06 0.06 0.30</size></box></geometry>
+        <material><ambient>0.2 0.2 0.8 1</ambient></material>
+      </visual>
+      <collision name="haste_esq_colisao">
+        <pose>0 0.23 0.15 0 0 0</pose>
+        <geometry><box><size>0.06 0.06 0.30</size></box></geometry>
+      </collision>
+
+      <!-- Haste Direita (Mais baixa e mais afastada para a borda) -->
+      <visual name="haste_dir_visual">
+        <pose>0 -0.23 0.15 0 0 0</pose>
+        <geometry><box><size>0.06 0.06 0.30</size></box></geometry>
+        <material><ambient>0.2 0.2 0.8 1</ambient></material>
+      </visual>
+      <collision name="haste_dir_colisao">
+        <pose>0 -0.23 0.15 0 0 0</pose>
+        <geometry><box><size>0.06 0.06 0.30</size></box></geometry>
+      </collision>
+    </link>
+
+    <link name="cilindro_carretel">
+      <pose>0 0 0.26 1.570796 0 0</pose> 
+      <inertial>
+        <mass>3.0</mass> 
+        <inertia><ixx>0.02</ixx><iyy>0.02</iyy><izz>0.02</izz></inertia>
+      </inertial>
+      
+      <visual name="cilindro_visual">
+        <geometry><cylinder><radius>0.07</radius><length>0.40</length></cylinder></geometry>
+        <material>1
+          <ambient>0.5 0.3 0.3 1</ambient>
+          <diffuse>0.5 0.3 0.3 1</diffuse>
+        </material>
+      </visual>
+
+      <collision name="cilindro_colisao">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry><cylinder><radius>0.07</radius><length>0.40</length></cylinder></geometry>
+      </collision>
+    </link>
+
+    <joint name="junta_eixo" type="revolute">
+      <parent>base_suporte</parent>
+      <child>cilindro_carretel</child>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-1e16</lower>
+          <upper>1e16</upper>
+        </limit>
+        <dynamics>
+          <damping>0.01</damping>
+          <friction>0.02</friction>
+        </dynamics>
+      </axis>
+    </joint>
+    
+    <joint name="ancora_mundo" type="fixed">
+      <parent>world</parent>
+      <child>base_suporte</child>
+    </joint>
+
+    <plugin
+      filename="gz-sim-joint-controller-system"
+      name="gz::sim::systems::JointController">
+      <joint_name>junta_eixo</joint_name>
+      <topic>/carretel/velocidade</topic> 
+    </plugin>
+
+  </model>
+</sdf>
