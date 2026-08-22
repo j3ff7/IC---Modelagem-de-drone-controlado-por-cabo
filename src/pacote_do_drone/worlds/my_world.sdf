@@ -74,7 +74,7 @@
       <pose>2.396508 0.180000 0.227589 0 0 0.000000</pose>
     </include>
 
-    <joint name="cabo_drone_joint" type="ball">
+    <joint name="cabo_drone_joint" type="universal">
       <parent>cabo_dinamico::ponta_cabo</parent>
       <child>meu_drone::base_link</child>
     </joint>

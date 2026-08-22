@@ -570,7 +570,7 @@ world = f"""<?xml version="1.0" ?>
       <pose>{drone_spawn_x:.6f} {drone_spawn_y:.6f} {drone_spawn_z:.6f} 0 0 {yaw_base:.6f}</pose>
     </include>
 
-    <joint name="cabo_drone_joint" type="ball">
+    <joint name="cabo_drone_joint" type="universal">
       <parent>cabo_dinamico::ponta_cabo</parent>
       <child>meu_drone::base_link</child>
     </joint>
