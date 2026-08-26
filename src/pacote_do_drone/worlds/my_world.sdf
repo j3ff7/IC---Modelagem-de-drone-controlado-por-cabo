@@ -58,7 +58,7 @@
     <include>
       <uri>model://cabo.sdf</uri>
       <name>cabo_dinamico</name>
-      <pose>0.0 0.18 0.35 0 0 0</pose>
+      <pose>0.0 0.18 0.335 0 0 0</pose>
       <static>false</static>
     </include>
 
@@ -71,10 +71,10 @@
     <include>
       <uri>model://meu_drone</uri>
       <name>meu_drone</name>
-      <pose>2.396508 0.180000 0.227589 0 0 0.000000</pose>
+      <pose>2.396885 0.180000 0.219759 0 0 0.000000</pose>
     </include>
 
-    <joint name="cabo_drone_joint" type="universal">
+    <joint name="cabo_drone_joint" type="ball">
       <parent>cabo_dinamico::ponta_cabo</parent>
       <child>meu_drone::base_link</child>
     </joint>

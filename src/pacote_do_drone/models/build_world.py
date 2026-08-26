@@ -164,7 +164,7 @@ comprimento_total = num_links * length
 
 ancora_x = 0.0
 ancora_y = 0.18
-ancora_z = 0.35
+ancora_z = 0.335
 
 offset_conexao_drone_x = float(params.get("offset_conexao_drone_x", 0.0))
 offset_conexao_drone_y = float(params.get("offset_conexao_drone_y", 0.0))
@@ -307,7 +307,7 @@ print(f"Yaw sugerido:       {yaw_base:.6f} rad")
 
 limite_inercia_minima = 1e-5
 massa_raiz = 0.02
-raio_raiz_visual = 0.01
+raio_raiz_visual = 0.005
 ixx_raiz = max((2.0/5.0)*massa_raiz*raio_raiz_visual**2, limite_inercia_minima)
 
 massa_ponta = 0.005   # massa maior para estabilidade
@@ -353,9 +353,9 @@ sdf = f"""<?xml version="1.0" ?>
 """
 
 parent_link = "raiz_cabo"
-for i in range(1, num_links+1):
-    nome_elo = "final_segment" if i == num_links else f"segment_{i}"
-    p_atual = pontos_cabo[i-1]
+for i in range(1, num_links + 1):
+    nome_elo = f"segment_{i}"
+    p_atual = pontos_cabo[i - 1]
     p_prox = pontos_cabo[i]
     seg_len = dist3(p_atual, p_prox)
 
@@ -364,16 +364,18 @@ for i in range(1, num_links+1):
     pose_y = p_atual[1] - ancora_y
     pose_z = p_atual[2] - ancora_z
 
-    if i == num_links:
-        mass_seg = max(densidade_linear * seg_len, 0.005)
-    else:
-        mass_seg = max(densidade_linear * seg_len, 0.001)
+    mass_seg = max(densidade_linear * seg_len, 0.001)
+    ixx_seg = max(0.5 * mass_seg * radius**2, limite_inercia_minima)
+    iyy_zz_seg = max((1.0/12.0) * mass_seg * (3*radius**2 + seg_len**2), limite_inercia_minima)
 
-    ixx_seg = max(0.5*mass_seg*radius**2, limite_inercia_minima)
-    iyy_zz_seg = max((1.0/12.0)*mass_seg*(3*radius**2 + seg_len**2), limite_inercia_minima)
+    collision_radius_seg = 0.50 * radius
+    collision_length_seg = max(0.001, 0.60 * seg_len)
 
-    collision_radius_seg = 0.50*radius
-    collision_length_seg = max(0.001, 0.60*seg_len)
+    dynamics_xml = f"""
+      <dynamics>
+        <damping>{damping_junta}</damping>
+        <friction>{friction_junta}</friction>
+      </dynamics>"""
 
     sensor_xml = ""
     if i == 1:
@@ -383,108 +385,109 @@ for i in range(1, num_links+1):
         <update_rate>50</update_rate>
         <topic>/cabo/tensao_carretel</topic>
       </sensor>"""
-    elif i == num_links:
-        sensor_xml = """
-      <sensor name="sensor_tensao_drone" type="force_torque">
-        <always_on>true</always_on>
-        <update_rate>50</update_rate>
-        <topic>/cabo/tensao_drone</topic>
-      </sensor>"""
 
-    visual_ponta_xml = ""
-    if i == num_links:
-        visual_ponta_xml = f"""
-      <visual name="visual_ponta_vermelha">
-        <pose>{seg_len:.6f} 0 0 0 0 0</pose>
-        <geometry><sphere><radius>{raio_ponta}</radius></sphere></geometry>
-        <material>
-          <ambient>0.8 0.1 0.1 1</ambient>
-          <diffuse>0.8 0.1 0.1 1</diffuse>
-        </material>
-      </visual>"""
-
-    dynamics_xml = f"""
-      <dynamics>
-        <damping>{damping_junta}</damping>
-        <friction>{friction_junta}</friction>
-      </dynamics>"""
-
-    # --- ALTERAÇÃO AQUI: junta universal com limites de 30° (ou o valor de limite_junta_deg) ---
     sdf += f"""
-    <link name="{nome_elo}">
-      <pose>{pose_x:.6f} {pose_y:.6f} {pose_z:.6f} 0 {pitch:.6f} {yaw:.6f}</pose>
-      <enable_wind>false</enable_wind>
-      <self_collide>false</self_collide>
+      <link name="{nome_elo}">
+        <pose>{pose_x:.6f} {pose_y:.6f} {pose_z:.6f} 0 {pitch:.6f} {yaw:.6f}</pose>
+        <enable_wind>false</enable_wind>
+        <self_collide>false</self_collide>
 
-      <visual name="visual">
-        <pose>{seg_len/2:.6f} 0 0 0 1.5708 0</pose>
-        <geometry><cylinder><radius>{radius}</radius><length>{seg_len:.6f}</length></cylinder></geometry>
-        <material>
-          <ambient>0 0 0 1</ambient>
-          <diffuse>0 0 0 1</diffuse>
-        </material>
-      </visual>
-{visual_ponta_xml}
-      <collision name="collision">
-        <pose>{seg_len/2:.6f} 0 0 0 1.5708 0</pose>
-        <geometry><cylinder><radius>{collision_radius_seg}</radius><length>{collision_length_seg:.6f}</length></cylinder></geometry>
-      </collision>
+        <visual name="visual">
+          <pose>{seg_len/2:.6f} 0 0 0 1.5708 0</pose>
+          <geometry><cylinder><radius>{radius}</radius><length>{seg_len:.6f}</length></cylinder></geometry>
+          <material>
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+          </material>
+        </visual>
+        <collision name="collision">
+          <pose>{seg_len/2:.6f} 0 0 0 1.5708 0</pose>
+          <geometry><cylinder><radius>{collision_radius_seg}</radius><length>{collision_length_seg:.6f}</length></cylinder></geometry>
+        </collision>
 
-      <inertial>
-        <pose>{seg_len/2:.6f} 0 0 0 0 0</pose>
-        <mass>{mass_seg}</mass>
-        <inertia>
-          <ixx>{ixx_seg}</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>{iyy_zz_seg}</iyy><iyz>0</iyz><izz>{iyy_zz_seg}</izz>
-        </inertia>
-      </inertial>
-    </link>
+        <inertial>
+          <pose>{seg_len/2:.6f} 0 0 0 0 0</pose>
+          <mass>{mass_seg}</mass>
+          <inertia>
+            <ixx>{ixx_seg}</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>{iyy_zz_seg}</iyy><iyz>0</iyz><izz>{iyy_zz_seg}</izz>
+          </inertia>
+        </inertial>
+      </link>
 
-    <joint name="joint_{i}" type="universal">
-      <parent>{parent_link}</parent>
-      <child>{nome_elo}</child>
-      <pose>0 0 0 0 0 0</pose>
-      <axis>
-        <xyz>0 1 0</xyz>{limite_xml}
-      </axis>
-      <axis2>
-        <xyz>0 0 1</xyz>{limite_xml}
-      </axis2>
-      {dynamics_xml}
-  {sensor_xml}
-    </joint>
-"""
-    # --- fim da alteração ---
-
+      <joint name="joint_{i}" type="universal">
+        <parent>{parent_link}</parent>
+        <child>{nome_elo}</child>
+        <pose>0 0 0 0 0 0</pose>
+        <axis>
+          <xyz>0 1 0</xyz>{limite_xml}
+        </axis>
+        <axis2>
+          <xyz>0 0 1</xyz>{limite_xml}
+        </axis2>
+        {dynamics_xml}
+    {sensor_xml}
+      </joint>
+  """
     parent_link = nome_elo
 
+# ---- elo extra: só a esfera, encaixada exatamente no fim do último cilindro ----
 ponta_x = p_final[0] - ancora_x
 ponta_y = p_final[1] - ancora_y
 ponta_z = p_final[2] - ancora_z
 
 sdf += f"""
-    <link name="ponta_cabo">
-      <pose>{ponta_x:.6f} {ponta_y:.6f} {ponta_z:.6f} 0 0 0</pose>
-      <inertial>
-        <mass>{massa_ponta}</mass>
-        <inertia>
-          <ixx>{ixx_ponta}</ixx><ixy>0</ixy><ixz>0</ixz>
-          <iyy>{ixx_ponta}</iyy><iyz>0</iyz><izz>{ixx_ponta}</izz>
-        </inertia>
-      </inertial>
-      <collision name="collision_ponta">
-        <geometry><sphere><radius>{raio_ponta}</radius></sphere></geometry>
-      </collision>
-    </link>
+      <link name="ponta_cabo">
+        <pose>{ponta_x:.6f} {ponta_y:.6f} {ponta_z:.6f} 0 0 0</pose>
+        <enable_wind>false</enable_wind>
+        <self_collide>false</self_collide>
 
-    <joint name="joint_ponta" type="universal">
-      <parent>final_segment</parent>
-      <child>ponta_cabo</child>
-      <pose>0 0 0 0 0 0</pose>
-    </joint>
+        <visual name="visual_ponta_vermelha">
+          <geometry><sphere><radius>{raio_ponta}</radius></sphere></geometry>
+          <material>
+            <ambient>0.8 0.1 0.1 1</ambient>
+            <diffuse>0.8 0.1 0.1 1</diffuse>
+          </material>
+        </visual>
+        <collision name="collision_ponta">
+          <geometry><sphere><radius>{raio_ponta}</radius></sphere></geometry>
+        </collision>
+
+        <inertial>
+          <mass>{massa_ponta}</mass>
+          <inertia>
+            <ixx>{ixx_ponta}</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>{ixx_ponta}</iyy><iyz>0</iyz><izz>{ixx_ponta}</izz>
+          </inertia>
+        </inertial>
+      </link>
+
+      <joint name="joint_ponta" type="universal">
+        <parent>{parent_link}</parent>
+        <child>ponta_cabo</child>
+        <pose>0 0 0 0 0 0</pose>
+        <axis>
+          <xyz>0 1 0</xyz>{limite_xml}
+        </axis>
+        <axis2>
+          <xyz>0 0 1</xyz>{limite_xml}
+        </axis2>
+        {dynamics_xml}
+        <sensor name="sensor_tensao_drone" type="force_torque">
+          <always_on>true</always_on>
+          <update_rate>50</update_rate>
+          <topic>/cabo/tensao_drone</topic>
+        </sensor>
+      </joint>
+  """
+
+sdf += """
   </model>
 </sdf>
 """
+
+
+
 
 with open(caminho_sdf, "w") as f:
     f.write(sdf)
@@ -570,7 +573,7 @@ world = f"""<?xml version="1.0" ?>
       <pose>{drone_spawn_x:.6f} {drone_spawn_y:.6f} {drone_spawn_z:.6f} 0 0 {yaw_base:.6f}</pose>
     </include>
 
-    <joint name="cabo_drone_joint" type="universal">
+    <joint name="cabo_drone_joint" type="ball">
       <parent>cabo_dinamico::ponta_cabo</parent>
       <child>meu_drone::base_link</child>
     </joint>
