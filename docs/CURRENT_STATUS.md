@@ -1,5 +1,59 @@
 # Current Status
 
+## Atualizacao 2026-08-27
+
+Foi iniciada a integracao incremental com PX4, preservando a baseline atual do tethered drone.
+
+PX4 configurado localmente:
+
+```text
+local                 px4/PX4-Autopilot/
+remote                https://github.com/PX4/PX4-Autopilot.git
+tag                   v1.14.4
+commit                1555f2bd2229544c43966ab5f94879c41d8e1e01
+estado                detached HEAD
+modelo testado        gz_x500
+```
+
+Resultados:
+
+```text
+make px4_sitl_default                 OK
+HEADLESS=1 PX4_GZ_MODEL=x500 make px4_sitl gz_x500  OK
+commander arm                         OK
+commander takeoff                     OK
+hover aproximado sem tether           OK
+commander land                        OK
+```
+
+Telemetria observada durante hover sem tether:
+
+```text
+vehicle_local_position:
+  x = -0.045 m
+  y = -0.119 m
+  z = -1.469 m  (NED; ~1.47 m acima da origem local)
+
+vehicle_attitude:
+  roll  = -0.1 deg
+  pitch = -0.3 deg
+  yaw   = 89.5 deg
+
+commander:
+  Arm state       Armed
+  navigation mode AUTO_LOITER
+  failsafe        no
+```
+
+Documentacao detalhada:
+
+```text
+docs/PX4_INTEGRATION.md
+px4/README.md
+```
+
+A integracao com o tether ainda nao foi feita. O proximo passo recomendado e criar uma variante externa `x500_tethered`, baseada em `Tools/simulation/gz/models/x500/model.sdf`, adicionando apenas um ponto de conexao fisico ao `base_link` para receber a `ball joint` do cabo atual.
+
 ## Atualizacao 2026-08-20
 
 A baseline atual foi congelada para os testes cardeais do drone:

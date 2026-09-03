@@ -3,3 +3,5 @@ install/
 log/
 __pycache__/
 .codegraph/
+px4/PX4-Autopilot/
+results/

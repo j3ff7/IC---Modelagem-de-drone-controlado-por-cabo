@@ -3,6 +3,7 @@ import math
 import os
 
 from ament_index_python.packages import get_package_share_directory
+from geometry_msgs.msg import PoseStamped
 from geometry_msgs.msg import Twist, WrenchStamped
 from nav_msgs.msg import Odometry
 import rclpy
@@ -142,6 +143,7 @@ class ControladorTrajetoriaDrone(Node):
         self.ultimo_timer_ns = None
 
         self.publisher_ = self.create_publisher(Twist, '/meu_drone/cmd_vel', 10)
+        self.ref_pub = self.create_publisher(PoseStamped, '/meu_drone/ref', 10)
         self.create_subscription(Clock, '/clock', self.clock_callback, 10)
         self.create_subscription(Odometry, '/meu_drone/odom', self.odom_callback, 10)
         self.create_subscription(WrenchStamped, '/cabo/tensao_drone', self.tensao_drone_callback, 10)
@@ -383,6 +385,14 @@ class ControladorTrajetoriaDrone(Node):
         self.ultimo_timer_ns = now_ns
 
         alvo_x, alvo_y, alvo_z = self.waypoints[self.indice_waypoint]
+        ref_msg = PoseStamped()
+        ref_msg.header.stamp = self.get_clock().now().to_msg()
+        ref_msg.header.frame_id = 'world'
+        ref_msg.pose.position.x = alvo_x
+        ref_msg.pose.position.y = alvo_y
+        ref_msg.pose.position.z = alvo_z
+        ref_msg.pose.orientation.w = 1.0
+        self.ref_pub.publish(ref_msg)
 
         erro_x = alvo_x - self.x
         erro_y = alvo_y - self.y
@@ -519,10 +529,12 @@ def main(args=None):
     except KeyboardInterrupt:
         pass
     finally:
-        node.get_logger().info('Parando controlador de trajetoria.')
-        node.publisher_.publish(Twist())
+        if rclpy.ok():
+            node.get_logger().info('Parando controlador de trajetoria.')
+            node.publisher_.publish(Twist())
         node.destroy_node()
-        rclpy.shutdown()
+        if rclpy.ok():
+            rclpy.shutdown()
 
 
 if __name__ == '__main__':

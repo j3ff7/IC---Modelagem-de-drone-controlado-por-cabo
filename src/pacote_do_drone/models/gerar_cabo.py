@@ -467,7 +467,8 @@ world = f'''<?xml version="1.0" ?>
       </joint>
 
       <joint name="cabo_drone_joint" type="fixed">
-        <parent>cabo_dinamico::ponta_cabo</parent>
+        <pose relative_to="cabo_dinamico::final_segment">{segment_lengths[-1] if segment_lengths else length} 0 0 0 0 0</pose>
+        <parent>cabo_dinamico::final_segment</parent>
         <child>meu_drone::cabo_sensor_link</child>
       </joint>
     </model>

@@ -2,6 +2,26 @@
 
 Este arquivo registra decisões técnicas relevantes já inferíveis pelo repositório ou pelo contexto disponível nesta sessão.
 
+## 2026-08-27 Integrar PX4 Como Trilha Paralela Inicial
+
+Contexto:
+O hardware real foi validado com PX4 v1.14.4 no Pixhawk/PX4_FMU_V3, commit `1555f2bd2229544c43966ab5f94879c41d8e1e01`. Foi solicitado iniciar a migracao para PX4 preservando a baseline atual do tethered drone.
+
+Decisão:
+Adicionar o PX4 como workspace local paralelo em `px4/PX4-Autopilot/`, ignorado pelo Git deste repositorio, fixado inicialmente no commit/tag:
+
+```text
+PX4 tag     v1.14.4
+PX4 commit  1555f2bd2229544c43966ab5f94879c41d8e1e01
+modelo SITL gz_x500
+```
+
+Justificativa:
+O commit informado existe no upstream e corresponde a `refs/tags/v1.14.4^{}` e a branch `release/1.14`. Isso mantem a simulacao proxima da versao ja validada no Pixhawk, sem trocar imediatamente o controlador/tether atual.
+
+Consequências:
+O repositorio principal continua guardando o tether, sensores, metricas e documentacao. O PX4 inteiro nao deve ser versionado dentro deste repo. A proxima integracao deve criar uma variante externa do `x500` com ponto de conexao para o cabo, preservando o PX4 upstream sem modificacoes nesta fase.
+
 ## 2026-08-20 Congelar Baseline Para Testes Cardeais Estáticos
 
 Contexto:

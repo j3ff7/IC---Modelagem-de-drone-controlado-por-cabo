@@ -1,6 +1,7 @@
 import os
 import json # <-- Adicionado
 import math
+import xml.etree.ElementTree as ET
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, AppendEnvironmentVariable, OpaqueFunction
@@ -29,6 +30,18 @@ def _comprimento_total_cabo(params):
     if 'comprimento_total_m' in params:
         return float(params['comprimento_total_m'])
     return int(params.get('num_links', 0)) * float(params.get('length', 0.0))
+
+
+def _offset_ponta_final_segment(caminho_cabo_sdf, params):
+    fallback = float(params.get('length', 0.05))
+    try:
+        root = ET.parse(caminho_cabo_sdf).getroot()
+        joint = root.find(".//joint[@name='joint_ponta_cabo']/pose")
+        if joint is None or joint.text is None:
+            return fallback
+        return float(joint.text.split()[0])
+    except (OSError, ET.ParseError, ValueError, IndexError):
+        return fallback
 
 
 def _payload_xml(massa):
@@ -109,6 +122,7 @@ def _criar_mundo_diagnostico(context, pkg_share, params):
     caminho_drone_sdf = os.path.join(models_path, 'meu_drone', 'meu_drone.sdf')
     caminho_cabo_sdf = os.path.join(models_path, 'cabo.sdf')
     caminho_world = os.path.join(pkg_share, 'worlds', 'my_world_diagnostico.sdf')
+    offset_ponta_cabo = _offset_ponta_final_segment(caminho_cabo_sdf, params)
 
     num_links = int(params.get('num_links', 40))
     length = float(params.get('length', 0.05))
@@ -189,7 +203,8 @@ def _criar_mundo_diagnostico(context, pkg_share, params):
             juntas_cabo_xml = f'''
 {junta_ancora_xml}
       <joint name="cabo_drone_joint" type="fixed">
-        <parent>cabo_dinamico::ponta_cabo</parent>
+        <pose relative_to="cabo_dinamico::final_segment">{offset_ponta_cabo} 0 0 0 0 0</pose>
+        <parent>cabo_dinamico::final_segment</parent>
         <child>meu_drone::{tether_attach_link}</child>
         <sensor name="sensor_conexao_drone" type="force_torque">
           <always_on>true</always_on>
@@ -201,7 +216,8 @@ def _criar_mundo_diagnostico(context, pkg_share, params):
             juntas_cabo_xml = f'''
 {junta_ancora_xml}
       <joint name="cabo_drone_joint" type="ball">
-        <parent>cabo_dinamico::ponta_cabo</parent>
+        <pose relative_to="cabo_dinamico::final_segment">{offset_ponta_cabo} 0 0 0 0 0</pose>
+        <parent>cabo_dinamico::final_segment</parent>
         <child>meu_drone::{tether_attach_link}</child>
         <sensor name="sensor_conexao_drone" type="force_torque">
           <always_on>true</always_on>

@@ -284,9 +284,14 @@ class LeitorCabo(Node):
 def main(args=None):
     rclpy.init(args=args)
     leitor = LeitorCabo()
-    rclpy.spin(leitor)
-    leitor.destroy_node()
-    rclpy.shutdown()
+    try:
+        rclpy.spin(leitor)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        leitor.destroy_node()
+        if rclpy.ok():
+            rclpy.shutdown()
 
 if __name__ == '__main__':
     main()

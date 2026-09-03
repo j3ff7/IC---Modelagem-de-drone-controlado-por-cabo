@@ -52,6 +52,7 @@ setup(
             'movimento_circular = pacote_do_drone.movimento_circular:main',
             'velocity_test = pacote_do_drone.velocity_test:main',
             'hover_metrics = pacote_do_drone.hover_metrics:main',
+            'experimento_tracking = pacote_do_drone.experimento_tracking:main',
             'test_tensao = pacote_do_drone.test_tensao:main',
         ],
     },

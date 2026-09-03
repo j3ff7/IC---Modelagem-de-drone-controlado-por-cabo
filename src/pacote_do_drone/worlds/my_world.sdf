@@ -95,7 +95,8 @@
       </joint>
 
       <joint name="cabo_drone_joint" type="fixed">
-        <parent>cabo_dinamico::ponta_cabo</parent>
+        <pose relative_to="cabo_dinamico::final_segment">0.05906355483391155 0 0 0 0 0</pose>
+        <parent>cabo_dinamico::final_segment</parent>
         <child>meu_drone::cabo_sensor_link</child>
       </joint>
     </model>
