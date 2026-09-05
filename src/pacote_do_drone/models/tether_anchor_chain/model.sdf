@@ -1,0 +1,223 @@
+<?xml version="1.0" ?>
+<sdf version="1.9">
+  <model name="tether_anchor_chain">
+    <static>false</static>
+    <link name="anchor_link">
+      <pose>0 0 0 0 0 0</pose>
+      <inertial>
+        <mass>1.0</mass>
+        <inertia>
+          <ixx>1</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1</iyy>
+          <iyz>0</iyz>
+          <izz>1</izz>
+        </inertia>
+      </inertial>
+      <visual name="anchor_visual">
+        <geometry>
+          <sphere>
+            <radius>0.035</radius>
+          </sphere>
+        </geometry>
+        <material>
+          <diffuse>0.05 0.15 0.9 1.0</diffuse>
+          <ambient>0.05 0.15 0.9 1.0</ambient>
+        </material>
+      </visual>
+      <collision name="anchor_collision">
+        <geometry>
+          <sphere>
+            <radius>0.025</radius>
+          </sphere>
+        </geometry>
+      </collision>
+    </link>
+    <joint name="anchor_world_fixed" type="fixed">
+      <parent>world</parent>
+      <child>anchor_link</child>
+    </joint>
+    <link name="tether_link_1">
+      <pose relative_to="anchor_link">0 0 0 0 -0 0</pose>
+      <inertial>
+        <pose>0.25 0 0 0 1.57079632679 0</pose>
+        <mass>0.03</mass>
+        <inertia>
+          <ixx>1.35e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0006250675</iyy>
+          <iyz>0</iyz>
+          <izz>0.0006250675</izz>
+        </inertia>
+      </inertial>
+      <visual name="tether_link_1_visual">
+        <pose>0.25 0 0 0 1.57079632679 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.003</radius>
+            <length>0.5</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0.02 0.02 0.02 1.0</diffuse>
+          <ambient>0.02 0.02 0.02 1.0</ambient>
+        </material>
+      </visual>
+
+    </link>
+    <joint name="tether_joint_1" type="ball">
+      <pose relative_to="anchor_link">0 0 0 0 0 0</pose>
+      <parent>anchor_link</parent>
+      <child>tether_link_1</child>
+    </joint>
+    <link name="tether_link_2">
+      <pose relative_to="tether_link_1">0.5 0 0 0 -0 1.88495559</pose>
+      <inertial>
+        <pose>0.25 0 0 0 1.57079632679 0</pose>
+        <mass>0.03</mass>
+        <inertia>
+          <ixx>1.35e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0006250675</iyy>
+          <iyz>0</iyz>
+          <izz>0.0006250675</izz>
+        </inertia>
+      </inertial>
+      <visual name="tether_link_2_visual">
+        <pose>0.25 0 0 0 1.57079632679 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.003</radius>
+            <length>0.5</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0.02 0.02 0.02 1.0</diffuse>
+          <ambient>0.02 0.02 0.02 1.0</ambient>
+        </material>
+      </visual>
+
+    </link>
+    <joint name="tether_joint_2" type="ball">
+      <pose relative_to="tether_link_1">0.5 0 0 0 0 0</pose>
+      <parent>tether_link_1</parent>
+      <child>tether_link_2</child>
+    </joint>
+    <link name="tether_link_3">
+      <pose relative_to="tether_link_2">0.5 0 0 0 -0 2.51327412</pose>
+      <inertial>
+        <pose>0.25 0 0 0 1.57079632679 0</pose>
+        <mass>0.03</mass>
+        <inertia>
+          <ixx>1.35e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0006250675</iyy>
+          <iyz>0</iyz>
+          <izz>0.0006250675</izz>
+        </inertia>
+      </inertial>
+      <visual name="tether_link_3_visual">
+        <pose>0.25 0 0 0 1.57079632679 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.003</radius>
+            <length>0.5</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0.02 0.02 0.02 1.0</diffuse>
+          <ambient>0.02 0.02 0.02 1.0</ambient>
+        </material>
+      </visual>
+
+    </link>
+    <joint name="tether_joint_3" type="ball">
+      <pose relative_to="tether_link_2">0.5 0 0 0 0 0</pose>
+      <parent>tether_link_2</parent>
+      <child>tether_link_3</child>
+    </joint>
+    <link name="tether_link_4">
+      <pose relative_to="tether_link_3">0.5 0 0 0 -0.0851026884 -2.63456316</pose>
+      <inertial>
+        <pose>0.25 0 0 0 1.57079632679 0</pose>
+        <mass>0.03</mass>
+        <inertia>
+          <ixx>1.35e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0006250675</iyy>
+          <iyz>0</iyz>
+          <izz>0.0006250675</izz>
+        </inertia>
+      </inertial>
+      <visual name="tether_link_4_visual">
+        <pose>0.25 0 0 0 1.57079632679 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.003</radius>
+            <length>0.5</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0.02 0.02 0.02 1.0</diffuse>
+          <ambient>0.02 0.02 0.02 1.0</ambient>
+        </material>
+      </visual>
+
+    </link>
+    <joint name="tether_joint_4" type="ball">
+      <pose relative_to="tether_link_3">0.5 0 0 0 0 0</pose>
+      <parent>tether_link_3</parent>
+      <child>tether_link_4</child>
+    </joint>
+    <link name="tether_link_5">
+      <pose relative_to="tether_link_4">0.5 0 0 0.0324209143 -0.163894326 2.75182278</pose>
+      <inertial>
+        <pose>0.25 0 0 0 1.57079632679 0</pose>
+        <mass>0.03</mass>
+        <inertia>
+          <ixx>1.35e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0006250675</iyy>
+          <iyz>0</iyz>
+          <izz>0.0006250675</izz>
+        </inertia>
+      </inertial>
+      <visual name="tether_link_5_visual">
+        <pose>0.25 0 0 0 1.57079632679 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.003</radius>
+            <length>0.5</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <diffuse>0.05 0.05 0.05 1.0</diffuse>
+          <ambient>0.05 0.05 0.05 1.0</ambient>
+        </material>
+      </visual>
+
+    </link>
+    <joint name="tether_joint_5" type="ball">
+      <pose relative_to="tether_link_4">0.5 0 0 0 0 0</pose>
+      <parent>tether_link_4</parent>
+      <child>tether_link_5</child>
+    </joint>
+    <plugin filename="libTetherForceConstraint.so" name="drone_cabo::TetherForceConstraint">
+      <drone_model>x500_0</drone_model>
+      <drone_link>base_link</drone_link>
+      <tether_model>tether_anchor_chain</tether_model>
+      <tether_link>tether_link_5</tether_link>
+      <drone_offset>0 0 -0.12</drone_offset>
+      <tether_offset>0.5 0 0</tether_offset>
+      <stiffness>5</stiffness>
+      <damping>0.5</damping>
+      <max_force>3</max_force>
+    </plugin>
+  </model>
+</sdf>

@@ -1,0 +1,63 @@
+<?xml version="1.0" ?>
+<sdf version="1.9">
+  <world name="inter_model_ball_probe">
+    <physics name="1ms" type="ignored">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
+    <plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands"/>
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster"/>
+    <model name="model_a">
+      <pose>0 0 0.5 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>1.0</mass>
+          <inertia>
+            <ixx>0.01</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.01</iyy>
+            <iyz>0</iyz>
+            <izz>0.01</izz>
+          </inertia>
+        </inertial>
+        <visual name="visual">
+          <geometry>
+            <sphere>
+              <radius>0.05</radius>
+            </sphere>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+    <model name="model_b">
+      <pose>0 0 0.5 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>1.0</mass>
+          <inertia>
+            <ixx>0.01</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.01</iyy>
+            <iyz>0</iyz>
+            <izz>0.01</izz>
+          </inertia>
+        </inertial>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.08 0.08 0.08</size>
+            </box>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+    <joint name="inter_model_ball_joint" type="ball">
+      <pose>0 0 0.5 0 0 0</pose>
+      <parent>model_a::link</parent>
+      <child>model_b::link</child>
+    </joint>
+  </world>
+</sdf>
